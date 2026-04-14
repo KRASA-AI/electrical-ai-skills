@@ -13,20 +13,23 @@ This repo is a complete AI toolkit for electrical. Every skill is a standalone p
 
 | Skill | What it does | Time saved |
 |-------|-------------|------------|
-| ⚡ Bid Summary Writer | Turn takeoff data into a clean bid summary with scope, exclusions, and payment terms. | ~30 min/bid |
-| 📘 Code Reference Lookup | Answer NEC code questions in plain English with article and section references. | ~10 min/lookup |
-| 📄 Change Order Drafter | Document scope changes with cost impact and get customer sign-off faster. | ~15 min/CO |
-| 🦺 Safety Toolbox Talk | Generate a job-specific safety briefing based on the day's tasks and conditions. | ~10 min/talk |
-| 🔌 Panel Schedule Documenter | Create or update panel schedules from as-built notes and photos. | ~20 min/panel |
-| 💬 Customer Explanation Generator | Translate technical findings into homeowner-friendly language for the invoice or email. | ~5 min/job |
-| 📝 Scope Letter Drafter | Draft formal scope-of-work letters with inclusions, exclusions, and NEC references. | ~20 min/letter |
-| 💡 Estimate Explainer | Translate technical estimates into plain-language summaries for clients. | ~10 min/estimate |
-| ⏰ Project Delay Communicator | Draft empathetic delay notifications with mitigation plans for any audience. | ~10 min/notice |
-| 🔧 Preventive Maintenance Scheduler | Build structured PM schedules with NFPA 70B references and compliance checklists. | ~45 min/schedule |
-| 📋 Material List / BOM Generator | Create organized bills of materials from job descriptions for supply house ordering. | ~30 min/list |
-| 🔍 Inspection Report Generator | Produce professional inspection reports from field notes with NEC citations. | ~25 min/report |
+| Code Reference Lookup | Answer NEC code questions in plain English with article and section references, practical application guidance, and local amendment awareness — so electricians can quickly verify requirements without flipping through the codebook. | ~10 min/lookup |
+| Inspection Report Generator | Generate a professional electrical inspection report from field notes, photos, or verbal observations — formatted for the property owner, general contractor, insurance company, or AHJ (Authority Having Jurisdiction). | ~25 min/report |
+| Material List / BOM Generator | Generate an organized bill of materials (BOM) or material pick list from job scope notes, work orders, or verbal descriptions of electrical work — formatted for supply house ordering, truck stocking, or estimate backing. | ~30 min/list |
+| Panel Schedule Documenter | Create or update a formatted panel schedule from as-built notes, photos, or verbal descriptions — producing a clean, NEC 408.4-compliant circuit directory ready for the panel door or project documentation. | ~20 min/panel |
+| Preventive Maintenance Schedule Generator | Generate a structured preventive maintenance (PM) schedule for commercial or residential electrical systems — covering panels, switchgear, transformers, generators, lighting, fire alarm circuits, and emergency power systems. | ~45 min/schedule |
+| Safety Toolbox Talk | Generate a job-specific safety toolbox talk for an electrical crew based on the day's tasks, site conditions, and hazards — formatted for a 5-10 minute field briefing that meets OSHA documentation requirements. | ~10 min/talk |
+| Bid Summary Writer | Turn takeoff data into a clean bid summary with scope, exclusions, and payment terms. | ~30 min/bid |
+| Scope Letter Drafter | Draft a professional scope-of-work letter from rough job notes, clearly defining inclusions, exclusions, and assumptions for electrical projects. | ~20 min/letter |
+| Customer Explanation Generator | Translate technical findings into homeowner-friendly language for the invoice or email. | ~5 min/job |
+| Estimate Plain-Language Explainer | Translate a technical electrical estimate into a clear, jargon-free explanation that homeowners and non-technical clients can understand, building trust and reducing back-and-forth questions. | ~15 min/estimate |
+| Project Delay Communicator | Draft professional, empathetic client communications when electrical projects face delays due to material shortages, inspection hold-ups, weather, scheduling conflicts, or other trade coordination issues. | ~15 min/message |
+| Change Order Drafter | Document scope changes with cost impact and get customer sign-off faster. | ~15 min/CO |
+| Email Drafter | Turn rough notes into a professional, trade-appropriate email for customers, GCs, property managers, inspectors, or suppliers — matching your company's voice and the conventions electrical contractors actually use. | ~10 min/use |
+| Meeting Summarizer | Turn raw meeting notes (typed, bullet-point, or transcript) into a clean, action-oriented summary for the kinds of meetings electrical contractors actually hold — pre-job walks, GC coordination, submittal reviews, inspection debriefs, safety committee meetings, and weekly ops huddles. | ~15 min/meeting |
+| Review Responder | Craft a professional, platform-appropriate response to an online review — positive, negative, or somewhere in between — that reinforces trust, protects your license, and reads like a real person wrote it. | ~10 min/review |
 
-**Total time saved per use: ~230+ minutes across all skills.**
+**Total time saved per use: ~275+ minutes across all skills.**
 
 ## Quick Start
 
