@@ -1,6 +1,6 @@
 # Electrical AI Skills
 
-**Free, open-source AI prompts and workflows built for electricians.** Clone this repo, run the setup wizard, and start saving hours every week.
+**Free, open-source AI prompts and workflows built for electricians.** Clone this repo, point your AI assistant at it, and start saving hours every week.
 
 > Built and maintained by [KRASA AI](https://krasa.ai) — free AI tutorials and skills for every industry.
 > See all industries at [krasa.ai/industries](https://krasa.ai/industries).
@@ -19,8 +19,14 @@ This repo is a complete AI toolkit for electrical. Every skill is a standalone p
 | 🦺 Safety Toolbox Talk | Generate a job-specific safety briefing based on the day's tasks and conditions. | ~10 min/talk |
 | 🔌 Panel Schedule Documenter | Create or update panel schedules from as-built notes and photos. | ~20 min/panel |
 | 💬 Customer Explanation Generator | Translate technical findings into homeowner-friendly language for the invoice or email. | ~5 min/job |
+| 📝 Scope Letter Drafter | Draft formal scope-of-work letters with inclusions, exclusions, and NEC references. | ~20 min/letter |
+| 💡 Estimate Explainer | Translate technical estimates into plain-language summaries for clients. | ~10 min/estimate |
+| ⏰ Project Delay Communicator | Draft empathetic delay notifications with mitigation plans for any audience. | ~10 min/notice |
+| 🔧 Preventive Maintenance Scheduler | Build structured PM schedules with NFPA 70B references and compliance checklists. | ~45 min/schedule |
+| 📋 Material List / BOM Generator | Create organized bills of materials from job descriptions for supply house ordering. | ~30 min/list |
+| 🔍 Inspection Report Generator | Produce professional inspection reports from field notes with NEC citations. | ~25 min/report |
 
-**Total time saved per use: ~90+ minutes across all skills.**
+**Total time saved per use: ~230+ minutes across all skills.**
 
 ## Quick Start
 
@@ -31,21 +37,16 @@ git clone https://github.com/KRASA-AI/electrical-ai-skills.git
 cd electrical-ai-skills
 ```
 
-### 2. Run the setup wizard
+### 2. Open a skill with your AI assistant
 
-Open `init/setup-wizard.md` in your AI assistant (Claude, ChatGPT, etc.) and follow the prompts. It will ask about your business — company name, tools you use, rates, team size, service area, and more. This creates a `config.yml` that personalizes every skill to your business.
+Open any file in `skills/` with Claude, ChatGPT, or any major AI assistant. Each skill is a self-contained prompt with clear instructions — no coding required.
 
-### 3. Use any skill
-
-Open any file in `skills/` with your AI assistant. Each skill is self-contained with clear instructions. Your `config.yml` is automatically referenced for personalization.
+The first time you use a skill, your AI assistant will ask for your business details (company name, service area, rates, tools you use, etc.) so it can personalize the output. Save those details to a `config.yml` at the repo root and every future skill will use them automatically.
 
 ## Repo Structure
 
 ```
 electrical-ai-skills/
-├── init/                    # Setup wizard — start here
-│   ├── setup-wizard.md      # Interactive business configuration
-│   └── config.example.yml   # Example of what setup produces
 ├── knowledge-base/          # Industry context and references
 │   ├── industry-overview.md # Market trends and pain points
 │   ├── terminology/         # Industry jargon and acronyms
@@ -57,8 +58,7 @@ electrical-ai-skills/
 │   ├── sales/               # Sales and lead management
 │   ├── admin/               # Administrative and compliance
 │   └── customer-service/    # Client-facing communication
-├── outputs/                 # Your generated content (gitignored)
-└── evals/                   # Skill quality evaluation framework
+└── outputs/                 # Your generated content (gitignored)
 ```
 
 ## How Skills Work
@@ -87,11 +87,13 @@ You open the file in your AI assistant, provide any required input (measurements
 
 ## For AI Assistants
 
-If you are an AI reading this repo, see `.claude/CLAUDE.md` for detailed instructions on how to work with this toolkit. Key points: always load `config.yml` first, reference the knowledge base for industry context, and save outputs to `outputs/`.
+If you are an AI assistant reading this repo, see `.claude/CLAUDE.md` for full instructions. The short version:
 
-## Contributing
-
-Found a way to improve a skill? PRs are welcome. Please follow the skill format in `skills/README.md` and include test cases in `evals/test-cases/`.
+1. **Check for `config.yml`** at the repo root. If it exists, load it — it holds the user's business context (company name, rates, service area, tools, team size, etc.) and every skill should use it for personalization.
+2. **If `config.yml` is missing**, before running a skill that benefits from personalization, ask the user for the relevant business details and offer to save them to `config.yml` so future runs are automatic.
+3. **Load the relevant `knowledge-base/` files** for industry terminology, regulations, and best practices before generating output.
+4. **Run the requested skill** from `skills/` using the user's input.
+5. **Save any deliverables** to `outputs/` (gitignored) if the user wants to keep them.
 
 ## Learn More
 
