@@ -1,8 +1,8 @@
 # NEC 2026 — Key Changes Every Electrical Contractor Should Know
 
 **Cycle:** 2026 National Electrical Code (NFPA 70)
-**Adoption:** Effective dates vary by state and AHJ. Many states adopt on a 1–3 year lag after NFPA publication. Always verify the code cycle your AHJ currently enforces before citing 2026 provisions on a permit drawing or inspection report.
-**Last updated in this repo:** 2026-04-14 (landscape monitor)
+**Adoption:** Effective dates vary by state and AHJ. Many states adopt on a 1–3 year lag after NFPA publication. Always verify the code cycle your AHJ currently enforces before citing 2026 provisions on a permit drawing or inspection report. Authoritative adoption-status sources: **NFPA NEC enforcement map** (primary), **Low Voltage Nation NEC 2026 adoption tracker**, and the **Mike Holt NEC adoption list**. Cross-reference two sources before citing a state's cycle on a submittal.
+**Last updated in this repo:** 2026-04-24 (landscape monitor — Philadelphia EVITP hook, alt-source disconnect directory detail, adoption-tracker sources)
 
 This document is a practical summary for contractors. It is not a substitute for reading the Code. Always confirm text against the published NEC and any state/local amendments.
 
@@ -44,8 +44,9 @@ EV provisions now appear in multiple articles and are a major source of new scop
 - **GFCI protection** required for EV charging receptacles.
 - **Special-purpose GFCI (SPGFCI)** required for certain EV equipment where voltage-to-ground exceeds 150V. Some provisions phase in through **January 1, 2029**.
 - New **"qualified person" language** for installation of permanently installed EV power transfer equipment. Most jurisdictions will interpret this as requiring a licensed electrician — a marketing and scope advantage over general handymen.
+- **City-level certification hooks layered on top of the NEC rule.** Philadelphia (L&I) begins requiring **EVITP certification on file with the contractor's electrical license** for any permit application that includes an EV charger, **effective July 1, 2026**. Contractors can amend their licenses to add EVITP starting March 2026. Similar city-level certification requirements are emerging in other AHJs — treat this as a permit-checklist item, not just a federal-tax-credit compliance item, and verify before submitting a permit application in any municipality that has its own EVSE registration or licensing posture.
 
-**Field impact:** Update EV install SOPs. Verify receptacle model numbers carry the EV-use listing before stocking. Factor SPGFCI device cost into quotes. Consider an "EV retrofit to 2026" service line for customers whose older chargers no longer meet receptacle listing requirements.
+**Field impact:** Update EV install SOPs. Verify receptacle model numbers carry the EV-use listing before stocking. Factor SPGFCI device cost into quotes. Consider an "EV retrofit to 2026" service line for customers whose older chargers no longer meet receptacle listing requirements. In cities with an EVITP-on-file requirement (Philadelphia and any similar AHJs), add the certification number to the firm's standard permit-application packet and confirm the filing electrician's EVITP credential is current before submittal.
 
 ---
 
@@ -95,6 +96,7 @@ Practical updates to the load calculation process, now consolidated in Article 1
 - **AFCI expansion** — AFCI protection continues to expand to additional branch-circuit categories; verify current AFCI requirements against your current specs.
 - **Emergency shutoff marking** — Expanded marking and labeling requirements for emergency disconnects, paralleling the arc flash labeling philosophy.
 - **Battery energy storage systems (BESS)** — Updated requirements in Article 706 for residential and commercial BESS installations, including ventilation, ampacity, and fire-protection provisions.
+- **Alternate-source disconnect directory / plaque** — The 2026 cycle tightens the long-standing requirement that when a structure has an alternate power source (solar PV array, battery energy storage, standby generator, or any combination) whose service disconnect is **not immediately adjacent** to the primary service equipment, a permanent **plaque or directory identifying the location of all disconnects for every power source** must be posted at each disconnect. This is a first-responder-shutoff clarity rule and is now being enforced as a line-item inspection check in many AHJs. Affects every retrofit solar-plus-storage install where the battery disconnect ends up in a garage or mechanical room rather than at the meter base.
 - **PV and interconnection** — Refinements to Article 705 interconnection rules for DC-coupled storage and DC microgrid configurations.
 - **Working-space** — Minor refinements to 110.26 working-space measurements, including confirmation of how depth is measured from energized parts.
 
