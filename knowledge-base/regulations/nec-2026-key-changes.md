@@ -2,7 +2,9 @@
 
 **Cycle:** 2026 National Electrical Code (NFPA 70)
 **Adoption:** Effective dates vary by state and AHJ. Many states adopt on a 1–3 year lag after NFPA publication. Always verify the code cycle your AHJ currently enforces before citing 2026 provisions on a permit drawing or inspection report. Authoritative adoption-status sources: **NFPA NEC enforcement map** (primary), **Low Voltage Nation NEC 2026 adoption tracker**, and the **Mike Holt NEC adoption list**. Cross-reference two sources before citing a state's cycle on a submittal.
-**Last updated in this repo:** 2026-04-24 (landscape monitor — Philadelphia EVITP hook, alt-source disconnect directory detail, adoption-tracker sources)
+**Q1 2026 adoption snapshot (industry-aggregator data):** approximately 14 states have adopted the 2026 NEC cycle in some form — partial, statewide, or with state amendments. The remainder are on 2023 or 2020. Washington is on a proposed full-by-reference adoption with a delayed effective date of December 31, 2026. Minnesota has a NEC 2026 Adoption Review Committee actively meeting through 2026.
+**Energy-code cross-reference:** For commercial lighting and lighting-controls scopes, a separate state-level energy code (typically California Title 24 2025 effective for permits filed January 1, 2026 onward, or an ASHRAE 90.1-2026 derivative) often drives the controls scope independent of NEC adoption status. See `lighting-incentives-2026.md` for the lighting-side framing.
+**Last updated in this repo:** 2026-04-25 (landscape monitor — Q1 2026 adoption snapshot, Title 24 / ASHRAE 90.1 cross-reference for lighting scopes)
 
 This document is a practical summary for contractors. It is not a substitute for reading the Code. Always confirm text against the published NEC and any state/local amendments.
 
