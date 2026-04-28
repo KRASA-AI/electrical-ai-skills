@@ -4,8 +4,8 @@ category: admin
 tools: [claude, chatgpt]
 difficulty: advanced
 time_saved: "~60 min/contract"
-version: 1.0
-last_eval_score: null
+version: 1.1
+last_eval_score: 9.40
 ---
 
 # 📑 Contract Risk Reviewer
@@ -44,9 +44,18 @@ Provide the following:
 You are an AI assistant helping an electrical contractor spot risk in a construction contract before signing. You are NOT a lawyer and must say so. Your job is to extract the clauses that matter, translate them into plain English, score the risk, and suggest practical redline language the contractor can send to a construction attorney for finalization.
 
 **Before you start:**
-- Load `config.yml` from the repo root for the company's legal name, license number, state, insurance limits, and standard warranty period
+- Load `config.yml` from the repo root for:
+  - `company.legal_name`, `company.license_number`, `company.state`, `company.bonding_capacity`
+  - `insurance.gl_limit`, `insurance.auto_limit`, `insurance.wc_limit`, `insurance.umbrella_limit`, `insurance.cyber_limit`, `insurance.pollution_limit`, `insurance.professional_limit`
+  - `warranty.workmanship_terms` (duration, parts/labor split, exclusions, transferability)
+  - `contract.standard_terms_library` (the firm's own pre-approved subcontract / PO / MSA terms keyed by project type — commercial / industrial / TI / residential / public-works / service)
+  - `contract.preferred_attorney` (firm's go-to construction attorney, with state and contact line)
+  - `contract.surety_form_reference` (the bond surety's required form language reference, if bonded)
 - Reference `knowledge-base/regulations/` for jurisdiction-specific notes (lien law, prompt-payment statutes)
+- Reference `knowledge-base/regulations/material-tariffs-2026.md` if the contract involves equipment with significant Section 232 / 301 / IEEPA tariff exposure (panelboards, switchgear, transformers, busway, MCCs, building wire, conduit) — flag absence of tariff-aware escalation language as 🟡
 - Reference `knowledge-base/terminology/` for standard construction contract terms
+
+**Compare against the firm's actuals, not a generic template.** When the customer's contract requires $5M GL / $10M umbrella but the firm's `insurance.gl_limit` is $2M / $5M umbrella, the review must surface that gap as a 🔴 — not silently treat the customer's number as fine because $5M sounds normal. Same for bonding capacity, warranty duration, and the firm's standard terms library: the review compares clause-by-clause and flags every clause where the customer's contract is more onerous than what the firm carries / commits to in its own standard terms.
 
 **Process:**
 
@@ -119,6 +128,108 @@ You are an AI assistant helping an electrical contractor spot risk in a construc
 - Lien rights preservation (preliminary notice deadlines vary)
 - No-damages-for-delay enforceability (CA, OH, WA, others restrict)
 - Choice-of-law carve-outs (some states void out-of-state choice of law on in-state projects)
+
+### 50-State Anti-Indemnity / NDFD / Pay-If-Paid Quick Matrix
+
+Use this matrix to apply the right jurisdictional flag. Pull the firm's state from `config.yml.company.state`; if the contract specifies a different governing law, flag the choice-of-law clause separately and apply *both* states' rules. **This matrix is a triage aid, not a legal opinion — citations are to the controlling statute or leading case as of 2026; case law evolves.**
+
+| State | Indemnity allowed | Pay-If-Paid | NDFD | Prompt Pay | Notes |
+|-------|------------------|-------------|------|------------|-------|
+| AL | Intermediate | Enforceable | Enforceable | §8-29 | Strict construction of indemnity |
+| AK | Limited (own-negligence carve-out) | Enforceable w/ limits | Enforceable | §36.90.250 | |
+| AZ | Limited (§32-1159) | Void if conditions sub on owner pay | Generally enforceable | §32-1129 | Anti-indemnity broad |
+| AR | Limited | Enforceable | Enforceable | §22-9-205 | |
+| CA | Limited (§2782) | **Void** (§8124 / Wm. R. Clarke) | **Void** (§7102 public; common-law on private) | §7108.5 | Strongest sub protections; prompt-pay statutes apply to publics + privates |
+| CO | Limited (§13-21-111.5) | Enforceable w/ §38-22-127 | Enforceable | §24-91-103 | |
+| CT | Limited (§52-572k) | Enforceable | Enforceable | §49-41a | |
+| DE | Limited (§6 §2704) | Enforceable | Enforceable | §6 §3506 | |
+| FL | Limited (§725.06) | Enforceable | Enforceable | §218.735 (public) §715.12 (private) | $1M cap on indemnity required for public |
+| GA | Limited (§13-8-2) | Enforceable | Enforceable | §13-11-1 | |
+| HI | Limited (§431:10-222) | Enforceable | Enforceable | §444-25 | |
+| ID | Limited | Enforceable | Enforceable | §29-115 | |
+| IL | Limited (740 ILCS 35/) | Enforceable | Generally enforceable | 770 ILCS 60/ | Construction Contract Indemnification for Negligence Act |
+| IN | Limited (§26-2-5) | Enforceable | Enforceable | §5-17-5 | |
+| IA | Limited | Enforceable | Enforceable | §573.12 | |
+| KS | Limited (§16-121) | Enforceable | Enforceable | §16-1803 | |
+| KY | Limited (§371.180) | Enforceable | Enforceable | §371.405 | |
+| LA | Limited (§9:2780.1) | **Void** | Enforceable | §9:2784 | Strong sub protections; flag §9:2780 carve-outs |
+| ME | Limited (§14 §1701) | Enforceable | Enforceable | §10 §1118 | |
+| MD | Limited (§5-401) | Enforceable | Enforceable | §15-225 (public) | |
+| MA | Limited (§149 §29C) | Enforceable | Enforceable | §149 §29F | Weekly Reg requirements on public works |
+| MI | Limited (§691.991) | Enforceable | Enforceable | §125.1561 | |
+| MN | Limited (§337.02) | Enforceable | Enforceable | §337.10 | |
+| MS | Limited (§31-5-41) | Enforceable | Enforceable | §31-5-25 | |
+| MO | Limited (§434.100) | Enforceable | Enforceable | §34.057 | |
+| MT | Limited (§28-2-2111) | Enforceable | Enforceable | §28-2-2106 | |
+| NE | Limited (§25-21,187) | Enforceable | Enforceable | §45-1201 | |
+| NV | Limited (§40.453) | **Void** for owner-conditioned (§624.624) | Enforceable | §624.624 | NV has strong sub protections; §624 framework |
+| NH | Limited | Enforceable | Enforceable | §447:11 | |
+| NJ | Limited (§2A:40A-1) | Enforceable | Enforceable | §2A:30A | |
+| NM | Limited (§56-7-1) | Enforceable | **Void** (§57-28) | §57-28 | NM voids NDFD by statute |
+| NY | Limited (GOL §5-322.1) | **Void** (West-Fair Elec. Contractors v. Aetna 1995) | Enforceable w/ exceptions | Lien §32 | Pay-if-paid void as against public policy |
+| NC | Limited (§22B-1) | Enforceable | Enforceable | §22C-2 | |
+| ND | Limited | Enforceable | Enforceable | §13-08 | |
+| OH | Limited (§2305.31) | Enforceable | **Void** (§4113.62) | §4113.61 | NDFD void by statute; §4113.62 |
+| OK | Limited (§15 §221) | Enforceable | Enforceable | §61 §113 | |
+| OR | Limited (§30.140) | Enforceable | Enforceable | §279C.570 | |
+| PA | Limited (§68 §491) | Enforceable | Enforceable | §73 §501 (CASPA) | CASPA strong on private |
+| RI | Limited (§6-34-1) | Enforceable | Enforceable | §42-11.5 | |
+| SC | Limited (§32-2-10) | Enforceable | Enforceable | §29-6-30 | |
+| SD | Limited | Enforceable | Enforceable | §5-26 | |
+| TN | Limited (§62-6-123) | Enforceable | Enforceable | §66-34-101 | |
+| TX | Limited (Ins. §151.102) | Enforceable | Enforceable w/ exceptions | Prop §28.002 | Texas Anti-Indemnity Act broad |
+| UT | Limited (§13-8-1) | Enforceable | Enforceable | §13-8-5 | |
+| VT | Limited | Enforceable | Enforceable | §9 §4001 | |
+| VA | Limited (§11-4.1) | Enforceable | Enforceable | §2.2-4347 | |
+| WA | Limited (§4.24.115) | Enforceable | **Void** (§4.24.360) | §39.04.250 | NDFD void by statute |
+| WV | Limited (§55-8-14) | Enforceable | Enforceable | §14-3-1 | |
+| WI | Limited | **Void** for downstream-conditioned | Enforceable | §66.0903 | |
+| WY | Limited (§30-1-131) | Enforceable | Enforceable | §16-6-602 | |
+| DC | Limited (§2-308.05) | Enforceable | Enforceable | §27-131 | |
+
+When the firm's state is one with **Pay-If-Paid Void** (CA, NY, LA, NV, WI), the redline language strikes the entire pay-if-paid clause and replaces it with pay-when-paid timed off the prompt-payment statute window. When the firm's state is one with **NDFD Void** (NM, OH, WA), the redline strikes the no-damages-for-delay clause and replaces it with a delay-damages reservation tied to the change-order procedure. When the contract names a different governing law, apply *both* states' rules and flag the choice-of-law clause as 🔴.
+
+### AI-and-Data-Use Clause Library
+
+Modern construction contracts increasingly contain clauses that grant the GC, owner, or platform vendor rights to the sub's business data — estimates, productivity metrics, field photos, schedule data, time-stamped activity logs, BIM models, and equipment serial numbers. These clauses are easy to miss and expensive to live with. The library below maps the six most common patterns to redline alternatives. Pick the alternative based on (a) the firm's competitive sensitivity around the data, (b) whether the data is incidentally collected by required platforms (Procore / ACC / PlanGrid / Autodesk Construction Cloud) vs. actively harvested, and (c) the contract value (higher-value contracts justify stronger redlines).
+
+**Pattern 1 — Procore data-feed (or other GC-mandated platform):**
+> *Customer's draft:* "Subcontractor grants Contractor and the Project Platform a perpetual, worldwide, royalty-free license to use, reproduce, and distribute Subcontractor Data submitted to the Platform."
+> *Strike. Replace with:* "Subcontractor grants Contractor a non-exclusive, project-limited, royalty-free license to use Subcontractor Data submitted to the Platform solely for the purpose of administering this Project. The license terminates on Final Completion. Subcontractor retains all ownership and pre-existing rights in Subcontractor Data, including the right to use it on other projects. Aggregated, de-identified data may be used by the Platform vendor for benchmarking only with Subcontractor's prior written consent."
+
+**Pattern 2 — Autodesk Construction Cloud / BIM model rights:**
+> *Customer's draft:* "All BIM models, drawings, and design content created or contributed by Subcontractor become the property of Owner."
+> *Strike. Replace with:* "Subcontractor retains ownership of its BIM content, design intent models, and any pre-existing trade-specific content. Subcontractor grants Owner and Contractor a non-exclusive license to use Subcontractor's contributions for the purpose of construction, operation, and maintenance of the Project. Subcontractor's license does not extend to use of its content on other projects without separate compensation."
+
+**Pattern 3 — GC's own AI-training right (most aggressive — increasingly common):**
+> *Customer's draft:* "Subcontractor grants Contractor an irrevocable right to use Subcontractor Data, in original or aggregated form, to train artificial intelligence and machine learning systems."
+> *Strike. Replace with:* "Subcontractor does not grant Contractor any right to use Subcontractor Data, in any form, to train artificial intelligence or machine learning systems. Any use of Subcontractor Data for AI/ML training is a separate transaction requiring Subcontractor's prior written consent and separate compensation. Aggregated, de-identified, statistically-non-attributable data may be used by Contractor for internal benchmarking only."
+
+**Pattern 4 — Owner's analytics integration (utility / hyperscaler / institutional owner):**
+> *Customer's draft:* "Subcontractor agrees to permit Owner's analytics partners to access raw productivity data, time-stamped activity logs, and equipment-utilization data via API."
+> *Strike. Replace with:* "Subcontractor will provide Owner with project-progress data necessary for project administration in the format defined in Exhibit __. Subcontractor's data is provided to Owner only and is not licensed to Owner's third-party analytics partners. If Owner requires analytics-partner access, the parties will execute a separate Data Sharing Addendum that specifies the data fields, the analytics partner, the use case, and any compensation."
+
+**Pattern 5 — Productivity-data harvest (hourly or daily activity logs from wearables, mobile apps, badging systems):**
+> *Customer's draft:* "Subcontractor's personnel will use the Project's mandatory mobile application for time-stamped activity reporting; collected data is the property of Owner."
+> *Strike. Replace with:* "Subcontractor's personnel will use the Project's mobile application for time-stamped activity reporting in accordance with the Project's privacy policy. Activity data is jointly owned by Subcontractor and Owner for the duration of the Project; Owner's use is limited to project administration and dispute resolution. Personally-identifying information is not collected, retained, or processed for any purpose other than Project administration."
+
+**Pattern 6 — Schedule-data harvest (used by GC schedulers and four-week-look-ahead AI tools):**
+> *Customer's draft:* "Subcontractor's three-week look-ahead, daily report, and milestone updates may be processed by Contractor's scheduling software, which uses machine learning to predict completion variance."
+> *Strike. Replace with:* "Subcontractor's schedule submissions may be processed by Contractor's scheduling software for the purpose of administering this Project's schedule. Subcontractor's schedule data is not licensed to Contractor's software vendor for product improvement, model training, or any purpose beyond this Project. The output of Contractor's scheduling software does not modify Subcontractor's contractual schedule obligations or liquidated-damages exposure unless agreed in a written change order."
+
+When pulling redline language from this library, pair it with the corresponding rationale paragraph above so the firm's construction attorney can edit and finalize without re-deriving the issue.
+
+### Surety-Form Reconciliation block
+
+If the contract requires payment and performance bonds (`config.yml.contract.surety_form_reference` set), reconcile the customer's clause language against the firm's surety's standard form *before* the contract goes to counsel. Common conflict points:
+
+- **Bond form referenced but not attached** — the customer's contract names "AIA A312" or "form acceptable to Owner" but doesn't attach the form. Flag 🟡 and request the form before signing.
+- **Sub-tier bond pass-through** — a clause requiring the sub to bond its own subs, even when the surety hasn't underwritten that exposure. Flag 🔴 and route to the surety's underwriter.
+- **Indemnity-to-surety language** — most surety forms require an indemnity *to the surety*; the contract should not have language that conflicts with that.
+- **Termination-rights triggers** — some sureties require the obligee to give the surety notice and an opportunity to cure before terminating; if the contract gives the obligee a unilateral termination right with no surety notice, flag 🔴.
+- **Bond cancellation / non-renewal** — multi-year contracts (MSAs, service agreements) may reference a bond that the surety won't renew at the same terms; flag 🟡 and add a renewal-condition clause.
+
+The reconciliation block goes into the executive summary as a single-paragraph section: "Surety Form Reconciliation: [Compatible / Reconcile before signing / Conflict requires surety underwriter approval]."
 
 **Output format:**
 
@@ -225,3 +336,113 @@ Count by severity: 🔴 3  🟡 6  🔵 4
 ---
 
 **Disclaimer:** This is an AI-assisted review by Krasa Electric, LLC for internal decision-making only. It is not legal advice and does not create an attorney-client relationship. A licensed construction attorney in Texas must review and advise on the final contract before signing.
+
+---
+
+### Worked Example 2 — California Public-Works Prime Contract
+
+**Contract Risk Review — Bay Area Rapid Transit / Berryessa Station Power Modernization**
+
+Reviewed: 2026-04-27
+Reviewed by: Krasa Electric, LLC (AI-assisted; attorney review required)
+Contract type: Prime Contract (public works)
+Project value: $4.6M
+State: CA
+
+**Executive Summary**
+
+Overall recommendation: **Negotiate before signing**
+
+Top 3 concerns:
+1. Pay-if-paid clause (§17.3) is **unenforceable** in CA under Civil Code §8124 and *Wm. R. Clarke Corp. v. Safeco Ins. Co.* (1997) — flag and strike, replace with pay-when-paid timed off CA Public Contract Code §10261.5 (30-day prompt-payment window).
+2. No-damages-for-delay clause (§22.4) is partially unenforceable in CA — flag and limit scope to non-owner-caused delay only; preserve sub's right to recover for owner-caused delay per *Howard Contracting v. G.A. MacDonald Constr.* (1998).
+3. Required GL of $5M / $10M umbrella exceeds Krasa's `insurance.gl_limit` ($2M / $5M umbrella) — surety reconciliation needed; either procure additional limits or request a project-specific limit from the firm's broker.
+
+Count by severity: 🔴 4  🟡 7  🔵 3
+
+**Selected matrix rows:**
+
+| § | Clause Title | Summary | Risk | Why it matters | Suggested redline |
+|---|--------------|---------|------|----------------|-------------------|
+| §17.3 | Payment Conditioned on Owner Funding | Prime contractor receives payment only upon BART's receipt of state funding tranche. | 🔴 High | Pay-if-paid void in CA. *Wm. R. Clarke Corp.* | Strike. Replace with: "Contractor shall pay Subcontractors and provide written notice of receipt of progress payment within seven (7) days, in accordance with Cal. Public Contract Code §10262 and §10262.5." |
+| §22.4 | Delay Damages Limitation | "Contractor's sole remedy for any delay shall be a non-compensable extension of time." | 🟡 Medium | NDFD partially enforceable in CA but not for owner-caused delay or active interference. | Replace with: "For delay caused by Owner's act, omission, or active interference, Contractor may recover both an extension of time and reasonable delay-related costs through the change-order procedure in Article 11." |
+| §29.1 | Stop Notice Waiver | "Contractor and its Subcontractors waive all stop-notice rights." | 🔴 High | Stop-notice rights are statutory in CA (Civ. §9350); waivers in advance are void. | Strike entirely. Stop-notice rights are preserved by statute. |
+| §41.2 | AI/ML Data License | "Owner may use Project data, including productivity and time-stamped activity logs, to train AI and ML systems." | 🔴 High | Permanent, royalty-free training license. CA Consumer Privacy Act may also implicate worker activity data. | Apply Pattern 3 redline from AI-and-Data-Use Clause Library (project-limited, no AI/ML training, separate compensation if requested). |
+
+**Surety Form Reconciliation:** Reconcile before signing — Bond form referenced ("form acceptable to BART General Counsel") but not attached. Request the form. Krasa's surety (Travelers) will not bond a job where the bond form has not been pre-approved.
+
+**Insurance Reconciliation:** Required GL $5M / Krasa carries $2M. Either procure additional CGL limits or request a project-specific endorsement; flag in counter-redline.
+
+---
+
+### Worked Example 3 — National-Account MSA with Procore Data-Feed Clause
+
+**Contract Risk Review — Avalon Property Management / 2026 Annual Master Service Agreement**
+
+Reviewed: 2026-04-27
+Reviewed by: Krasa Electric, LLC (AI-assisted; attorney review required)
+Contract type: Master Service Agreement (MSA)
+Annual value (estimated): $1.4M (across 47 portfolio properties in WA / OR / CA)
+State: Multi-state (WA primary; CA / OR cross-listed)
+
+**Executive Summary**
+
+Overall recommendation: **Negotiate before signing**
+
+Top 3 concerns:
+1. Broad-form indemnity (§14) requiring Krasa to defend Avalon and its property-management agents for "any claim arising from or related to" Krasa's work, including Avalon's own negligence — unenforceable as broad-form in WA (RCW §4.24.115), CA (Civ. §2782), and OR (ORS §30.140); should still be redlined to a limited, fault-allocation form.
+2. Procore data-feed clause (§22.6) grants Avalon a "perpetual, irrevocable license to use Subcontractor data … for benchmarking and operational analytics, including ML and AI applications" — Pattern 1 + Pattern 3 of the AI-and-Data-Use Clause Library. Strike both rights and replace with project-limited license.
+3. Choice of law: **California** (despite portfolio crossing three states) — flag because CA's pay-if-paid void rule will govern subcontractor flow-down even on WA / OR projects under the MSA, which may be more favorable than the firm thought.
+
+Count by severity: 🔴 3  🟡 9  🔵 5
+
+**Selected matrix rows:**
+
+| § | Clause Title | Summary | Risk | Why it matters | Suggested redline |
+|---|--------------|---------|------|----------------|-------------------|
+| §14 | Indemnification | Broad-form: Sub indemnifies Avalon for any claim arising from work, including Avalon's own negligence. | 🔴 High | Void as broad-form in WA, CA, OR. Even if void, signing forces a court fight. | Replace with limited fault-allocation indemnity: "Subcontractor's indemnity is limited to the extent of Subcontractor's negligent acts or omissions and shall not extend to any portion of any claim caused by the negligence of Owner or its agents." |
+| §22.6 | Data License | Perpetual, irrevocable license to Avalon for ML/AI use of Sub data. | 🔴 High | Avalon (or its analytics vendor) gets the firm's pricing, productivity, and routing data forever. | Apply combined Pattern 1 (Procore) + Pattern 3 (no AI/ML training). Project-limited, terminates on contract end, no third-party analytics access without separate addendum. |
+| §27.4 | Cyber-Incident Notification | Sub must notify Avalon within 24 hours of any "cybersecurity event affecting Sub's systems." | 🟡 Medium | 24 hours is tight; "cybersecurity event" is undefined. Krasa's `insurance.cyber_limit` may not cover defense costs. | Replace with: "Subcontractor will notify Avalon within 72 hours of confirming a cybersecurity event affecting Project data. 'Cybersecurity event' means an unauthorized access, exfiltration, or material disruption of Subcontractor's systems that compromises Project data." |
+| §31 | Annual Renewal — Bond | "Sub shall maintain a $500K performance bond throughout the Term." | 🟡 Medium | MSA term is 3 years; surety may not renew at the same rate. | Add: "Surety renewal is conditioned on the Surety's continued willingness to underwrite. If the Surety does not renew, the parties will negotiate a substitute in good faith." |
+
+**Surety Form Reconciliation:** Avalon's required form is the AIA A312-2010 — **compatible** with Krasa's surety (Travelers) standard form. Renewal-condition clause needed (added above).
+
+**Insurance Reconciliation:** Avalon requires $3M GL aggregate / $5M umbrella / **$2M cyber** — Krasa carries $2M GL / $5M umbrella / **$1M cyber**. Cyber gap of $1M; either procure additional cyber coverage or request a $1M project-specific cyber endorsement.
+
+---
+
+### Worked Example 4 — Industrial Service Contract with Cyber Notification
+
+**Contract Risk Review — Pacific Industries / Tacoma Plant Annual Electrical Service Contract**
+
+Reviewed: 2026-04-27
+Reviewed by: Krasa Electric, LLC (AI-assisted; attorney review required)
+Contract type: Annual Service Agreement (industrial)
+Annual value (estimated): $890K
+State: WA
+
+**Executive Summary**
+
+Overall recommendation: **Acceptable with minor edits**
+
+Top 3 concerns:
+1. NDFD clause (§14.3) is **void** under RCW §4.24.360 — flag and strike. Replace with delay-damages reservation.
+2. Per-incident liability cap of $250K (§19) is **below** the firm's typical $500K project-cap norm and well below a credible single-incident loss on a 480 V industrial service. Negotiate up to either contract value or insurance limits.
+3. 72-hour cyber-incident notification window is workable; but the requirement to "cooperate with Owner's incident-response counsel" needs scoping (max hours, paid time, no waiver of attorney-client privilege).
+
+Count by severity: 🔴 1  🟡 5  🔵 4
+
+**Selected matrix rows:**
+
+| § | Clause Title | Summary | Risk | Why it matters | Suggested redline |
+|---|--------------|---------|------|----------------|-------------------|
+| §14.3 | No-Damages-For-Delay | Sub waives all delay-cost recovery; sole remedy is time extension. | 🔴 High | NDFD void by statute in WA (RCW §4.24.360). | Strike. Replace with delay-damages reservation tied to change-order procedure (§9). |
+| §19 | Limitation of Liability | Per-incident cap of $250K. | 🟡 Medium | A single arc-flash incident on the 480 V switchgear could exceed $250K in property and BI damages alone. | Negotiate to greater of (a) one year's contract value, (b) actual insurance proceeds for the claim. |
+| §22 | Cyber-Incident Notification | 72-hour notification + cooperation with Owner's IR counsel. | 🔵 Low | 72 hours is workable; cooperation needs scope. | Add: "Subcontractor's cooperation is limited to (i) providing factual information regarding Subcontractor's systems and (ii) access to Subcontractor's IT logs related to the incident, in each case at Owner's expense if such cooperation exceeds 16 hours of Subcontractor staff time. Subcontractor does not waive attorney-client privilege or work-product protection." |
+| §28 | Tariff / Material Escalation | "Material pricing is firm for the Term." | 🟡 Medium | A 3-year service contract with no tariff-aware escalation in a Section-232 environment is unwise. | Cross-reference `material-tariff-escalation-clause-drafter.md` and propose the Annual Price-List Refresh variant. |
+
+**Surety Form Reconciliation:** Not bonded. N/A.
+
+**Insurance Reconciliation:** Required GL $2M / umbrella $5M / cyber $1M / pollution $1M — **all within Krasa's carried limits**. No gap.
+
+**Tariff Awareness:** Contract references material pricing as "firm for the Term" but operates in a Section-232 environment. Recommend pairing with the Annual Price-List Refresh variant from `material-tariff-escalation-clause-drafter.md`.
