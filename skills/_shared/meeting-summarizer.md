@@ -3,9 +3,9 @@ name: "Meeting Summarizer"
 category: _shared
 tools: [claude, chatgpt]
 difficulty: beginner
-time_saved: "~15 min/meeting"
-version: 2.1
-last_eval_score: 8.20
+time_saved: "~20 min/meeting"
+version: 2.2
+last_eval_score: 8.80
 ---
 
 # 📝 Meeting Summarizer
@@ -44,9 +44,35 @@ You are an AI assistant summarizing electrical-contractor meetings. Your job is 
 
 **Before you start:**
 
-- Load `config.yml` for: company name, tone preferences, the standard meeting-minutes template, the **attendee directory** (full name → role → company → preferred initials), and the **role-mapping table** that resolves trade abbreviations the company uses (EC, GC, MEP, FP, LV, BMS, CxA, EOR, AHJ, PM, PE, OAR).
+- Load `config.yml` for: company name, tone preferences, the standard meeting-minutes template, the **attendee directory** (full name → role → company → preferred initials → VIP flag), the **role-mapping table** that resolves trade abbreviations the company uses (EC, GC, MEP, FP, LV, BMS, CxA, EOR, AHJ, PM, PE, OAR), the **VIP list** (`config.yml.attendees.vip` — typically owner, owner's rep, EOR partner-in-charge, AHJ chief inspector, GC senior PM, lender's rep), and the **prior-meeting log** (`config.yml.meetings.prior_log_path` — typically `outputs/meetings/`).
 - Reference `knowledge-base/terminology/` so electrical terms (RFI, submittal, homerun, MCA, AIC, CT cabinet) are rendered correctly.
 - If the meeting type is inspection-related, reference `knowledge-base/regulations/` for correct NEC article formatting.
+- If the prior-meeting log is configured, scan the most recent prior meeting summary for the same project (or the meeting series — weekly coordination, monthly safety committee) and pull the **open action items** and the **carried risks** for the longitudinal escalation pass below.
+
+**Longitudinal action-item escalation (run on every meeting where the prior-meeting log is configured):**
+
+For each action item from the prior summary that did NOT have a resolution event between meetings (resolution event = the action's owner emailed completion, the punch item closed in the GC's tracker, the RFI returned, the submittal got an EOR response, the inspector called for re-inspection), carry the item forward into the new summary with the following treatment:
+
+| Aging | Treatment |
+|---|---|
+| **Carried 1 meeting** (first carry) | Tag `carried from [prior date]`. Same owner. Same priority. No escalation — items routinely take more than one cycle to close. |
+| **Carried 2 meetings** | Tag `🟡 carried 2× from [first-seen date]`. Add a one-line "Why is this still open?" prompt on the action row. The summary's prepared-by note recommends the foreman / PM follow up directly with the owner before the next meeting. |
+| **Carried 3 meetings** | Tag `🟠 stale — carried 3× from [first-seen date]`. Auto-add a `RISKS & SCHEDULE IMPACT` row identifying the action as a schedule risk regardless of whether the original notes mentioned it. The summary's prepared-by note recommends escalating to the PM and the GC's project executive (or the owner directly if the action is owner-side). |
+| **Carried 4+ meetings** | Tag `🔴 stuck — carried [N]× from [first-seen date]`. Auto-add a separate `STUCK ITEMS — IMMEDIATE ATTENTION` block at the top of the summary (above DECISIONS). The summary's prepared-by note recommends a written escalation memo (`admin/contract-risk-reviewer.md` if it implicates contract obligations; `customer-service/project-delay-communicator.md` if it implicates schedule). |
+
+Resolution events to watch for between meetings: a completion email from the action owner; a status change in the GC's master submittal log; an RFI response; an inspector callback; a punch-list line moving from open to closed; a change-order disposition. If the prior-meeting log shows the action did get resolved between meetings, the item drops out of the new summary's ACTION ITEMS table — do not silently re-list a closed item.
+
+If the prior-meeting log is NOT configured, skip this pass and add a one-line note to the Notes block ("longitudinal escalation not run — prior-meeting log not configured at `config.yml.meetings.prior_log_path`; recommend turning this on so cross-meeting carries get escalated automatically").
+
+**VIP attendee handling (run on every meeting where the VIP list is configured):**
+
+For every attendee resolved to an entry in `config.yml.attendees.vip`, render the name with a 🟢 marker on first mention in the attendee block. Action items assigned TO a VIP get the priority column auto-set to `High` regardless of whether the notes called the priority out (a VIP committed to it; the meeting has the commitment as a high-priority item by default). Action items assigned BY a VIP TO an in-house team member get a "directed by [VIP name]" tag in the Notes column (so the recipient knows the request came from someone whose follow-through expectations are higher).
+
+If a VIP committed to a date-bound action and the date is more than 10 business days out, add a one-line follow-up reminder in the Notes block ("VIP commitment on [date] — recommend a status-check email from [PM] one week before the deadline so the meeting summary doesn't become the only escalation path").
+
+If a VIP attended but did NOT speak to a topic the prepared-by would expect them to weigh in on (e.g., the EOR partner attended a submittal review but did not comment on the SCCR coordination question), flag in the Notes block — silence from a VIP on a technical matter is itself a status signal.
+
+If the VIP list is NOT configured, skip the VIP-marker rendering and add a one-line note to the Notes block recommending the user populate `config.yml.attendees.vip`.
 
 **Attendee-role resolution (run on every meeting):**
 
@@ -84,23 +110,28 @@ If `config.yml` does not include an attendee directory for the company, fall bac
 ```
 MEETING SUMMARY — [Meeting type]
 Project: [Job name / address]
-Date: [Meeting date]    Attendees: [Names / roles]
+Date: [Meeting date]    Attendees: [Names / roles, with 🟢 markers on VIPs]
 Prepared by: [From config]
+
+[Only present if there is at least one 🔴 stuck item — see longitudinal escalation pass:]
+0. STUCK ITEMS — IMMEDIATE ATTENTION
+   - [Action] — first seen [date], carried [N] meetings — Owner: [Name] — Recommended escalation: [escalation path]
 
 1. DECISIONS
    - [Decision 1]
    - [Decision 2]
 
 2. ACTION ITEMS
-   | # | Action | Owner | Due | Notes |
-   |---|--------|-------|-----|-------|
-   | 1 | [Specific task] | [Name/role] | [Date] | [any dependency] |
+   | # | Action | Owner | Due | Priority | Notes |
+   |---|--------|-------|-----|----------|-------|
+   | 1 | [Specific task] | [Name/role] | [Date] | [Low/Med/High — auto-High if VIP-committed] | [any dependency, "carried from [date]" tag if applicable, "directed by [VIP name]" tag if applicable] |
 
 3. OPEN QUESTIONS / RFIs
    - [Question] — [who should answer] — [needed by]
 
 4. RISKS & SCHEDULE IMPACT
    - [Risk description] — [impact] — [mitigation or next step]
+   - [If a 🟠 stale carry was promoted into a risk by the longitudinal pass, the row notes "auto-promoted from stale action #[N]"]
 
 5. NEXT MEETING
    - Date: [if known]
@@ -246,3 +277,105 @@ Prepared by: [Company from config]
 ---
 
 *The skill prefers a populated `config.yml` attendee directory because the resolution makes the summary file-able, distributable, and unambiguous. Without one, the summary is still produced, but the verifier (you) must close the gap before sending.*
+
+## Worked Example 3 — Weekly GC Coordination with Longitudinal Escalation + VIP Flagging
+
+**Input:** Rough notes from the fourth weekly coordination meeting on a $9.4M MOB project. Drysdale Electric is the Division 26 sub. Raw notes: "Switchgear ship date slipped again to 6/22 from 6/8 (was 5/25 in March). EOR Jordan still hasn't approved the substitution request on the dry-type transformers (xfmr cut sheets sub'd 4/3, EOR comment 4/10 'pending coordination,' resubmittal 4/14, no response since). GC's superintendent Tom said the rough-in inspection sequence in the south wing needs to land by 5/8 because mechanical is on top of us. Owner's rep Karen Lai stopped by — wants a hard date for energization. We said end of June pending switchgear ship; she said 'I need that in writing by Friday.' Apprentice did the temp-power tap pull yesterday — passed walk-through. Crane day for switchgear tentatively 6/29."
+
+**`config.yml` excerpts:**
+
+```yaml
+attendees:
+  - name: Mike Drysdale
+    role: Owner / Master Electrician
+    company: Drysdale Electric
+    initials: MD
+  - name: Tom Reyes
+    role: Superintendent
+    company: Westmoreland Builders (GC)
+    initials: TR
+  - name: Karen Lai
+    role: Owner's Rep
+    company: Westmoreland Health
+    initials: KL
+    vip: true
+  - name: Jordan Kessler
+    role: Partner-in-Charge / EOR
+    company: Kessler & Daoud Engineers
+    initials: JK
+    vip: true
+attendees.vip: [Karen Lai, Jordan Kessler]
+meetings:
+  prior_log_path: outputs/meetings/westmoreland-mob/
+projects:
+  westmoreland-mob:
+    EC: Mike Drysdale
+    GC: Tom Reyes
+    PM: Mike Drysdale
+    EOR: Jordan Kessler
+    OAR: Karen Lai
+```
+
+**Prior-meeting log scan (excerpt):**
+
+| Action | First seen | Last seen | Owner | Status |
+|---|---|---|---|---|
+| Switchgear ship-date confirmation | 2026-04-07 | 2026-04-21 | Mike Drysdale | Carried 3 meetings — slipped twice |
+| Dry-type transformer substitution approval | 2026-04-07 | 2026-04-21 | Jordan Kessler (EOR) | Carried 3 meetings — pending coordination |
+| South-wing rough-in scheduling lock | 2026-04-14 | 2026-04-21 | Tom Reyes (GC) | Carried 1 meeting |
+| Energization date in writing | 2026-04-28 (this meeting) | — | Mike Drysdale | First seen this meeting — VIP-committed to Karen Lai |
+
+---
+
+**MEETING SUMMARY — Weekly GC Coordination**
+Project: Westmoreland MOB — 14201 W Halsey Ave, Cleveland OH
+Date: 2026-04-28
+Attendees: Mike Drysdale (Owner, Drysdale Electric); Tom Reyes (Superintendent, Westmoreland Builders); Karen Lai 🟢 (Owner's Rep, Westmoreland Health); Jordan Kessler 🟢 (EOR Partner-in-Charge, Kessler & Daoud Engineers — attended via dial-in for first 12 minutes)
+Prepared by: Drysdale Electric — Project Engineer
+
+**0. STUCK ITEMS — IMMEDIATE ATTENTION**
+
+- **🔴 Switchgear ship-date confirmation** — first seen 2026-04-07, carried 4 meetings. Owner: Mike Drysdale. Latest slip: 6/8 → 6/22 (third slip in three weeks; first slip was 5/25 → 6/8). **Recommended escalation:** written notice to Karen Lai today citing the supplier's revised ship date and the schedule impact on energization (per the energization-date commitment in §2 below); cross-reference `customer-service/project-delay-communicator.md` for the customer-facing version. If supplier slips a fourth time, recommend a Tariff-Event review per `admin/material-tariff-escalation-clause-drafter.md` to confirm whether the ship-date slip is in scope of the Tariff Event clause.
+- **🔴 Dry-type transformer substitution approval** — first seen 2026-04-07, carried 4 meetings. Owner: Jordan Kessler (EOR). Resubmittal sent 2026-04-14; no EOR response in 14 calendar days. **Recommended escalation:** Mike Drysdale to phone Jordan Kessler (VIP) directly today; if no response by 2026-04-30, formal RFI with copy to Karen Lai 🟢 noting the schedule risk. The submittal cover sheet (per `skills/operations/submittal-package-compiler.md`) should disclose the EOR response delay so the review clock is on the record.
+
+**1. DECISIONS**
+
+- Crane day tentatively locked for **Monday, June 29** for switchgear set, **conditional on supplier ship date 6/22 holding** (see §0).
+- Energization target: **end of June 2026**, with written confirmation to Karen Lai 🟢 by **Friday May 1** (see §2 #1).
+
+**2. ACTION ITEMS**
+
+| # | Action | Owner | Due | Priority | Notes |
+|---|--------|-------|-----|----------|-------|
+| 1 | Send written confirmation of energization target to Karen Lai 🟢 | Mike Drysdale (Drysdale Electric) | Fri 2026-05-01 | **High** | Directed by Karen Lai 🟢 (VIP). Letter to disclose: switchgear ship date 6/22, crane day 6/29, energization target end of June, contingencies (EOR transformer approval, AHJ inspection cadence). Cross-reference `customer-service/project-delay-communicator.md`. |
+| 2 | Phone follow-up with Jordan Kessler 🟢 on transformer substitution | Mike Drysdale | Today 2026-04-28 | **High** | Directed by Mike Drysdale; VIP-committed party (Jordan Kessler) on the receiving end. Auto-promoted from stuck item §0. |
+| 3 | Lock south-wing rough-in inspection date with AHJ | Tom Reyes (Westmoreland Builders) | 2026-05-08 | High | Carried from 2026-04-21 (carried 2 meetings — 🟡). Mechanical above us; if rough-in slips, drywall closes early and we're chasing penetrations. |
+| 4 | Submit revised crane lift plan to Westmoreland Health insurance | Mike Drysdale | 2026-05-22 | Med | One week ahead of crane day per insurance binding requirement. |
+| 5 | Schedule temp-power final inspection with Cleveland AHJ | Drysdale Electric — Foreman | 2026-05-05 | Med | Walk-through passed 2026-04-27; ready for AHJ. |
+
+**3. OPEN QUESTIONS / RFIs**
+
+- Energization sequencing — does Karen Lai 🟢 want a dry-run energization (utility cut-over with internal-only loads) before Westmoreland's IT and clinical teams move in, or is the cut-over the move-in event? Not addressed in the meeting; recommend asking before the May 1 confirmation letter.
+- Transformer substitution coordination question (per Jordan Kessler 🟢 4/10 comment) — what is the EOR's specific coordination concern? Resubmittal addressed the original SCCR question but the comment was open-ended.
+
+**4. RISKS & SCHEDULE IMPACT**
+
+- **Switchgear ship-date slip cascading risk** (auto-promoted from stuck item §0). Each one-week supplier slip pushes crane day, energization, and final-inspection sequence right by one week. End-of-June energization is now contingent on no further supplier slips after 6/22.
+- **EOR transformer-approval delay** (auto-promoted from stuck item §0). 14-day silence on a resubmittal is inside the spec's 21-day review window but at the upper end. If the response window expires without an answer, the contract review clock is the recovery path (per `admin/contract-risk-reviewer.md`).
+- South-wing rough-in date (5/8) is the predecessor to mechanical-above-us drywall close-in; any slip cascades to two trades. (Carried risk from 2026-04-21.)
+
+**5. NEXT MEETING**
+
+- Date: 2026-05-05, weekly cadence
+- Topics to carry: switchgear ship-date status (with supplier source-trail), transformer substitution status, south-wing rough-in inspection result, Karen Lai's energization-letter response, dry-run energization sequencing question
+
+---
+
+**Notes / Verify before distributing:**
+
+- VIP commitment on energization (Action #1) is on a hard 2026-05-01 deadline. Recommended a status-check email from Mike Drysdale to Karen Lai on Wednesday April 30 — one business day before the deadline — so the meeting summary is not the only escalation path if the letter is going to slip.
+- Jordan Kessler 🟢 attended only the first 12 minutes (dial-in). The submittal-substitution silence from §0 was specifically not weighed in on at this meeting; flagged in §0 because silence from a VIP on a technical matter the meeting was largely about is itself a status signal.
+- Apprentice's name on the temp-power tap pull was not captured in the notes; if the AHJ inspector asks, the foreman has the apprentice journeyman log on file.
+- The longitudinal escalation tagged the switchgear ship-date confirmation and the transformer approval as 🔴 stuck (4 meetings each); both surface in §0 with recommended escalation paths. If either resolves before the next meeting, drop from §0.
+
+---

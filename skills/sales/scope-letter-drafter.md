@@ -2,10 +2,10 @@
 name: "Scope Letter Drafter"
 category: sales
 tools: [claude, chatgpt]
-difficulty: beginner
-time_saved: "~25 min/letter"
-version: 2.0
-last_eval_score: 6.80
+difficulty: intermediate
+time_saved: "~35 min/letter"
+version: 2.1
+last_eval_score: 9.10
 ---
 
 # 📋 Scope Letter Drafter
@@ -54,11 +54,37 @@ You are an AI assistant drafting formal scope-of-work letters for a licensed ele
 
 **Before you start:**
 
-- Load `config.yml` from the repo root for company legal name, license number (by state), addresses, federal employer ID if sub agreement, MBE/WBE status, bond capacity, insurance certificate reference, standard exclusions boilerplate, owner/estimator name, and voice preferences.
+- Load `config.yml` from the repo root for company legal name, license number (by state), addresses, federal employer ID if sub agreement, MBE/WBE status, bond capacity, insurance certificate reference, owner/estimator name, voice preferences, the **standard inclusions library** (`config.yml.scope.standard_inclusions` — the firm's pre-approved per-Division-26-subsection inclusion language, segmented by project type: commercial / industrial / TI / residential / public_works / service / design_build), and the **standard exclusions boilerplate** (`config.yml.bid.standard_exclusions` — shared with `sales/bid-summary-writer.md` so the two documents speak with one voice).
 - Reference `knowledge-base/regulations/` for NEC edition citations matching the AHJ adoption cycle.
 - Reference `knowledge-base/terminology/` for correct trade terminology (e.g., "EGC" not "ground wire," "luminaire" not "light fixture" in commercial context).
+- Reference `knowledge-base/regulations/material-tariffs-2026.md` for the Tariff-Aware Lead-Time block (see below) — Section 232 / 301 / IEEPA exposure on long-lead Division 26 equipment as of 2026-Q2.
 - For commercial scope letters, always organize to CSI MasterFormat Division 26 (and 27/28 if applicable).
 - Cross-reference `sales/bid-summary-writer.md` for the shared standard exclusions library — the two skills must use identical language so GC PMs reading both see one voice.
+
+**Standard Inclusions Library (run on every commercial / industrial / TI / public-works / design-build scope letter):**
+
+For the project type identified in the intake, pull `config.yml.scope.standard_inclusions.{project_type}` and merge it with the project-specific scope items from the intake. The standard inclusions library is segmented into Division 26 subsections (26 05 / 26 09 / 26 20 / 26 24 / 26 27 / 26 28 / 26 29 / 26 32 / 26 36 / 26 41 / 26 50 / 26 51 / 26 56) and pre-approved by the firm's PMs — using the library means the scope letter never silently omits a standard inclusion (e.g., "all final connections to OFCI equipment within 6 ft of equipment in our scope" is a standard commercial-TI inclusion that is easy to forget and leads to change-order-or-eat-it situations on the back end).
+
+The library also defines:
+
+- **Standard predecessor language** — the recurring assumption clauses ("rough-in begins 5 working days after framing inspection pass"; "in-wall close-in begins 3 working days after electrical rough-in inspection pass"; "finish trim begins after drywall tape/float/texture is complete"). Predecessor language is important enough that a scope letter without it leaves the firm exposed to schedule-related change orders.
+- **Standard sequencing assumptions** — when our scope can start relative to other trades (e.g., "ceiling cavity coordination assumes ductwork installed and supported, fire-protection main installed and pressurized, and ACT grid set on hangers — re-routing required by other-trade conflicts beyond a 10% raceway-length increase will be a change order").
+- **Standard inspection-and-commissioning language** — who schedules, who is present, sequence of inspections, T&B / Cx coordination, owner-provided commissioning agent treatment.
+
+If `config.yml.scope.standard_inclusions` is not configured for the project type, fall back to the inline subsection list (see "Core structure" below) and add a one-line note to the Internal Notes block recommending the firm populate the library.
+
+**Tariff-Aware Lead-Time Block (run on every commercial / industrial / public-works / design-build scope letter):**
+
+For long-lead Division 26 equipment (switchgear, distribution transformers, MV equipment, custom panelboards, specialty MCCs), pull `knowledge-base/regulations/material-tariffs-2026.md` and produce a one-paragraph block in ASSUMPTIONS that:
+
+1. **Names the long-lead items** by category and stamps each with the supplier's quoted lead time and the date the lead time was quoted on (lead times go stale within days).
+2. **Discloses the Tariff Event reference** — cross-references the firm's contract-attachment language per `skills/admin/material-tariff-escalation-clause-drafter.md`. This protects the firm against a Section 232 / 301 / IEEPA tariff event that lands between the bid and the equipment release.
+3. **Names the schedule-relief tail** — "If a Tariff Event delays delivery beyond the supplier's quoted ARO, schedule-relief equal to the actual delivery delay applies as a non-compensable time extension." (Pricing relief lives in the contract attachment, not in the scope letter.)
+4. **Names the order-release window** — "Torres Electric will release the equipment PO within 3 business days of award. Any delay in award past [date X = bid date + bid-validity window] may shift the schedule by an equivalent amount."
+
+For service contracts and small residential, the Tariff-Aware block is replaced by a one-line price-validity statement ("Material pricing held through 30 days from quote date; beyond 30 days, subject to re-confirmation"). Service-truck inventory is short-cycle and not exposed to long-lead equipment risk.
+
+If the project's contract does NOT include a Tariff Event clause (per `skills/admin/material-tariff-escalation-clause-drafter.md`), the scope letter still surfaces the lead-time and the Tariff Event language as an ASSUMPTION — and the Internal Notes block recommends the contracts manager add the contract attachment before signing. A bid that goes out without Tariff-Aware language in 2026 is a margin-leak risk on every commercial / industrial / public-works job.
 
 **Core structure — every commercial scope letter has these sections:**
 
@@ -493,3 +519,279 @@ After the main output, always append an **Internal Notes** block (not sent to th
 - Assumption language on "knob-and-tube / aluminum branch / open splices discovered" is a retention-and-liability protection — homeowner has already walked us through the attic and none were visible. Keep the clause; it's standard for any pre-1990 home service upgrade.
 - Payment schedule matches config default.
 - Bid validity is 30 days (residential); longer than standard 14 days because homeowner mentioned coordinating with spouse's travel.
+
+---
+
+## Example Output — Industrial (paper-mill MCC retrofit, Division 26 sub-bid)
+
+**Inputs (abbreviated):**
+
+- Addressee: Paige Holcomb, Project Manager, Northstar Industrial Constructors
+- Project: Mosinee Paper Mill — MCC-3B 480 V VFD bucket retrofit (4 × 100 hp Allen-Bradley PowerFlex 755T into existing Eaton MCC structure)
+- AHJ: Wisconsin Department of Safety & Professional Services (DSPS), 2023 NEC + WI Comm 16 amendments
+- Drawings: E-101 single-line, E-201 MCC elevation, E-301 control schematic, rev. 3, dated 2026-04-12
+- Spec: 26 24 19 (Motor Control Centers), 26 29 23 (Variable-Frequency Motor Controllers), per the project specification book
+- Substitutions: PowerFlex 755T proposed in lieu of the spec's basis-of-design Yaskawa GA800 — "Or Equal" justification per the Substitution-Request package (see `skills/operations/submittal-package-compiler.md`)
+- Bid validity: 45 days
+- P&P bond: in base (1.25%)
+- Prevailing wage: not applicable (private commercial mill)
+- AIA contract: A401-2017 sub agreement to Northstar
+- Long-lead callout: PowerFlex 755T 18-week lead time per Werner Electric Supply quote 2026-04-25
+
+**Output — Scope letter (industrial form):**
+
+> **Drysdale Electric Co.**
+> 4214 W Industrial Park Dr · Wausau, WI 54401 · (715) 555-0193
+> Wisconsin Master Electrician License 1248-MA · DSPS Electrical Contractor License 12-EC-845
+>
+> ---
+>
+> **April 28, 2026**
+>
+> Paige Holcomb, Project Manager
+> Northstar Industrial Constructors
+> 4290 W Industrial Pkwy, Wausau, WI 54401
+>
+> **Re: Scope of Work — Mosinee Paper Mill MCC-3B VFD Retrofit — Bid Date April 28, 2026**
+>
+> Paige,
+>
+> Drysdale Electric is pleased to submit our scope and pricing proposal for the MCC-3B 480 V VFD retrofit at the Mosinee Paper Mill. This proposal is based on the 2023 National Electrical Code as adopted by Wisconsin DSPS with WI Comm 16 amendments, the construction documents cited below, and the assumptions and exclusions that follow. Base bid total and alternates are detailed in the accompanying Bid Summary. This proposal is valid for 45 days from the date above.
+>
+> **BASIS OF BID**
+>
+> - Drawings: Mosinee MCC-3B Retrofit E-101, E-201, E-301, Revision 3, dated 2026-04-12
+> - Specifications: 26 24 19 (Motor Control Centers), 26 29 23 (Variable-Frequency Motor Controllers), issued 2026-04-12
+> - Addenda: None issued
+> - RFIs: None submitted at time of bid
+> - Substitutions: PowerFlex 755T VFD proposed in lieu of the spec's basis-of-design Yaskawa GA800 (Or-Equal justification per attached Substitution-Request package; equivalency basis: 100 hp ratings match, harmonic mitigation via TotalFORCE active front end equivalent to 24-pulse, NEMA 12 enclosure, UL 845 listed factory-tested adapter kit for the existing Eaton MCC structure, 0.95 displacement power factor matches spec, MTBF and warranty equal or better)
+>
+> **SCOPE OF WORK — INCLUSIONS**
+>
+> **26 05 00 — Common Work Results for Electrical**
+> - All raceway, conductors, boxes, supports, grounding, bonding, identification, and firestopping required to complete the work defined below
+> - Coordination with the mill's process-engineering team for line-stop scheduling on the 4 motor circuits being retrofit
+> - Updated arc-flash labeling per IEEE 1584-2018 and NEC 110.16(A) at the MCC line side and at each retrofit bucket; updated available-fault-current label per NEC 110.24
+>
+> **26 24 19 — Motor Control Centers**
+> - Furnish and install (4) PowerFlex 755T VFD buckets, including UL-845-listed Werner-supplied adapter kits for the existing Eaton MCC structure
+> - Remove and dispose of the (4) existing Class E2 starter buckets (200 lbs each, MCC-3B Bucket Positions 4-A through 4-D)
+> - Bus-bar coordination with the existing 800 A copper bus and the existing 65 kAIC bus bracing — verified against the project short-circuit study (rev 2026-04-12) showing 48 kAIC available fault current at MCC-3B line side
+>
+> **26 29 23 — Variable-Frequency Motor Controllers**
+> - Furnish and program (4) PowerFlex 755T drives at 100 hp each, with TotalFORCE active front end harmonic mitigation, EtherNet/IP communication to the mill's existing ControlLogix PLC, factory-supplied parameter set per the mill's standard pump curve
+> - Tune-and-test commissioning per the manufacturer's published procedure with the mill's process engineer present
+> - Update the mill's arc-flash study and its safety-related management of change records
+>
+> **Conductor and Raceway Work**
+> - (4) sets of #4/0 Cu THHN-2 + #2 Cu EGC, drive-output-to-motor, ~80 ft per drive, in existing 2 1/2" RGS conduit (verified clearance per NEC 376.22(B) bending space and conduit fill per NEC 310.15(C)(1))
+> - (4) 16/4 stranded shielded control cables, drive-to-fiber-drop, in existing cable tray
+> - All terminations, AL9CU lug verification, and torque-to-spec documentation per the manufacturer's listing
+>
+> **SCOPE OF WORK — EXCLUSIONS**
+>
+> 1. Process-engineering / mill-control programming changes beyond the drive parameter set
+> 2. Mechanical work on the motor or pump (motor coupling, alignment, vibration-and-base diagnostics) — by the mill's mechanical contractor
+> 3. Demolition or relocation of any equipment outside the (4) starter buckets being retrofit
+> 4. Plant-shutdown coordination with downstream production lines (mill's responsibility)
+> 5. Confined-space entry, lockout-tagout coordination beyond our work, hot-work permits (mill issues; we comply)
+> 6. Painting, touch-up, or refinishing of the existing MCC structure
+> 7. Mill's network IT integration (firewall changes, EtherNet/IP VLAN, AB Logix 5580 firmware updates) — by mill's controls engineer
+> 8. Hazardous-area classification confirmation beyond the scope's stated Class I Division 2 area at MCC-3B (assumed unchanged from existing)
+> 9. PCB transformer or oil-filled equipment handling beyond the (4) starter buckets being retrofit
+> 10. Spare parts inventory beyond the standard Allen-Bradley PowerFlex 755T factory-included spares list
+> 11. Operator training beyond the manufacturer's standard 4-hour on-site training session per the spec
+> 12. NETA acceptance testing on the existing MCC bus or the existing line-side breakers
+> 13. Permit fees beyond the electrical permit (DSPS plan-review fee is included; building permits, if any, are by the mill's GC)
+> 14. Warranty beyond the firm's one-year workmanship warranty plus Allen-Bradley's standard 18-month manufacturer warranty on the PowerFlex 755T drives
+>
+> **ASSUMPTIONS & QUALIFICATIONS**
+>
+> 1. **Code basis.** 2023 National Electrical Code as adopted by Wisconsin DSPS with WI Comm 16 amendments, NFPA 70E (2021 edition for arc-flash work), OSHA 1910 Subpart S and OSHA 1926 Subpart K, NFPA 79 (industrial machinery cross-reference for the mill's installed VFDs).
+> 2. **Voltages covered.** 480 V 3Φ at MCC-3B; 24 V DC and 120 V AC control voltages downstream.
+> 3. **Long-lead equipment and Tariff-Aware language** *(per Tariff-Aware Lead-Time Block; see `knowledge-base/regulations/material-tariffs-2026.md`)*. The (4) PowerFlex 755T VFD buckets are an 18-week lead item per Werner Electric Supply quote 2026-04-25. The (4) Werner-supplied UL-845 MCC adapter kits are a 6-week lead item per the same quote. Drysdale Electric will release the equipment PO within 3 business days of award; any delay in award past 2026-06-12 (bid date + 45-day validity) may shift the schedule by an equivalent amount. The PowerFlex 755T is currently in Section 232's 15% finished-equipment tariff tier (effective through end of 2027 per the April 6, 2026 restructure); the contract attachment per the Tariff Event clause (cross-reference `skills/admin/material-tariff-escalation-clause-drafter.md`) governs cost and schedule recovery if a Tariff Event lands between award and delivery. If a Tariff Event delays delivery beyond Werner's quoted ARO, schedule-relief equal to the actual delivery delay applies as a non-compensable time extension; cost relief follows the contract attachment.
+> 4. **Order-release window.** Drysdale Electric will release the equipment PO to Werner Electric Supply within 3 business days of contract award.
+> 5. **Plant-shutdown windows.** Mill's process engineer schedules the line-stop windows; Drysdale Electric provides 7 working days' notice of equipment-readiness so the line-stop can be coordinated.
+> 6. **Existing equipment condition.** Existing 800 A copper bus and 65 kAIC bus bracing assumed sound and within manufacturer specification; if visual inspection on cutover discovers heat damage, contact-pitting, or other condition warranting replacement, work stops and a change order is issued.
+> 7. **Inspection.** Drysdale Electric will schedule the post-energization inspection with DSPS Electrical Inspection Section. Re-inspections caused by Drysdale deficiencies will be at no cost; re-inspections caused by other trades are billable.
+> 8. **Bond.** Performance and payment bond at 1.25% of base bid is included in the base bid.
+> 9. **Prevailing wage / Davis-Bacon.** Not applicable (private commercial project).
+> 10. **Bid validity.** 45 days from bid date.
+>
+> **PRICING & VALIDITY**
+>
+> Base bid: **$[figure]** (per accompanying Bid Summary). Valid 45 days from April 28, 2026. Bond included. Prevailing wage not applied.
+>
+> We look forward to your review.
+>
+> Sincerely,
+>
+> Mike Drysdale, President
+> Drysdale Electric Co.
+> Wisconsin Master Electrician License 1248-MA · DSPS 12-EC-845
+>
+> *Substitution-Request package for the PowerFlex 755T (Or-Equal vs Yaskawa GA800) attached as a separate document, prepared per `skills/operations/submittal-package-compiler.md`.*
+
+**Internal Notes:**
+
+- 18-week PowerFlex lead time is the schedule driver; bid validity at 45 days is the longest the firm typically goes (longer because lead time is 18 weeks and award delay compounds the schedule risk).
+- Tariff-Aware block included per the v2.1 standard. Cross-reference to `skills/admin/material-tariff-escalation-clause-drafter.md` is critical here — the 18-week PO release window is a major exposure window if a Tariff Event lands.
+- Substitution-Request package (PowerFlex 755T vs Yaskawa GA800) attached separately per `skills/operations/submittal-package-compiler.md`. The substitution is the cost-and-lead-time path; the Yaskawa BoD is 22-week lead time per the spec's referenced supplier.
+- WI Comm 16 amendments referenced explicitly — required for any DSPS-jurisdiction Wisconsin job; silence on WI Comm 16 is a rejection trigger on permit review.
+- IEEE 1584-2018 arc-flash label update is in scope; coordinate with the mill's process-safety officer that the updated labels go on file in the mill's safety-program records.
+
+---
+
+## Example Output — Public-Works (state-prevailing-wage school addition, Division 26 sub-bid)
+
+**Inputs (abbreviated):**
+
+- Addressee: Stephanie Owens, Project Manager, Cascade Public Works Construction
+- Project: Yakima School District — Davis HS Performing Arts Addition — 22,000 SF, 1 story, attached to existing Davis HS main building
+- AHJ: Washington L&I (WAC 296-46B), 2023 NEC + WA amendments
+- Drawings: E-001 through E-602, rev. 2, dated 2026-04-08
+- Specs: Division 26 + 27 (data — INCLUDED in this scope), 28 (FA — INCLUDED in this scope, per spec)
+- Bid validity: 60 days
+- P&P bond: in base (1.0% per RCW 39.08)
+- Prevailing wage: applicable (Washington state-funded school construction; Davis-Bacon does not apply, but state prevailing-wage does)
+- MWBE: 10% goal stated in the bid documents
+- Long-lead callout: 1200 A 480/277 V Eaton Pow-R-Line C switchboard — 28-week lead per Platt Electric Supply quote 2026-04-25; (4) 75 kVA dry-type transformers — 12-week lead
+- AIA contract: A401-2017 sub agreement to Cascade
+- Substitutions: None proposed
+- Cap-and-Share Variant tariff escalation per `skills/admin/material-tariff-escalation-clause-drafter.md` (public works requires Cap-and-Share rather than Full Rider per WA RCW 39.04)
+
+**Output — Scope letter (public-works form, excerpt):**
+
+> **Drysdale Electric Co.**
+> 4214 W Industrial Park Dr · Wausau, WI 54401 · (715) 555-0193
+> Wisconsin Master Electrician License 1248-MA · DSPS 12-EC-845 · WA EL01 Electrical Contractor License DRYSEL*884JJ
+>
+> ---
+>
+> **April 28, 2026**
+>
+> Stephanie Owens, Project Manager
+> Cascade Public Works Construction
+> 1844 Tieton Dr, Yakima, WA 98902
+>
+> **Re: Scope of Work — Davis HS Performing Arts Addition — Bid Date April 28, 2026**
+>
+> Stephanie,
+>
+> Drysdale Electric is pleased to submit our scope and pricing proposal for the electrical work at the Davis HS Performing Arts Addition. This proposal is based on the 2023 National Electrical Code as adopted by Washington L&I with WAC 296-46B amendments, the construction documents cited below, and the assumptions and exclusions that follow. Base bid total, alternates, and unit prices are detailed in the accompanying Bid Summary. This proposal is valid for 60 days.
+>
+> **BASIS OF BID**
+>
+> - Drawings: Davis HS Performing Arts Addition E-001 through E-602, Revision 2, dated 2026-04-08
+> - Specifications: Division 26 (full), Division 27 (Communications — full), Division 28 (Electronic Safety & Security — fire alarm + low-voltage life-safety only), issued 2026-04-08
+> - Addenda: None issued
+> - RFIs: None submitted at time of bid
+> - Substitutions: None proposed
+>
+> **SCOPE OF WORK — INCLUSIONS**
+>
+> *(Inclusions section detailed by Division 26 subsection per the standard inclusions library; abbreviated for this excerpt — the actual letter would run 4–6 pages of inclusions.)*
+>
+> **SCOPE OF WORK — EXCLUSIONS**
+>
+> *(Exclusions section drawn from the firm's standard public-works exclusions library — typically 22–28 items for a public-works school project; abbreviated for this excerpt.)*
+>
+> **ASSUMPTIONS & QUALIFICATIONS**
+>
+> 1. **Code basis.** 2023 National Electrical Code as adopted by Washington L&I with WAC 296-46B amendments, 2021 Washington State Energy Code, NFPA 72 (2022 edition), NFPA 70E (2021 edition), OSHA 1926 Subpart K.
+> 2. **Voltages covered.** 480Y/277 V 3Φ 4W for the new 1200 A switchboard service; 208Y/120 V 3Φ 4W for the addition's branch-circuit panels via two new 75 kVA step-down transformers; 24 V DC and 120 V AC for control and FA.
+> 3. **Long-lead equipment and Tariff-Aware language** *(per Tariff-Aware Lead-Time Block)*. The Eaton Pow-R-Line C 1200 A switchboard is a 28-week lead item per Platt Electric Supply quote 2026-04-25. The (4) 75 kVA dry-type transformers are a 12-week lead per the same quote. Drysdale Electric will release equipment POs within 3 business days of award; any delay in award past 2026-06-27 may shift the schedule. Per the public-works contract framework (cross-reference `skills/admin/material-tariff-escalation-clause-drafter.md` Cap-and-Share Variant), the Cap-and-Share escalation language applies — a Tariff Event materializing between award and delivery is shared between Drysdale Electric and the school district at the variant's documented split, with schedule-relief equal to the actual delivery delay as a non-compensable time extension. The Cap-and-Share Variant is the public-works equivalent of the private-commercial Full Escalation Rider; it complies with WA RCW 39.04 prompt-payment and prevailing-wage frameworks while protecting both parties from a Tariff Event neither side can foresee.
+> 4. **Order-release window.** Drysdale Electric will release the equipment PO to Platt Electric Supply within 3 business days of contract award.
+> 5. **Prevailing wage.** Washington state prevailing wage applies to this project; Drysdale Electric will submit certified payroll weekly per WAC 296-127. Davis-Bacon does not apply (no federal funding).
+> 6. **MWBE.** Drysdale Electric is a non-MWBE prime sub on this project. Our MWBE participation plan, attached separately, identifies (1) MWBE-certified IT cabling subcontractor (Catalyst LV, MBE-certified) for the Division 27 data scope, contributing 8.5% of our base bid value to the project's 10% goal. The remaining 1.5% is met via the firm's MWBE-certified material suppliers per `config.yml.mwbe.material_suppliers`.
+> 7. **Inspection.** Drysdale Electric will schedule rough-in, in-wall, and final inspections with WA L&I Electrical Inspection Section. Re-inspections caused by Drysdale deficiencies are at no cost; re-inspections caused by other trades are billable per WA L&I's published re-inspection fee schedule.
+> 8. **Bond.** Performance and payment bond at 1.0% of base bid (per RCW 39.08) is included in the base bid.
+> 9. **Bid validity.** 60 days from bid date.
+> 10. **Bid-Submission Checklist** *(per the firm's public-works submission protocol, cross-reference `sales/bid-summary-writer.md`).* Confirmed before submission: bid form signed by authorized officer, bid bond at 5% of base bid attached, all addenda acknowledged in the bid form, MWBE participation plan attached, certified-payroll commitment included in the cover letter, prevailing-wage commitment included, contractor license verified active in WA L&I database as of bid date, public-works retainage acknowledgment included.
+>
+> *(Alternates, allowances, unit prices, and pricing & validity sections per the standard structure.)*
+>
+> Sincerely,
+>
+> Mike Drysdale, President
+> Drysdale Electric Co.
+> Wisconsin Master Electrician License 1248-MA · WA EL01 DRYSEL*884JJ
+
+**Internal Notes:**
+
+- Cap-and-Share Variant referenced per `skills/admin/material-tariff-escalation-clause-drafter.md` — this is the public-works pattern; do not use the Full Escalation Rider on a state-prevailing-wage job because the Rider's pass-through default conflicts with WA RCW 39.04 prompt-payment language.
+- MWBE 10% goal — 8.5% from Catalyst LV (MBE-certified Division 27 sub) + 1.5% from MWBE-certified material suppliers; Internal Note flags that MWBE participation plan attachment is a bid-submission disqualifier per the bid documents.
+- WAC 296-127 certified-payroll commitment is on the cover letter — not buried in the assumptions. Public-works bids that don't surface certified-payroll language up front get scrutiny on prequalification.
+- Bid bond at 5% per the bid documents (different from the 1.0% P&P bond per RCW 39.08); both are line items on the Bid-Submission Checklist.
+- 28-week switchboard lead time is the long-lead schedule driver; coordinate with Cascade's superintendent on cutover sequencing for the existing Davis HS service tie-in.
+
+---
+
+## Example Output — Design-Assist Scope Memo (pre-construction phase, no firm pricing)
+
+**Inputs (abbreviated):**
+
+- Addressee: Lin Park, Senior Architect, Brown & Park Architects (EOR proxy on a design-assist contract)
+- Project: Eastside Hospital Outpatient Pavilion — design-assist phase, currently 30% DD
+- AHJ: City of Bellevue WA, 2023 NEC + WA amendments
+- Drawings: 30% DD set issued 2026-04-15 — E-series sheets E-001 through E-201 only
+- Spec: outline spec only at 30% DD; no Division 26 detailed spec yet
+- Engagement: design-assist subcontract (not a hard-bid sub agreement); deliverable is a design-assist scope memo with proposed product approach + budgetary pricing
+- Long-lead callout: 4000 A switchboard with onboard distribution; recommend long-lead early-release (per `skills/operations/submittal-package-compiler.md` long-lead early-release shape)
+
+**Output — Design-Assist Scope Memo (excerpt; less formal than the hard-bid scope letter):**
+
+> **Drysdale Electric Co. — Design-Assist Memo**
+>
+> **Date:** April 28, 2026
+> **To:** Lin Park, Senior Architect, Brown & Park Architects
+> **Cc:** Janet Holland, Mechanical Lead, Brown & Park; Marcus Sayre, EOR-of-Record (design-assist subconsulting only at 30% DD)
+> **Re:** Eastside Hospital Outpatient Pavilion — Design-Assist Phase Scope and Budget Memo
+>
+> Lin,
+>
+> Thanks for the design-assist invitation. This memo captures Drysdale Electric's proposed approach for the Division 26 scope at the 30% DD stage, our budgetary pricing range, and the design decisions we recommend locking before we move to 60% DD. Pricing in this memo is budgetary and subject to firm pricing at bid; the design-assist engagement is paid on a time-and-materials basis per our signed design-assist agreement dated 2026-03-10.
+>
+> **DESIGN INTENT — DIVISION 26 PROPOSED APPROACH**
+>
+> 1. **Service entrance.** 4000 A 480/277 V 3Φ 4W main service switchboard fed from the utility's 13.2 kV primary via a pad-mount 2500 kVA dry-type transformer (utility-owned, contractor-installed pad). Section 1 main breaker, Section 2 distribution to the building's load centers. Recommended basis-of-design: Eaton Pow-R-Line C with onboard distribution. Alternate: Square D Power-Style Q-Frame (longer lead time as of Q2 2026; currently 32 weeks vs Eaton's 28 weeks per Platt Electric Supply quote 2026-04-25). Recommend Eaton.
+>
+> 2. **Distribution architecture.** 480 V branch panels for HVAC and motor loads (mechanical scope); (4) 75 kVA step-down dry-type transformers for general 208Y/120 V branch-circuit distribution; (3) 75 kVA isolation transformers for hospital-grade isolated power systems on the four (4) wet-procedure rooms (per NEC Article 517 Part III). Recommend Square D EE series for the dry-types and PowerCet IsoBlock for the isolation transformers.
+>
+> 3. **Branch-circuit and emergency systems.** Hospital essential electrical system (EES) per NEC Article 517 — life-safety branch (10s autotransfer), critical branch (10s autotransfer), equipment branch (10s autotransfer); ATS sizing TBD pending the 60% DD load summary; assume (3) 800 A 4-pole ATSs with delayed-transition for equipment branch. Generator sizing TBD pending the 60% DD load calculation; budgetary based on a 750 kW diesel generator (Cummins or Caterpillar) with 96-hour runtime tank.
+>
+> 4. **Lighting.** All-LED, occupancy-and-daylight-controlled per WA Energy Code 2021. Recommend Acuity nLight or Lutron Quantum networked lighting controls — DALI-2 or 0-10 V depending on the architectural fixture selection at 60% DD. Title 24 cross-reference does not apply (WA, not CA).
+>
+> 5. **Communications and life-safety.** Division 27 data per the IT consultant; Division 28 fire alarm per the FA consultant — Drysdale Electric's scope is the line-voltage interconnect from the FA panel to the EES.
+>
+> **BUDGETARY PRICING RANGE**
+>
+> | Scope component | Budgetary range (Q2 2026 dollars) |
+> |---|---|
+> | Service entrance + distribution | $1.95M – $2.35M |
+> | EES (life-safety + critical + equipment branches) + (3) ATSs + 750 kW genset | $1.40M – $1.75M |
+> | Branch-circuit, devices, lighting | $2.20M – $2.65M |
+> | Hospital-grade isolated power (4 wet-procedure rooms) | $185K – $235K |
+> | Total Division 26 budgetary range | **$5.74M – $6.99M** |
+>
+> Pricing range reflects the Q2 2026 input-price baseline (Section 232 finished-equipment tier 15% on switchboards, transformers, panelboards; 50% raw tier on copper basis; 25% derivative tier on aluminum and steel raceway). Budgetary range tightens to a single point at 60% DD and to a firm price at hard bid.
+>
+> **DESIGN DECISIONS WE RECOMMEND LOCKING BEFORE 60% DD**
+>
+> 1. **EES architecture.** Confirm the (3)-branch architecture (life-safety / critical / equipment) vs a (4)-branch with separate optional standby; the (3)-branch matches NEC Article 517 minimum and is our recommendation absent a specific owner program requirement.
+> 2. **Generator fuel type.** Diesel vs natural gas. Diesel gives better cold-start reliability for a Bellevue WA seismic-zone hospital; natural gas is lower fuel-storage maintenance. Recommend diesel.
+> 3. **ATS transition type.** Closed-transition vs delayed-transition. Closed-transition costs ~$8K more per ATS but eliminates the 10-second outage on the critical branch during weekly testing, which the hospital's IT and clinical teams will appreciate.
+> 4. **Switchboard lead time and tariff exposure** *(per Tariff-Aware Lead-Time Block)*. The Eaton Pow-R-Line C 4000 A switchboard is a 28-week lead item per Platt Electric Supply quote 2026-04-25. If hard-bid award is targeted for Q4 2026, equipment delivery is Q2 2027 — this aligns with the project's substantial-completion target Q3 2027. If award slips past Q4 2026, the schedule moves accordingly. The Section 232 finished-equipment tier 15% (effective through end of 2027) is in effect at the time of this memo; recommend the construction documents include the Tariff Event clause per `skills/admin/material-tariff-escalation-clause-drafter.md` so a Tariff Event between award and delivery is contracted.
+>
+> Lin, I'd like to schedule a 30-minute call to walk through these items before the 60% DD deadline. The four design decisions above (EES architecture, generator fuel, ATS transition, and the tariff-language confirmation) drive ~$280K of the budgetary range.
+>
+> — Mike Drysdale, President
+> Drysdale Electric Co.
+
+**Internal Notes:**
+
+- This is a design-assist memo, not a hard-bid scope letter. Tone is consultative; pricing is budgetary, not firm; sign-off is informal.
+- Tariff-Aware Lead-Time Block included even at 30% DD — recommend the EOR include the Tariff Event clause language in the contract documents so the hard-bid version inherits it.
+- Hospital-grade isolated power on the four wet-procedure rooms is the scope item most easily missed at 30% DD; called out explicitly.
+- WA Energy Code 2021 referenced (not Title 24); WA project, not CA.
+- Long-lead early-release submittal recommendation cross-references `skills/operations/submittal-package-compiler.md` so the EOR knows the contractor will produce an early-release at the appropriate phase.
