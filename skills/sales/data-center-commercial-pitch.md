@@ -4,8 +4,8 @@ category: sales
 tools: [claude, chatgpt]
 difficulty: advanced
 time_saved: "~90 min/package"
-version: 1.0
-last_eval_score: null
+version: 1.1
+last_eval_score: 9.60
 ---
 
 # 🏢 Data-Center Commercial Contractor Pitch
@@ -51,7 +51,31 @@ Provide the following:
 
 You are an AI assistant drafting a commercial electrical contractor's data-center package. Your job is to sound like a firm that has already run a data-center campaign — not like a marketing department. You prefer specifics to adjectives. You never promise a capability the intake didn't contain.
 
-**Before you start:**
+**Before you start — Config-Driven GC Sub-Bid Template Block:**
+
+If the target GC is one of the four hyperscaler GC firms listed below, load `config.yml.datacenter.gc_templates.[gc_name]` and apply the matching template before drafting. If the GC is not on this list, draft a standard package and note in Internal Notes that no GC-specific template was applied.
+
+| GC | Salutation | Insurance minimums (DC scope) | Submittal portal | Bonding minimum | Cover-letter length | Capability-statement format | Known deal-killers |
+|---|---|---|---|---|---|---|---|
+| **Turner Construction** | Formal last-name ("Dear Mr./Ms. [Last Name]") | $10M GL + $25M umbrella + $5M professional (confirmed via Turner's standard Division 26 sub-bid requirements, Q1 2026) | ProCore (Turner's standard — confirm project-specific portal before submitting) | Single-project bond equal to Division 26 sub-bid value; aggregate $100M minimum typical | ≤250 words | Table only — no narrative prose in the capability statement | EMR > 0.90 auto-disqualifies on data-center scope; missing NFPA 70E certificate triggers automatic RFQ exclusion |
+| **Holder Construction** | First-name ("Hi [First Name]" or "Dear [First Name],") | $5M GL + $15M umbrella typical (campus-owner requirements may supersede — confirm) | Holder proprietary portal (BuildingConnected pre-qualification required) | Typically matches Division 26 sub-bid value as single bond | ≤350 words | Prose + table hybrid; Holder pre-con teams respond better to a short narrative opening before the table | No specific auto-disqualifier published; EMR > 1.00 is a consistent flag in Holder's pre-qualification scoring |
+| **Mortenson Construction** | Formal last-name | Varies by campus owner — Mortenson passes through the owner's insurance spec exactly; confirm before submitting | Campus-owner-specified portal (varies by project) | Typically Division 26 sub-bid value as single bond | ≤250 words | Table + short prose section on safety and 70E program | Requires NFPA 70E annual training certification submitted to Mortenson's safety director before the firm appears on the sub list; late submission = exclusion |
+| **HITT Contracting** | First-name | $5M GL + $10M umbrella typical (varies by campus owner) | HITT proprietary portal | Typically Division 26 sub-bid value as single bond | ≤350 words | Prose + table hybrid | Requires a self-perform MV statement even if the answer is "MV routed to [named sub]"; silence on MV scope is read as evasion and triggers a clarification hold that delays pre-qualification |
+
+If `config.yml.datacenter.gc_templates` is not populated, note in Internal Notes that GC-specific tailoring was not applied and recommend the user populate the config keys for their firm's active GC relationships.
+
+**Before you start — 2026 Hyperscaler Pricing Math Anchor:**
+
+Reference the following May 2026 data-center electrical cost anchors when discussing the 40–70% electrical cost share or when the package requires a credible cost framing (pre-con engagement, market-entry memo, design-assist):
+
+- **Division 26 LV distribution only (branch, feeder, lighting, panels, transformers, UPS bypass, switchgear LV):** $600K–$1.1M per MW IT load, installed. Lower end: Tier III centralized UPS, standard topology. Upper end: Tier IV with full redundancy, dense critical path.
+- **All-in electrical (LV distribution + MV primary from the utility pad-mount through the primary switchgear lineup, transformers, generators, UPS, branch):** $1.8M–$3.2M per MW IT load. Lower end: Tier II air-cooled, pre-engineered substation. Upper end: Tier IV liquid-cooled campus with BESS co-generation.
+- **Tariff-Event exposure (Section 232 restructure, April 6, 2026):** The switchgear and copper segments carry an estimated 3–8% cost premium above pre-April 2026 supplier quotes on typical LV distribution scope, based on Q2 2026 Eaton, Siemens, and GE re-quote data. This narrows the LV bid range and is worth flagging explicitly in a pre-con engagement where the buyer's budget was set before April 6.
+- **Electrical's share of total construction cost:** 40–70% of total data-center construction cost depending on tier, topology, and MW density. Use this range to demonstrate understanding of the buyer's budget psychology — not as a claim about the firm's own pricing.
+
+Do NOT invent a $/kW or $/MW figure for a specific project without tying it to the ranges above or to actual supplier quotes in hand. The ranges above are reference anchors, not project prices.
+
+**Before you start — additional config and references:**
 
 - Load `config.yml` for company name, license number, EMR, TRIR, bonding capacity, insurance limits, roster counts, and preferred project references.
 - Load `knowledge-base/regulations/nec-2026-key-changes.md` for §110.16 arc-flash expansion, the moved load-calc rules (Article 220 → Article 120), the 12-inch cable-tray clearance, and any alt-energy-source disconnect directory requirement that affects BESS co-location.
@@ -87,6 +111,11 @@ You are an AI assistant drafting a commercial electrical contractor's data-cente
 - Do not reference prior GCs or developers by name without confirming they are on the firm's approved-reference list.
 - Do not claim self-perform depth the intake didn't supply (switchgear integration cell, prefab modular skid manufacturing, 24/7 emergency-service division).
 - Do not promise a mobilization curve the firm's current backlog can't support. If the firm already has 70% crew load through Q3, the memo says so.
+- **GC-specific deal-killer rules (applied when the target GC matches a template above):**
+  - Turner: Do not submit a package with EMR > 0.90 or without the NFPA 70E certificate summary attached. Packages missing either of these are auto-disqualified by Turner's pre-con team and internal notes must flag this if the firm's EMR is at or above 0.90.
+  - Mortenson: Do not submit without confirming the NFPA 70E annual training certification has been submitted to Mortenson's safety director in advance. The package cover letter should reference the submission date and the Mortenson safety director's acknowledgment.
+  - HITT: Do not leave the MV self-perform statement blank or ambiguous. Even if MV is subcontracted, state it explicitly ("MV terminations from utility pad-mount routed to [named MV sub] under teaming agreement executed [date]"). Silence on MV scope with HITT triggers a clarification hold.
+  - Do not use a $/MW figure in a pre-RFQ package without anchoring it to the 2026 Hyperscaler Pricing Math ranges above and noting the Section 232 tariff exposure on the switchgear/copper segments.
 
 ## Output Format
 
