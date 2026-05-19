@@ -4,8 +4,8 @@ category: customer-service
 tools: [claude, chatgpt]
 difficulty: beginner
 time_saved: "~5 min/job"
-version: 2.0
-last_eval_score: 3.90
+version: 2.1
+last_eval_score: 9.10
 ---
 
 # 💬 Customer Explanation Generator
@@ -93,6 +93,104 @@ Use these translations consistently. Expand them naturally — don't paste the w
 | **Nuisance trip** | A breaker tripping without a real fault — usually because something's on the edge of the limit. |
 | **Neutral overload** | Too much current returning on the shared neutral wire — can overheat and melt insulation. |
 | **Arc flash** | An electrical explosion inside a panel or gear — why we de-energize before opening anything big. |
+
+## Explainer Template Library (Residential / Commercial / Industrial)
+
+Each template defines the *frame* the explanation lives inside — the order of sections, the safety vs. cost emphasis, the audience-default register, and which technical anchors must be present. Pick the template first; then fill it with the dictionary translations.
+
+### Residential template
+
+For homeowner-occupied single-family, multi-family ≤4 units, and condo unit-interior work. Default audience is the homeowner; secondary audiences are real-estate agent, insurance adjuster, home inspector.
+
+Section order:
+1. **What we found** — Two short sentences, plain-English. Lead with the *effect* the homeowner can feel ("the kitchen outlets above the counter weren't shutting off if anything got wet") before the *name* of the condition ("a GFCI that had failed its self-test").
+2. **What it means for your house** — One sentence. Safety risk / fire risk / nuisance / code violation that blocks a future sale or insurance renewal. No NEC article numbers in the homeowner-facing prose; if a citation is *needed*, use the Citation Block rules below.
+3. **What we did** — Plain verbs only. Replaced / re-landed / tightened / labeled / tested.
+4. **What's next** — Nothing needed / monitor / recommend follow-up / must address before [event] / we'll return [date].
+
+Required anchors: warranty period from `config.yml`, tech/owner name, license number, jurisdiction-aware code framing if a code-triggered upgrade is in scope (e.g., "the 2026 Oregon electrical code, which Portland adopted in April 2026, now requires…"). Forbidden: NEC article numbers, the words "illegal" / "dangerous" / "hazardous" without a grounded explanation, the words "previous electrician botched this" or any liability-attaching prose.
+
+Voice: warm, "knowledgeable neighbor." A homeowner finishing the explanation thinks "now I know what was wrong and what to do, and the electrician didn't make me feel stupid."
+
+### Commercial template
+
+For property-manager-administered multi-tenant, owner-occupied commercial, retail, restaurant TI, and small-office TI work. Default audience is the property manager; secondary audiences are tenant, GC PM, EOR, and commercial insurance broker.
+
+Section order:
+1. **Finding (one-line)** — Component + condition + circuit/location reference. "Panel A-2, breaker 14, double-tapped feeder to RTU-3 disconnect."
+2. **Operational impact** — What does this mean for occupancy, tenant operations, lease compliance, or after-hours work? "RTU-3 will continue to function but is at elevated risk of nuisance trip on summer peak load; tenant has flagged comfort complaints already."
+3. **Code framing** — NEC article number on first reference; cited correctly per the AHJ-adopted cycle. (See the Code Citation Block below.)
+4. **What we did / recommend** — Repair completed, deferred recommendation, or quote-on-request. Include any tenant-coordination, after-hours scheduling, or live-work safety stipulation.
+5. **Documentation / sign-off** — Reference photos, panel-schedule update, follow-up service ticket number, and the tenant-notification status if applicable.
+6. **Cost framing** — Stated in repair vs. recommendation buckets. Tenant-pay vs. landlord-pay flagged where the lease apportions responsibility ambiguously.
+
+Required anchors: license number, ESA / professional-engineer stamp reference if scope crosses Division 26 design, jurisdiction-specific energy-code or accessibility-code framing where in scope. Optional: PGE / utility commercial-rebate filing status.
+
+Voice: business-brief, collegial, no warmth padding. Property managers see hundreds of these per year; brevity is respect.
+
+### Industrial template
+
+For manufacturing facilities, utility substations, water/wastewater, healthcare service-distribution-level work, and any facility with an in-house plant electrician or maintenance engineer audience. Default audience is the facility maintenance manager; secondary audiences are plant engineer, EHS officer, owner's rep, and AHJ.
+
+Section order:
+1. **Finding** — Component + nameplate + system reference (designation, voltage class, AIC). "MCC-EAST, Section 4, Bucket 4B, 200 A FVNR starter, 480 V three-phase, 65 kAIC rated, serving CP-301 cooling-tower booster pump." Precision is the trust-builder; ambiguity is not acceptable in this audience.
+2. **Test data / measurements** — Resistance, insulation-test (megger) results, IR temperature deltas, torque values, breaker trip-time test results — whatever was measured. Numbers go in tables when there are more than three.
+3. **Code framing** — NEC article on first reference; NFPA 70B (Recommended Practice for Maintenance) and NFPA 70E (Electrical Safety in the Workplace) citations where applicable. (See the Code Citation Block below.)
+4. **What we did / recommend** — Repair, replacement, or test result with pass/fail and re-test interval. Reference any temporary risk-mitigation (e.g., "temporary increased PPE category boundary until the breaker trip curve is re-validated").
+5. **Safety stipulations** — Energized-work authorization (EEWP), LOTO requirements for follow-up, PPE category, arc-flash boundary changes if applicable. Cross-reference `operations/job-hazard-analysis-drafter.md` if a JHA is required for follow-up work.
+6. **Compliance / record** — OSHA recordable triggers if any, environmental / hazmat flags, NFPA 70B-aligned maintenance-record updates, asset-tag updates.
+
+Required anchors: license number, NFPA 70E certification status of the technician(s) on site, any third-party-witness reports (insurer's loss-control engineer, AHJ inspector if present), and the arc-flash-label assessment date.
+
+Voice: technically precise, NFPA-fluent, no condescension and no informality. Plant maintenance engineers can read a one-line study and they expect equivalent rigor in writing.
+
+## Code Citation Block (NEC-2026-aware)
+
+Code citations are the single most common place a customer-facing explanation slips into liability exposure or factual error. This block governs *whether* to cite, *which edition* to cite, and *how* to phrase the citation across audiences.
+
+**Step 1 — Determine the AHJ's adopted NEC cycle.**
+
+Load `knowledge-base/regulations/nec-adoption-by-state.md` (or its equivalent) and look up the jurisdiction's currently adopted cycle. Do not assume 2026. As of May 2026 only a minority of jurisdictions have adopted the 2026 cycle; many are still on 2023, some on 2020, and a few on 2017. Cite the cycle that is *adopted* in the jurisdiction where the work is performed, not the cycle that has been *published*.
+
+If the AHJ has formally adopted 2026 but the project's permit was pulled under the prior cycle, the *permit cycle* governs the project — cite the permit cycle and note the adoption-date mismatch in Internal Notes.
+
+**Step 2 — Decide whether to cite at all (audience-driven).**
+
+| Audience | Cite NEC article? | How? |
+|---|---|---|
+| Homeowner | No | Translate the requirement into plain English ("the kitchen code requires…"). Never the article number. |
+| Tenant | No | Same as homeowner. |
+| Real-estate agent | No, unless the agent specifically asked | Translate; flag as a sale-blocker or non-blocker. |
+| Property manager | Once, on first mention | Use full article reference; translate the implication. |
+| Insurance adjuster | Only if the line is code-triggered post-loss-coverage | Cite article + section; cite the loss-related repair scope. |
+| Commercial tenant | Once | Translate the operational impact. |
+| GC / PM | Yes, as needed | Article + section; trade-fluent. |
+| EOR | Yes, with section + cycle | Use full citation: "NEC 2023 §210.8(F)" not "NEC 210.8." |
+| Inspector / AHJ | Yes, mandatory | Full citation: edition, article, section, subsection. Cite the AHJ's adopted cycle. |
+| Plant maintenance engineer / EHS | Yes | Full citation + NFPA 70B / 70E where applicable. |
+
+**Step 3 — Format the citation correctly.**
+
+When citing, always include the edition: "NEC 2026 §210.8(A)(6)" not "NEC §210.8(A)(6)." The edition matters because the article numbering and the requirement language often differ across cycles. If the citation crosses cycles (e.g., a 2020 install that now needs a 2026-compliant retrofit), say so: "Original install met NEC 2020 §210.8; the 2026 retrofit at the new garage circuit follows NEC 2026 §210.8(A)(2)/(F)."
+
+**Step 4 — Translate, then cite (commercial+) or translate only (residential).**
+
+Commercial / industrial example: "The receptacle in the corridor outside the panel room is now within the 6-foot perimeter that NEC 2023 §210.8(F) brought under GFCI protection; we added GFCI breaker coverage to that circuit." Residential equivalent: "We added GFCI protection on the outlet outside the panel room — the 2023 code added that area to the list of places that need shock protection."
+
+**Step 5 — Cross-reference the in-house source-of-truth skill.**
+
+For deep code questions, route to `operations/code-reference-lookup.md` rather than improvising. The lookup skill is the source-of-truth for NEC article navigation and AHJ adoption status; this skill's job is the customer-facing translation.
+
+**NEC 2026 highlights to know in 2026:**
+
+- **§110.16(B) and (C)** — Arc-flash assessment date now required on the equipment label (residential dwelling-unit service equipment is exempt under §110.16(A); non-dwelling structures, including detached garages classified as accessory non-dwelling occupancies, are covered).
+- **§210.8** — GFCI protection scope continued to expand in 2023 and 2026 cycles. §210.8(F) (outdoor outlets serving HVAC + similar equipment, expanded in 2023 to include perimeter receptacles within 6 ft of an electrical panel room or similar) is the most common 2023→2026 retrofit trigger; verify the AHJ's adopted cycle before citing.
+- **§230.70(B)(2)** — Outdoor service emergency-disconnect requirement, originally in NEC 2020 §230.85, now consolidated under §230.70. Cite the version the AHJ adopted; many 2020-cycle jurisdictions still permit the §230.85 reference.
+- **Article 706 / §705.20** — Energy Storage System (ESS) disconnect marking and one-and-two-family-dwelling outside-building emergency-shutdown initiation. New in 2026; many 2020/2023-cycle jurisdictions do not yet require.
+- **§210.8(D)** — Receptacles serving kitchen dishwashers; clarified to require GFCI protection in 2020 — almost universally adopted now.
+- **Article 690 / 705 / 706** — Solar + Storage interconnection language was re-organized in 2026; if the work touches PV or BESS, route to `operations/code-reference-lookup.md` for the cycle-specific article number.
+
+When in doubt across audiences, use the *effect-first* phrasing: "This circuit was missing the kind of breaker that catches the small sparking that starts most electrical fires (NEC 2023 §210.12 for the GC/EOR readers; nothing to memorize on the homeowner side)." The article number, when present, never anchors the explanation — the *effect* anchors it.
 
 ## Channel-Specific Tone & Length
 

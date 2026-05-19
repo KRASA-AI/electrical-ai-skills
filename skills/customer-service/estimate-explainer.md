@@ -4,8 +4,8 @@ category: customer-service
 tools: [claude, chatgpt]
 difficulty: beginner
 time_saved: "~15 min/estimate"
-version: 2.0
-last_eval_score: 6.70
+version: 2.1
+last_eval_score: 9.10
 ---
 
 # 💡 Estimate Plain-Language Explainer
@@ -82,6 +82,56 @@ You are an AI assistant drafting the customer-facing narrative that accompanies 
 - "About a third of this line is the permit and inspection fees, which your city collects directly."
 - "The premium on this line comes from working after hours / on a weekend / with the power live — your tenants won't be without power."
 - "This is a code-required upgrade triggered by the work we're doing anyway — the city won't sign off without it."
+
+## Standard Line-Item Explainer Phrases (config-driven)
+
+The 18 line items below appear on >70% of residential service-work estimates and >40% of commercial TI estimates. Pull the firm's standard explainer phrasing for each from `config.yml.estimate_explainer.standard_phrases` so the same line item is described the same way across every estimate the firm sends. Consistency matters — a homeowner who collected two estimates from the same firm three months apart and saw two different descriptions of "service entrance cable" will rightly question which one is accurate.
+
+When `config.yml.estimate_explainer.standard_phrases.[line-item-key]` is populated, use it verbatim (with light tense / pronoun adjustments). When it is not populated, use the default below and flag it in Internal Notes as a candidate to add to config.
+
+| Config key | Default explainer phrase |
+|---|---|
+| `panel_replacement` | "Removing your existing panel and installing a new one in the same location. Each circuit gets carefully transferred to the new panel and re-tested. Mostly labor — the panel itself is straightforward, but the careful removal and circuit transfer is what takes the time." |
+| `service_entrance_upgrade` | "Replacing the cable that runs from the utility meter to your main panel, sized up to carry the new amperage. Includes utility coordination for the meter pull and re-set." |
+| `outdoor_emergency_disconnect` | "A weather-rated switch on the outside of your house that firefighters can use to shut off all power in an emergency. Required by the 2026 electrical code whenever we replace a service panel." |
+| `meter_base_replacement` | "Replacing the meter base — the housing that holds the utility's electric meter — usually paired with a panel or service upgrade so the meter base and panel match." |
+| `whole_house_surge_protector` | "A device installed at your panel that catches voltage spikes from the utility before they reach your appliances, TV, and any sensitive electronics. Best installed when the panel is already open." |
+| `dedicated_kitchen_circuit` | "A new dedicated circuit from the panel to the kitchen — typically 20-amp arc-fault protected — so the kitchen appliances don't share a circuit with other rooms and cause flickering or trips." |
+| `gfci_outlet_install` | "An outlet that shuts power off in milliseconds if electricity tries to run through water or a person. Required by code in kitchens, bathrooms, garages, and outdoor locations." |
+| `afci_breaker_install` | "An arc-fault breaker — the type that detects the small sparking that starts most electrical fires and shuts the circuit off. Required by code on most circuits in living spaces." |
+| `ev_charger_circuit` | "A new 50-amp dedicated circuit from the panel to the garage for your EV charger. Includes the breaker, cable, and the receptacle or hardwire connection to the charger." |
+| `bonding_grounding_upgrade` | "Updating the connections that tie your electrical system to earth and to the metal piping in your house. Required to bring the system to current code whenever we upgrade the service." |
+| `recessed_light_install` | "A recessed LED light fixture with the necessary cable and switching. The price per fixture includes the housing, the trim, the bulb (LED, dimmable), the wiring, and the labor to cut the ceiling hole and connect." |
+| `smoke_detector_install` | "A hardwired-and-interconnected smoke detector that runs on the house wiring with a battery backup — meaning when one detector goes off, every detector in the house goes off. Required by code on new circuits in living spaces." |
+| `outlet_replacement` | "Replacing an outlet — the receptacle on the wall. Each replacement includes the new outlet, a new cover plate, and a tested connection." |
+| `switch_replacement` | "Replacing a wall switch. Each replacement includes the new switch, a new cover plate, and a tested connection. Dimmer switches are a small upcharge." |
+| `panel_circuit_directory` | "Updating the label inside your panel door so every breaker has a clear, accurate description of what it controls. Required when we touch the panel." |
+| `permit_and_inspection` | "The city or county permit fee and the cost of the inspection itself. We pull the permit and schedule the inspection on your behalf; the dollars on this line go to the jurisdiction, not to us." |
+| `mobilization` | "The cost to get the truck, the crew, and the materials staged at your address on the day of work — separate from the labor and materials of the work itself." |
+| `warranty_labor_reserve` | "A built-in reserve for any one-year-warranty return visit. If anything we touched needs a warranty-covered fix in the first year, this reserve covers our return labor at no additional cost to you." |
+
+Voice / register adjustments per audience: keep the same factual content; adjust only the warmth (homeowner > tenant > property manager > commercial > GC/EOR). Industry-specific clarifications (e.g., for healthcare TI, the §517 patient-care receptacle rules) take precedence over the default phrasing — surface those in the section narrative rather than the line-item phrasing.
+
+## Unit-Price Transparency Block (service work)
+
+For service-work estimates that quote unit prices (per receptacle, per fixture, per breaker, per AFCI retrofit, per hour for T&M ride-alongs) — separate the unit price into its three components so the customer can verify the math against any other quote they have on file.
+
+For every unit-price line, the explainer must include:
+
+1. **Unit price = labor + materials + overhead-and-profit.** State the three components in approximate proportion — exact margins are firm-confidential, but a customer can see that the $185 receptacle replacement is ~$110 labor + ~$45 materials + ~$30 overhead-and-profit, not ~$30 materials + ~$155 overhead. Verbatim numbers are not required; the *shape* of the price is.
+2. **What the unit includes.** Parts list ("the receptacle itself, the new cover plate, the wire-nut connectors, anti-oxidant compound if applicable"), the trip / no-trip status ("this unit assumes we are already on-site for the larger scope; separate trip charge applies if it's a standalone visit"), and the warranty period.
+3. **What the unit excludes.** Drywall patching, paint, ceiling-tile replacement, structural work, any condition discovered behind the wall that the visible scope didn't include ("if we open the wall and find K&T wiring, we'll stop and quote it separately as a change order").
+4. **How additional quantities are handled.** Whether quantities ≥10 get a volume rate, whether after-hours / weekend rates apply, and what the round-up rule is for partial hours on T&M.
+
+For T&M lines specifically:
+
+- **Hourly rate breakdown.** State the journeyman vs. apprentice rate, the minimum billable interval (15-min / 30-min / 1-hr), the on-site arrival window, and the round-up rule.
+- **NTE (not-to-exceed) cap, if quoted.** State the cap dollar figure, what happens if work is going to exceed the cap ("we stop and ship a supplemental change order — we do not invoice past the cap without your written approval"), and whether the cap includes materials or labor-only.
+- **Documentation cadence.** Daily field tickets, signed at the end of each day by the customer's on-site rep — or, if no on-site rep is available, photographed and emailed within 24 hours of each shift.
+
+Audience adjustments: homeowner audience gets the three-component breakdown in plain English (no margin %), property-manager audience gets the same with portfolio-level rate confirmation, GC/PM audience gets a CSI-Division-26 formatted table with the journeyman / apprentice / overtime / weekend rate columns, and EOR audience gets the full rate schedule per the executed master services agreement (MSA) reference.
+
+Cross-references: `admin/change-order-drafter.md` for the T&M NTE CO variant (CO-003 worked example) and `sales/scope-letter-drafter.md` for the unit-price schedule when the scope letter accompanies the estimate.
 
 **Liability-protective phrasing:**
 
