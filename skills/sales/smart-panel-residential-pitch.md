@@ -4,7 +4,7 @@ category: sales
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~30 min/pitch"
-version: 1.0
+version: 1.1
 last_eval_score: null
 ---
 
@@ -49,7 +49,7 @@ Provide the following. Where the contractor doesn't have a value, leave it blank
 4. **Primary trigger** — Why is the homeowner in the conversation? (Aging panel, solar add, battery add, EV charger, service upgrade quote, energy bill, home renovation, second EV.)
 5. **Current or planned energy loads** — EV(s) (make/model/target charger amp rating), battery/PV system (if any, brand and kWh), major appliances (range gas/electric, dryer gas/electric, water heater type/kW, HVAC type).
 6. **Prior quote (if any)** — If the homeowner has a competitor's service-upgrade or panel-replacement quote, include the dollar amount. The pitch will address it directly.
-7. **Incentives / rebates to reference (optional)** — Federal 25C residential energy-efficiency credit (if applicable), state/utility smart-panel or battery rebates, utility demand-response program enrollment. Reference by program name only; confirm current amounts before committing a figure.
+7. **Incentives / rebates to reference (optional)** — **The federal §25C Energy Efficient Home Improvement Credit is no longer available for property placed in service after December 31, 2025** (the One Big Beautiful Bill Act, signed July 4, 2025, accelerated the credit's sunset from 2032). For any 2026 smart-panel install — including the $600 panel-upgrade adder that historically rode alongside a heat pump or HPWH — §25C cannot be claimed and must not be referenced in the pitch. State and utility programs (smart-panel rebates, battery rebates, demand-response program enrollment, time-of-use shifting incentives, CA SGIP for paired battery, NY HEAT-Smart, MA Mass Save smart-panel pilots, etc.) **are still active** and remain the live incentive lever for 2026 smart-panel pitches — reference each by program name only and confirm current amounts before committing a figure.
 8. **SPAN authorization status** — Is the contractor already a SPAN Authorized Installer? (Complete training at span.io/b2b-get-authorized if not — 45-minute virtual on-demand course. Required for 10-year warranty and 2026 NEC UL 3141 / PCS compliance sign-off.) Note in Internal Notes if authorization is pending.
 
 ## Instructions
@@ -84,7 +84,7 @@ You are an AI assistant drafting a residential smart-panel pitch for a licensed 
 
 - Do not pitch SPAN when the homeowner's real situation is covered more cheaply by a conventional panel plus a standalone EVEMS device. Run the check first.
 - Do not invent battery compatibility. SPAN is confirmed compatible with Powerwall, Enphase IQ, FranklinWH, LG ESS, and SolarEdge — say "major brands" rather than inventing a compatibility claim for an unlisted product.
-- Do not claim federal tax credits for smart panels without verifying applicability. The 25C residential energy-efficiency credit may apply to home energy management systems in some circumstances; confirm with the homeowner's tax preparer before quoting a dollar figure.
+- Do not reference the federal §25C Energy Efficient Home Improvement Credit in any 2026 pitch. The OBBBA repealed §25C for property placed in service after December 31, 2025; the $600 panel-upgrade adder is no longer claimable. Direct any homeowner asking about §25C to their tax preparer and pivot the incentive conversation to active state/utility programs (smart-panel rebates, battery rebates, demand-response enrollment). If §25D or §48E come up in conversation, those are different programs covered in `skills/sales/bess-residential-pitch.md` — point the homeowner there rather than improvising.
 - Do not frame UL 3141 as "illegal without SPAN" in non-2026 jurisdictions. Say "coming with the next code cycle — your panel will already be ready."
 - Do not describe a competitor's conventional-panel quote as wrong or inferior. If the competitor's quote is lower, explain what's in the SPAN pitch that the conventional quote doesn't include (EVEMS, no subpanel, circuit-level backup, UL 3141).
 - Do not quote a 10-year warranty without the SPAN Authorized Installer status confirmed or pending.

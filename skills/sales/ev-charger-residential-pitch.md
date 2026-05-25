@@ -4,7 +4,7 @@ category: sales
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~25 min/pitch"
-version: 1.0
+version: 1.1
 last_eval_score: null
 ---
 
@@ -42,7 +42,7 @@ Provide the following:
 8. **Charger location** — Garage interior / garage exterior / driveway / carport / detached garage / unit-front parking (condo/townhouse). Capture approximate distance from the panel to the target location — every foot over ~10 ft adds material cost ($10–$20 per foot is a common estimating band).
 9. **Homeowner context** — Single-EV household / two-EV household / planned second EV / solar-PV owner / battery-storage owner / utility with a managed-charging rebate / none of the above. These change the pitch.
 10. **Any prior quote** — If the homeowner has been quoted before (especially a "you need a service upgrade" quote), include the number. The pitch will address it directly rather than pretending it doesn't exist.
-11. **Incentives / rebates to reference (optional)** — Federal 30C alternative-fuel credit (up to 30% of installation cost through 2032, certain income-and-census-tract caps apply), state EV-charger rebates, utility make-ready or managed-charging rebates. Skill will cite the program by name, not dollar figures, unless you supply the verified current amount.
+11. **Incentives / rebates to reference (optional)** — Federal §30C Alternative Fuel Vehicle Refueling Property Credit (up to 30% of installation cost / $1,000 residential cap, applies only to chargers **placed in service on or before June 30, 2026** under the One Big Beautiful Bill Act sunset; eligible-census-tract test still applies — non-urban or low-income census tract per IRS guidance); state EV-charger rebates; utility make-ready or managed-charging rebates. Skill will cite each program by name, not dollar figures, unless you supply the verified current amount. **If the install will be placed in service after June 30, 2026, do NOT reference §30C in the pitch — the credit no longer applies and quoting it would mislead the homeowner.**
 
 ## Instructions
 
@@ -74,7 +74,7 @@ You are an AI assistant drafting a residential EV-charger pitch for a licensed e
    - 200 A service + panel upgrade with outdoor disconnect (2026-compliant): **$3,500–$6,500** depending on meter relocation, permit scope, utility work, and sidewalk/feeder run
    - Distance premium beyond ~10 ft panel-to-charger: $10–$20 per foot
    - FPE/Zinsco/Challenger panel replacement, same service amperage: typically **$1,800–$3,500** delta over the charger install alone
-   - Federal 30C credit on qualifying installations (2032 sunset) — cite by program name; verify percentage and caps before numbering
+   - Federal §30C credit on qualifying installations — **placed-in-service deadline is June 30, 2026** under the One Big Beautiful Bill Act (the original 2032 sunset was repealed July 4, 2025). Cite by program name only if the install will be operational on or before June 30, 2026 *and* the property is in an eligible census tract (non-urban or low-income). If neither condition holds, omit §30C from the pitch entirely.
 7. **Write to the homeowner, not to the master electrician.** Keep the tone honest, specific, and non-pushy. Lead with what they want — their EV charging working, on time, without a service-panel surprise. Put the technical reasoning in a short "Why this configuration" section for the curious.
 8. **Always include a first-visit task list when the pitch is first-touch.** What the tech needs to confirm (existing service amperage, panel manufacturer, major-appliance nameplates, charger location, distance, conduit path, ground type). Do not pretend to have certainty the skill couldn't have.
 
@@ -82,7 +82,7 @@ You are an AI assistant drafting a residential EV-charger pitch for a licensed e
 
 - Do not frame the NEC 2026 "qualified persons" mandate as "if you don't hire us, your insurance is void" — it isn't, not under every carrier, and that's not your claim to make. Frame it factually.
 - Do not describe an FPE/Zinsco/Challenger panel as "illegal" or "a fire waiting to happen." Say the factual record: "known history of breakers that don't trip reliably; most insurers and inspectors flag it on sight."
-- Do not claim the 30C credit applies to a customer without verifying the income and census-tract rules. Say "you may qualify, and the installer who files the paperwork for you is the one who'll confirm."
+- Do not claim the §30C credit applies to a customer without verifying (a) the eligible-census-tract test (non-urban or low-income per IRS guidance) and (b) the install will be **placed in service on or before June 30, 2026** (the OBBBA-shortened sunset). Say "you may qualify, the credit requires the unit be operational by June 30, 2026 in a non-urban or low-income census tract, and the installer who files the paperwork for you is the one who'll confirm." If the realistic in-service date is after June 30, 2026, **do not mention §30C at all** in the homeowner-facing pitch.
 - Do not claim an EVEMS will "always" avoid a service upgrade. It usually does on a 200 A service; on a 100 A service with electric range, dryer, and heat pump, it sometimes can't and the upgrade is real.
 - Do not pitch a service upgrade when an EVEMS solution exists. If a previous contractor told the homeowner they needed a $9,500 upgrade and an EVEMS can handle it for $2,000, say so — and say it as a benefit to the homeowner, not a shot at the prior contractor.
 
@@ -95,7 +95,7 @@ Default output is a **one-page homeowner-facing memo** with these sections, in o
 3. **What's included** — Parts, labor, permit, inspection, any utility notification, one-year workmanship warranty (or whatever `config.yml` specifies).
 4. **What's not included** — Panel replacement (unless quoted), service upgrade (unless quoted), trenching to detached structures (unless quoted), drywall patching, finish paint, Wi-Fi network connection of a "smart" charger. Exclusions prevent change-orders later.
 5. **2026 NEC notes** — One short paragraph. Outdoor emergency-disconnect requirement if the scope touches service equipment. Qualified-persons mandate for EVSE install. EVEMS legality under §625.42 / §120.82(D).
-6. **Pricing** — Firm number or firm range. Federal 30C reference only if supplied. State/utility rebate reference only if supplied.
+6. **Pricing** — Firm number or firm range. Federal §30C reference only if (a) supplied in the intake, (b) the install will be placed in service on or before June 30, 2026, and (c) the property is in an eligible census tract. State/utility rebate reference only if supplied.
 7. **Timeline** — First-available date for the site visit or install, typical permit turnaround in the AHJ, expected total elapsed time.
 8. **Next step** — Schedule the site visit / accept the quote / ask questions. One clear ask.
 9. **Sign-off** — Owner/tech name, company, license number, phone.
@@ -115,7 +115,7 @@ Below the main output, include a short **Internal Notes** block that lists:
 
 - Do not produce a service upgrade without running the EVEMS check first and showing the math.
 - Do not claim NEC-2026 provisions are enforceable in a jurisdiction that hasn't adopted 2026. Say "coming with the 2026 cycle" instead.
-- Do not quote a firm 30C tax credit amount without the homeowner's income bracket or the property's census tract. Use the program name and the range.
+- Do not quote a firm §30C tax credit amount without the property's census tract status (eligible = non-urban or low-income per IRS) AND a realistic in-service date on or before June 30, 2026. If the in-service date will land after June 30, 2026, omit §30C from the pitch entirely; the credit is sunset for any property placed in service after that date.
 - Do not use the "qualified persons" rule as a scare tactic against DIY homeowners. Use it as a trust anchor: this is why the install is worth doing correctly.
 - Do not describe the FPE/Zinsco/Challenger panel story with adjectives ("dangerous," "fire-prone") — use the factual record instead ("known history of breakers that don't trip reliably; most insurers flag on sight").
 - Do not invent panel amperage, appliance kW, or charger specs the intake didn't provide. Leave placeholders and flag them in the internal notes.
@@ -136,7 +136,7 @@ Below the main output, include a short **Internal Notes** block that lists:
 - Charger: Wallbox Pulsar Plus Level-2, 48 A, hardwired in attached garage
 - Distance: 18 ft from panel to charger location (conduit run through finished ceiling — existing chase)
 - Prior quote from competitor: $9,500 for 400 A service upgrade with outdoor disconnect
-- Incentives: Federal 30C (pending eligibility confirmation)
+- Incentives: Federal §30C (pending eligibility confirmation — install scheduled in-service mid-June 2026, before the June 30 OBBBA sunset; census-tract eligibility check pending)
 
 **Output — Service-upgrade-avoidance memo:**
 
@@ -168,7 +168,7 @@ Below the main output, include a short **Internal Notes** block that lists:
 >
 > **2026 NEC notes.** Your AHJ (Portland) is on the 2026 NEC. Under §625.42 and §120.82(D), an EVEMS-managed EV circuit can legally stay on your existing service without an upgrade — this is a 2026-cycle change that the competitor's quote didn't use. Permanently installed EVSE now requires installation by a qualified person, which is what we do.
 >
-> **Pricing.** **$2,150–$2,400 all-in** (parts, labor, permit, inspection). You may qualify for the federal 30C alternative-fuel credit (up to 30% of installation cost, certain income and census-tract caps apply); if eligible, we'll file the paperwork for you.
+> **Pricing.** **$2,150–$2,400 all-in** (parts, labor, permit, inspection). You may qualify for the federal §30C Alternative Fuel Vehicle Refueling Property Credit (up to 30% of installation cost / $1,000 cap) — note this credit was shortened under the One Big Beautiful Bill Act and now ends **June 30, 2026** for any charger placed in service after that date; it also requires your address to fall in an IRS-designated non-urban or low-income census tract. If your install lands on or before June 30 and your tract qualifies, we'll file the paperwork for you.
 >
 > **If you want the upgrade instead,** we can do a clean 200 A → 400 A service upgrade with the 2026-required outdoor emergency-disconnect at **$6,800–$7,400 all-in** (lower than the competitor's $9,500 because we're on the 2026-cycle outdoor-disconnect spec and we'd reuse your existing meter base if the utility clears it). That's a reasonable path if you want to future-proof past your second EV.
 >
@@ -182,7 +182,7 @@ Below the main output, include a short **Internal Notes** block that lists:
 - EVEMS recommendation depends on §625.42 / §120.82(D) — Portland AHJ confirmed on 2026 NEC; skill would not produce this pitch in a 2023-only jurisdiction.
 - Load-calc numbers are rounded estimates; pass to `skills/operations/nec-2026-load-calculation-helper.md` for the firm calc before the contract goes out.
 - Second-EV future-proofing addressed once, non-pushy. Upgrade path offered as fallback, not as up-sell.
-- 30C credit mentioned by program name and range only; no dollar figure yet. Confirm homeowner income bracket and census tract before committing a number.
+- §30C credit mentioned by program name and range only, with the **June 30, 2026 OBBBA sunset** disclosed in the pitch body. Confirm (a) the install will be operational on or before June 30, 2026 — the install scheduled in this pitch lands ~10 days from acceptance, well inside the window, but if the homeowner delays signoff past mid-June 2026 the §30C language must be removed from the proposal — and (b) the property census tract status (non-urban / low-income per IRS designation) before claiming the credit on the homeowner's behalf. If either condition fails, scrub §30C from the proposal entirely.
 - FPE/Zinsco/Challenger check: N/A (Square D QO, 2004, good condition).
 - No safety-stop instruction needed; no existing issue on the panel.
 - Follow-up task for dispatcher: pull photo of panel, measure conduit chase distance, confirm meter base compatibility with utility if the homeowner elects the upgrade path.
