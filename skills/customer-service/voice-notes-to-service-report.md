@@ -4,8 +4,8 @@ category: customer-service
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~20 min/ticket"
-version: 1.0
-last_eval_score: null
+version: 1.1
+last_eval_score: 9.20
 ---
 
 # 🎙️ Voice Notes to Service Report
@@ -85,6 +85,20 @@ You are an AI assistant converting a field electrician's voice-recorded dictatio
 - Do not omit a safety issue the tech flagged. If the tech said "I told them to stop using the hot tub until we replace the GFCI," the customer-facing report repeats that instruction.
 - Do not put an NEC article number in front of a homeowner. Translate it ("the code that protects outdoor circuits from shock"). Keep article numbers for inspector- or GC-audience outputs.
 
+**Warranty-Callback-Trigger Detection Block (mandatory pre-emit check):**
+
+Before emitting the customer-facing output, scan the transcript one more time for language that signals the visit either *is* a warranty callback (the tech named it) or *might be* a hidden warranty trigger (the tech didn't name it but the symptom pattern matches). The handoff target is `customer-service/warranty-callback-analyzer.md`, which performs the diagnostic-pattern matching and the callback-rate analysis — this block only *detects the trigger* and routes the artifact.
+
+Run this five-point check on every transcript:
+
+1. **Did the tech explicitly say "warranty," "callback," "we installed this," "we did this last [time]," or reference a prior job number / install date by this firm?** YES → tag the ticket as a warranty callback in Internal Notes; route to `warranty-callback-analyzer.md` for the post-visit diagnostic pattern review.
+2. **Is the current symptom on a circuit / device / system this firm previously touched within the firm's warranty window (default 1 year labor, 1 year parts; pull `config.yml.warranty.labor_window` and `config.yml.warranty.parts_window` for the firm's actual terms)?** YES even if the tech didn't say "warranty" → flag in Internal Notes as a possible hidden warranty trigger and recommend the dispatcher pull the prior ticket before billing.
+3. **Did the tech describe a *recurring* fault pattern — "third time this has tripped," "same breaker as last month," "same circuit the other guys looked at," "it did this before we left last time"?** YES → flag the recurrence in Internal Notes. Recurrence within 90 days of a firm-installed component is the strongest hidden-warranty signal in the field-service data.
+4. **Did the tech speculate about a *failed install* — "the bonding screw wasn't in," "the lug wasn't torqued," "I think the neutral was loose from the start," "looks like someone backstabbed this"?** YES → flag in Internal Notes; remove the speculation from the customer-facing output (it may be inaccurate); recommend the dispatcher route to `warranty-callback-analyzer.md` so the firm can decide whether to absorb the visit cost before invoicing the customer.
+5. **Did the tech identify a part that is still under manufacturer warranty (typical: panels 5–25 yr, breakers 1–10 yr, AFCI/GFCI devices 2–10 yr, EVSE 3–10 yr, generators 2–5 yr standard, smart panels 10 yr, batteries 10 yr typical)?** YES → flag in Internal Notes the part, the install date if known, and the recommendation to file with the manufacturer rather than charge the customer. Do not promise the homeowner the warranty will pay — the dispatcher confirms eligibility before the call.
+
+The customer-facing output never names the warranty trigger directly ("we think this is on us" / "this is under warranty") — the dispatcher confirms eligibility against the prior ticket and the manufacturer's terms before that conversation happens with the customer. The block's only job is to land the trigger in Internal Notes so the dispatcher catches it before the invoice goes out.
+
 ## Output Format
 
 **Invoice narrative** — 1–3 short paragraphs, no salutation, no signature. Lead with what was wrong in plain terms, what the tech did, and what's left. 300 words max. End with any concrete next step (follow-up visit, separate estimate, part on order).
@@ -142,6 +156,7 @@ After the main output, always append an **Internal Notes** block that lists:
 - No safety-stop instruction from tech; none added.
 - No promise of a follow-up visit; none added.
 - Recommend: tech take a photo of the corrected panel and attach to the ticket.
+- **Warranty-Callback-Trigger Detection:** No warranty language in transcript; existing panel pre-dates the firm's involvement (Square D QO mid-90s); double-tap was the prior installer's work, not this firm's. No callback trigger.
 
 ### Example 2 — Follow-up email from a diagnostic-only voice note (property manager audience)
 
@@ -176,6 +191,7 @@ After the main output, always append an **Internal Notes** block that lists:
 - No blame assigned to a prior contractor or installer.
 - No safety hazard framed as "illegal" or "dangerous" — framed factually.
 - Recommend: pull photo of panel and neutral bus for the quote packet.
+- **Warranty-Callback-Trigger Detection:** No callback trigger. FPE Stab-Lok pre-dates this firm; no prior firm install in scope. Tenant nuisance-trip pattern is real but is on the FPE panel — not a firm-warranty matter.
 
 ### Example 3 — Full service report with customer-facing + internal sections (warranty callback)
 
@@ -200,3 +216,130 @@ After the main output, always append an **Internal Notes** block that lists:
 - Need to: pull the ATS manufacturer's guidance on undervoltage dropout re-programming, check warranty implications of factory-setting change, then call the homeowner back with a firm recommendation.
 - Photo of controller event log should be attached to the ticket.
 - No NEC article cited — irrelevant to the outcome.
+- **Warranty-Callback-Trigger Detection:** Tech explicitly named "warranty callback" and referenced the February install → routed to `customer-service/warranty-callback-analyzer.md` for post-visit pattern review. No defect found; not a billable visit. Generator installed by this firm 2026-02 (within firm 1-yr labor / 2-yr install-defect warranty window per `config.yml.warranty`). Generac 22 kW prime mover under manufacturer 5-yr limited warranty; ATS under Generac 2-yr — neither in play because no part failed.
+
+### Example 4 — Commercial PM visit dictation (property manager + EOR audience, mixed output)
+
+**Input transcript (raw, 3:18, scheduled quarterly PM visit at a small office building, mixed-audience report needed for both the property manager and the engineer of record):**
+
+> "Okay quarterly PM at the — at Cedar Plaza building B, the office TI we re-fed last fall. Uh main switchboard is the 800-amp Square D I-line we put in October 2025. Checked the IR scan on all three sections, all bus splices and main lugs are within 3 degrees C of ambient delta, no hot spots. Uh torqued the line side and load side lugs to the Square D spec uh 250 inch-pounds, the — the C-phase main lug was loose, like maybe 180 inch-pounds, re-torqued. Pulled the trip unit on the main, ran the Megger trip-unit-test, all four trip points passed within spec, primary injection numbers attached on the tablet. Uh GFCI test on the kitchenette circuits, all four passed. ATS at the loading dock, exercised under load for the full thirty seconds, no chatter, no nuisance trip. Uh — the one thing — the the panelboard in the second-floor IT closet, panel LP-2B, three breakers feel warm to the touch but no IR delta worth flagging, like 5 degrees over ambient. Need to come back next quarter with the IR camera and re-shoot, I want to see if it grows. The property manager — Cathy — she said the tenant on the third floor has had two nuisance trips in the lounge last month, breaker 14, didn't get a chance to look at it today because of time, recommend a separate diagnostic visit. Total on site three hours, no parts used."
+
+**Output — Customer-Facing Summary (for property manager Cathy):**
+
+> **Cedar Plaza Building B — Q2 PM visit summary (2026-04-25)**
+>
+> **Equipment we covered today.** Main 800 A switchboard, all panelboards on floors 1 and 2 we have access to, the loading-dock ATS, and the GFCI-protected circuits in the kitchenette. We did not access the 3rd-floor MDF closet — locked at time of visit; we'll coordinate access on the next visit.
+>
+> **What we found and corrected.** All major equipment is operating within spec. One item to note: the C-phase main lug on the switchboard was slightly under-torqued. We re-torqued it to manufacturer spec. The most common cause of an under-torqued lug after six months of service is normal thermal cycling — not a defect. We will check it again on the Q3 visit.
+>
+> **What we want to follow up on.**
+>
+> 1. **Panel LP-2B (2nd-floor IT closet) — three breakers running a few degrees warm.** Below the threshold where we'd act today, but I want a second IR scan on the next visit to see whether the temperature is stable, climbing, or coming back down. If it climbs we'll trace the load.
+> 2. **3rd-floor lounge tenant — two nuisance trips on breaker 14 last month.** You mentioned this today. We didn't have time to investigate. I recommend a separate diagnostic visit, ~1 hour, before the next quarterly. Happy to schedule directly with the tenant.
+>
+> **What is on the regular cadence.** Next quarterly PM is scheduled for 2026-07-25. We will bring the IR camera primed for the LP-2B re-scan.
+>
+> — Mike Torres, Torres Electric (EC-00842) · Torres Electric reference TE-25-Q2-CP-B
+
+**Output — EOR / Engineer-of-Record Technical Summary (for the building's EOR):**
+
+> **Cedar Plaza Building B — Q2 PM Report (2026-04-25)**
+>
+> **Scope.** Quarterly preventive maintenance per the maintenance contract executed 2025-10-12. NFPA 70B reference for the cadence and tests.
+>
+> **Switchboard MDP (800 A Square D I-line, installed 2025-10).** IR thermography on all bus splices and main lugs — Δ ≤ 3 °C above ambient on all phases at full load (load measured at 412 A balanced ±4%). C-phase main lug torque measured at ~180 in-lb against the Square D spec of 250 in-lb; re-torqued to spec. Primary injection on the main trip unit — long-time, short-time, instantaneous, ground-fault — all four passed within ±5% of trip-curve set point. Trip-unit-test report attached (file TE-25-Q2-CP-B-MDP-TU.pdf).
+>
+> **Branch panelboards LP-1A, LP-1B, LP-2A, LP-2B.** IR thermography. LP-2B shows three breakers (positions 7, 9, 11) at Δ ≈ 5 °C above ambient. Below NETA MTS-2023 Class 2 action threshold (Δ ≥ 10 °C) but above baseline. Flagged for re-scan at Q3 2026.
+>
+> **ATS (Generac RTS 200 A, loading dock standby).** Exercised under load for 30 s; no chatter, no nuisance trip. Battery voltage at controller 13.4 V; transfer time 8.2 s from utility loss to load pickup.
+>
+> **GFCI / AFCI verification.** Kitchenette GFCI receptacles (4) — all trip and reset within UL 943 Class A timing. No AFCI in scope at this property.
+>
+> **Open items for next quarter.**
+> - LP-2B IR re-scan with thermographer present, load profile matched
+> - Separate diagnostic visit on the 3rd-floor lounge nuisance trips (tenant report — not in PM scope today)
+> - Access to 3rd-floor MDF closet (locked at visit; coordinate via property manager)
+>
+> Reference NFPA 70B 2023 Table 11.18 (annual electrical equipment maintenance cadence) and the executed PM contract §3.2 (quarterly scope).
+
+**Internal Notes:**
+- Tech identified a re-torque on the C-phase lug — flagged for trending, not for fault. Customer-facing version describes the correction factually without speculating about cause.
+- Three warm breakers on LP-2B — within tolerance today; will trend. Not communicated as a fault to the customer; communicated as a follow-up to watch.
+- No NEC citations in the property-manager-facing version; NFPA 70B and NETA MTS in the EOR version.
+- 3rd-floor lounge nuisance trips noted but **not** investigated today; explicitly named as out-of-scope for this visit so neither audience reads it as a closed item.
+- Recommend: photo of the C-phase lug post-torque, photo of the LP-2B IR scan attached to the ticket. Tag the LP-2B follow-up to the dispatcher with a Q3 calendar reminder.
+- **Warranty-Callback-Trigger Detection:** The Cedar Plaza MDP was installed by this firm in 2025-10 (within the firm's 1-year labor warranty window per `config.yml.warranty`). The C-phase lug re-torque was identified during scheduled PM and not as a callback — the visit is billable as PM. No warranty exposure on the lug torque (post-install thermal cycling is normal). Square D I-line panelboards are under 10-yr manufacturer limited warranty; nothing in today's scope triggers a manufacturer claim. No customer-facing warranty language used.
+
+### Example 5 — Estimate-request-from-the-field dictation (commercial GC audience)
+
+**Input transcript (raw, 1:55, tech dictating an estimate request from a walk-through at a small medical-office TI for a GC):**
+
+> "Okay walk-through at Riverside Medical TI suite 240, GC is Hammond. Uh existing space is 1,800 square feet, four exam rooms, two consult offices, a shared lab. Existing electrical is a 200-amp three-phase 208 wye sub off the building MDP, looks adequate but I want to load-calc it. Uh customer wants — Hammond wants — quote for new circuiting for the four exam rooms, each exam room is gonna have uh a procedure light, a nurse-call uh head-end interface, a — a hospital-grade duplex on the patient wall, two USB-C charging duplexes, and a dedicated 20-amp circuit for the exam-room imaging device. So that's uh five circuits per exam room give or take. Uh the consult offices are simpler, just general lighting and three duplex circuits each. Lab needs uh a dedicated 30-amp for the centrifuge, a 20-amp for the autoclave, two 20-amps for the cooler and freezer. New panel — I think we put a 100-amp HD sub-panel in the suite to keep the home runs short, fed from the existing 200-amp sub. Uh GC schedule is rough-in by end of August, finish by end of September, occupancy October 15. Hammond wants the quote by Friday so I'd like the office to turn this around in the next two days."
+
+**Output — Estimate request to the office (internal, formatted for the estimator):**
+
+> **Estimate Request — Riverside Medical TI Suite 240 (Hammond GC)**
+> **Field walk by:** Mike Torres
+> **Walk date:** 2026-04-25  ·  **Hammond's quote deadline:** Friday 2026-04-29
+>
+> **Context.**
+> - 1,800 SF medical TI, suite 240, Riverside Medical Plaza.
+> - Existing electrical: 200 A 3-phase 208/120 wye sub-panel inside the suite, fed from building MDP.
+> - GC schedule: rough-in by 2026-08-31, finish by 2026-09-30, occupancy 2026-10-15.
+> - Hammond is bidding to the owner; this is their electrical sub quote.
+>
+> **Scope to quote.**
+>
+> **(a) Existing service.** Load-calc the existing 200 A 3-phase sub-panel against the proposed new connected load. Flag any service-upgrade exposure. (Run `operations/nec-2026-load-calculation-helper.md`.) Assumption: existing sub is adequate; verify before pricing.
+>
+> **(b) New 100 A sub-panel in the suite** (12-space minimum, 24-space preferred for future), HD healthcare-grade, fed from existing 200 A 3-phase sub. Confirm available spare breaker slot in the upstream panel during pricing.
+>
+> **(c) Exam rooms (×4), each room:**
+> - 1 × dedicated 20 A circuit, hospital-grade duplex on the patient wall (NEC Article 517 patient-care space requirements apply — verify exam-room patient-care classification with the medical-equipment planner before pricing)
+> - 1 × 20 A circuit, two USB-C duplexes (commercial-grade USB-C receptacles, e.g., Leviton T5635 or Hubbell USB20X2)
+> - 1 × dedicated 20 A circuit, procedure light (verify manufacturer model and load with Hammond)
+> - 1 × dedicated 20 A circuit, nurse-call head-end interface (low-voltage trade carries the head-end; we provide the 120 V branch only)
+> - 1 × dedicated 20 A circuit, exam-room imaging device (assume 16 A continuous; verify model)
+> - Subtotal: 5 circuits per exam room × 4 exam rooms = 20 branch circuits
+>
+> **(d) Consult offices (×2), each office:**
+> - General lighting on the building's master lighting scheme (verify with Hammond's lighting designer)
+> - 3 × duplex circuits (20 A general-purpose, code-minimum for the SF)
+> - Subtotal: 3 circuits per office × 2 offices = 6 branch circuits
+>
+> **(e) Lab.**
+> - 1 × dedicated 30 A circuit, centrifuge (verify manufacturer NEMA receptacle config — likely L6-30R or L14-30R)
+> - 1 × dedicated 20 A circuit, autoclave (verify continuous-load classification per manufacturer)
+> - 2 × dedicated 20 A circuits, cooler and freezer (each on its own circuit per kitchen/lab equipment good-practice)
+> - Subtotal: 4 branch circuits
+>
+> **(f) Permits, inspections, low-voltage coordination.**
+> - 1 × medical-TI building permit (assume Riverside city + Riverside County health-occupancy plan check)
+> - Coordination with the LV nurse-call sub, the medical-equipment planner, and Hammond's GC field super
+>
+> **Quantities for material list.**
+> - 30 branch circuits total (20 exam-room + 6 consult-office + 4 lab) + sub-panel feeder
+> - Hospital-grade receptacles: 4 (one per exam room)
+> - Commercial-grade USB-C duplexes: 8 (two per exam room)
+> - Standard commercial-grade duplexes: roughly 14 (consult offices + lab non-equipment) — verify against the GC's furniture / outlet layout when received
+> - 100 A 3-phase HD sub-panel + breakers
+> - Conduit, EMT and MC mix per typical commercial TI assumption — verify against Hammond's ceiling-cavity vs furred-wall constraints during pricing
+>
+> **Confirm-before-pricing items (flag in the estimate as assumptions):**
+> - Existing 200 A 3-phase sub-panel has spare breaker space for the new 100 A feeder
+> - Procedure light, imaging device, centrifuge, autoclave — manufacturer make / model / load
+> - Exam-room patient-care classification (NEC Article 517) — confirms hospital-grade-receptacle scope and isolated-ground-bonding requirements
+> - Permit fee allowance — use Riverside city schedule
+> - Whether Hammond wants the lab equipment terminations (cord-and-plug) or hard-wired
+>
+> **Schedule.**
+> - Rough-in by 2026-08-31; finish by 2026-09-30; occupancy 2026-10-15.
+> - Lead time on the 100 A HD sub-panel — assume 4–6 weeks at quote (pull current vendor quote during pricing). Critical-path item.
+>
+> **Quote turnaround.** Hammond expects the quote by 2026-04-29 (Friday). Office to draft by 2026-04-28 EOD; Mike to review 2026-04-29 AM; send before noon.
+>
+> **Internal Notes:**
+> - This is an estimate-request artifact, not a customer-facing scope letter — handoff to `sales/scope-letter-drafter.md` for the Hammond-facing scope-letter draft after the estimator returns numbers.
+> - Run `operations/nec-2026-load-calculation-helper.md` on the existing 200 A 3-phase sub BEFORE pricing the new sub-panel feeder; if the load calc shows the existing sub is undersized, the project gains a service-upgrade scope line. Material-impact on the bid.
+> - Article 517 patient-care classification is the single biggest scope variable. If the exam rooms are classified Category 1 or 2 patient-care spaces, the hospital-grade-receptacle scope, isolated-ground bonding, and equipotential grounding requirements expand the scope materially. Confirm with the medical-equipment planner before locking in the quote.
+> - **Warranty-Callback-Trigger Detection:** Not applicable — this is a new-TI estimate request, not a service visit. No prior firm-installed equipment in scope. No customer-facing warranty language needed.

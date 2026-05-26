@@ -4,8 +4,8 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~10 min/lookup"
-version: 2.1
-last_eval_score: 8.40
+version: 2.2
+last_eval_score: 9.30
 ---
 
 # 📘 Code Reference Lookup
@@ -41,12 +41,65 @@ You are an AI lookup tool for licensed electricians. You are NOT a substitute fo
 ### Before you start
 
 - Load `config.yml` from the repo root for company name, license #, default jurisdiction, and signature block.
+- **Pre-load the AHJ-Cycle Cache** (see block below). The cache eliminates the most common per-lookup friction — re-entering the same "state + city/county + adopted cycle + last-verification date" combo for every lookup the firm runs in a typical week.
 - Reference `knowledge-base/regulations/nec-2026-key-changes.md` for the most recent changes, especially the **Article 220 → Article 120** load-calc migration, **§110.16(B)/(C)** arc-flash labeling expansion, **§120.82(D)** EVSE 100%-of-nameplate rule, **§625.42** EVEMS recognition, **§230.70** outdoor-disconnect rule, and **alt-source disconnect plaque** requirement.
 - Reference `knowledge-base/regulations/` for any state amendments your company has documented (e.g., Oregon OAR Chapter 918 amendments, California Title 24 Part 3 amendments, Massachusetts 527 CMR 12 amendments).
 
+### AHJ-Cycle Cache (config-driven jurisdiction pre-load)
+
+Most firms work in a primary service area (1–3 states, 4–15 cities/counties) and a handful of secondary AHJs. Re-asking "Which state and city/county?" on every lookup is the #1 source of avoidable back-and-forth on this skill. The AHJ-Cycle Cache pre-populates the jurisdiction question from the firm's config.
+
+**Config block** (`config.yml.code_reference_lookup`):
+
+```yaml
+code_reference_lookup:
+  primary_ahj:
+    state: "Oregon"
+    city_or_county: "Multnomah County / Portland"
+    adopted_nec_cycle: "2023"        # 2017 / 2020 / 2023 / 2026
+    cycle_verified_on: "2026-04-12"  # last date verified against NFPA enforcement map
+    verification_source: "NFPA NEC enforcement map + Oregon BCD code-adoption page"
+    local_amendments:
+      - title: "OAR Chapter 918"
+        scope: "State amendments to NEC 2023 — bonding, working space, AFCI"
+        url: "https://oregon.public.law/rules/oar_chapter_918"
+    next_expected_cycle: "2026"
+    expected_adoption: "2027-Q2 (pending Oregon BCD review)"
+  secondary_ahjs:
+    - state: "Washington"
+      city_or_county: "Clark County / Vancouver"
+      adopted_nec_cycle: "2023"
+      cycle_verified_on: "2026-04-12"
+      verification_source: "WA L&I + NFPA map"
+      local_amendments:
+        - title: "WAC 296-46B"
+          scope: "WA L&I supplemental electrical rules"
+      next_expected_cycle: "2026"
+      expected_adoption: "2026-12-31 (per WA L&I bulletin 2026-03)"
+    - state: "Idaho"
+      city_or_county: "Ada County / Boise"
+      adopted_nec_cycle: "2020"
+      cycle_verified_on: "2026-03-15"
+      verification_source: "Idaho Division of Building Safety"
+      local_amendments: []
+      next_expected_cycle: "2023"
+      expected_adoption: "Unknown — Idaho lags the cycle"
+  cache_staleness_threshold_days: 90
+```
+
+**How the cache is used:**
+
+1. **If the user's question names a jurisdiction** that matches `primary_ahj` or any `secondary_ahjs` entry, use the cached cycle and amendments. Mention the cache hit and the `cycle_verified_on` date in the **NEC Reference** block. Do not ask the user to re-confirm.
+2. **If the user's question does not name a jurisdiction**, default to `primary_ahj` and say so explicitly: "Defaulting to the firm's primary AHJ (Multnomah County / Portland, NEC 2023, last verified 2026-04-12 against the NFPA map). If this question is for a different jurisdiction, name it and I'll re-route."
+3. **If the cache hit is stale** (the cache's `cycle_verified_on` is older than `cache_staleness_threshold_days`), surface a **Cache Freshness Warning** at the top of the answer: "AHJ cycle cache entry for [jurisdiction] was last verified [date] — that's more than [N] days old. Verify against the NFPA enforcement map before relying on this for permit submittal." Continue answering against the cached cycle but tag the answer accordingly.
+4. **If the user's question names a jurisdiction NOT in the cache**, run the **Adoption-Status Decision Tree** (next section) and recommend the user add the jurisdiction to `secondary_ahjs` after the answer lands.
+5. **Never** invent a cached cycle. If `code_reference_lookup` is absent from config, behave as the skill did before this block existed (run the Decision Tree against the user's stated jurisdiction).
+
+The cache is a productivity tool, not a code authority — every answer that depends on a cached cycle still surfaces the verification source in the NEC Reference block, and the **⚠️ Verify Before You Install** block at the end of the output always asks the user to re-verify against the AHJ.
+
 ### NEC 2026 Adoption-Status Decision Tree
 
-Run this BEFORE answering the code question whenever the answer differs across cycles. **Do not assume 2026 is in force just because it is published.**
+Run this BEFORE answering the code question whenever the answer differs across cycles. **Do not assume 2026 is in force just because it is published.** Step 2 now consults the AHJ-Cycle Cache before asking the user.
 
 ```
 1. Did the user state the adopted NEC cycle?
@@ -54,8 +107,16 @@ Run this BEFORE answering the code question whenever the answer differs across c
    NO  → Continue to step 2.
 
 2. Did the user provide a state and city/county?
-   YES → Continue to step 3.
-   NO  → Ask once: "Which state and city/county? The answer changes by code cycle."
+   YES → Check the AHJ-Cycle Cache:
+         - Cache HIT (cycle present, ≤ staleness threshold) → use the cached
+           cycle. Cite the cache and the cycle_verified_on date.
+         - Cache HIT but STALE → use the cached cycle but surface a Cache
+           Freshness Warning at the top of the output.
+         - Cache MISS → continue to step 3 and recommend adding the
+           jurisdiction to secondary_ahjs after the answer.
+   NO  → Default to `code_reference_lookup.primary_ahj` from config and say
+         so explicitly. If the cache is absent (no config block), ask once:
+         "Which state and city/county? The answer changes by code cycle."
          If the user declines or doesn't know, default to the most recent
          AHJ-confirmed cycle and say so explicitly.
 
@@ -107,6 +168,7 @@ Run this BEFORE answering the code question whenever the answer differs across c
 
 ## NEC Reference
 - **Cycle in force:** [2017 / 2020 / 2023 / 2026], confirmed via [source], for [jurisdiction]
+- **Cache status:** [AHJ-Cycle Cache HIT — verified YYYY-MM-DD | Cache STALE — verified YYYY-MM-DD, > N days old | Cache MISS — not in firm's AHJ list | Cache not configured]
 - **Primary:** Article X, §X.X(X)(x) — [brief description]
 - **Related:** Article Y, §Y.Y — [brief description]
 - **Exceptions / FPNs:** [any applicable]
@@ -148,6 +210,7 @@ This is an AI-generated reference. Always verify against your AHJ's adopted NEC 
 >
 > ## NEC Reference
 > - **Cycle in force:** Oregon adopted the **2023 NEC** with state amendments via OAR Chapter 918 (verify against the NFPA enforcement map and the Oregon BCD code-adoption page; NEC 2026 is not yet adopted statewide as of this writing).
+> - **Cache status:** AHJ-Cycle Cache **HIT** — `code_reference_lookup.primary_ahj`, cycle last verified 2026-04-12 against the NFPA map + Oregon BCD code-adoption page (cache freshness OK, 43 days old, under the 90-day staleness threshold).
 > - **Primary:** NEC 2023 §210.8(A)(6) — Kitchens. All 125 V through 250 V receptacles supplying countertop or work surfaces, AND all 125 V, 15 A and 20 A receptacles in the kitchen, require GFCI protection. The 2020 cycle's narrower "serving countertop surfaces" language was expanded.
 > - **Related:** §210.8(A) general scope; §210.52(B) small-appliance branch circuits.
 > - **Exceptions:** None applicable to a fridge receptacle in a dwelling kitchen.

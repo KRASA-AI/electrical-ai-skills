@@ -4,8 +4,8 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: beginner
 time_saved: "~10 min/talk"
-version: 2.1
-last_eval_score: 8.60
+version: 2.2
+last_eval_score: 9.20
 ---
 
 # 🦺 Safety Toolbox Talk
@@ -38,7 +38,76 @@ You are an AI assistant helping electrical contractors run effective, job-specif
 
 **Before you start:**
 - Load `config.yml` from the repo root for company name and preferences
+- **Run the Hazard-Prioritization Pre-load Block** (see below). This pulls the firm's crew roster, primary service-area / climate defaults, and the current month from `config.yml.safety_toolbox_talk` so the talk is tuned to today's specific crew, location, and season — not a generic OSHA recap.
 - Reference `knowledge-base/regulations/` for applicable safety standards
+- **NFPA 70E citation cycle note:** NFPA 70E 2024 is currently in force. NFPA 70E 2027 is on the cycle, with the NFPA Technical Meeting scheduled for late June 2026 and publication expected fall 2026. Until 70E 2027 publishes, cite 70E 2024 article and section numbers (e.g., §130.4, §130.7, §120.5). After 70E 2027 publishes, a v2.3 citation refresh will swap in any moved or renumbered sections — particularly the expanded sub-50V "or where an electrical hazard exists" hazard-recognition language. Do not pre-cite 70E 2027 until it ships.
+
+### Hazard-Prioritization Pre-load Block (config-driven personalization)
+
+Most contractors run their crews in a stable service area with a known mix of skills, license levels, and seasonal exposure patterns. The Pre-load Block pulls these three dimensions from config so the talk lands on the right hazards for *this* crew *this* season — not a one-size-fits-all OSHA reminder.
+
+**Config block** (`config.yml.safety_toolbox_talk`):
+
+```yaml
+safety_toolbox_talk:
+  # Crew roster — names + license levels. Lets the skill address the apprentice
+  # by name and reserve line-side / >50V tasks for qualified persons per
+  # NFPA 70E §110.2(A) "qualified person" definition.
+  crew_roster:
+    - name: "Mike Torres"
+      license: "Master / EC-00842"
+      qualified_for: ["line-side energized cut-in", "MV up to 600 V", "voltage-rated glove work"]
+    - name: "Devon Mills"
+      license: "Journeyman / JE-04488"
+      qualified_for: ["MV up to 600 V", "voltage-rated glove work"]
+    - name: "Ari Vasquez"
+      license: "Apprentice / 2nd year"
+      qualified_for: ["de-energized work only", "ladder work", "ground rod", "trench-side observation"]
+      apprentice_supervision_required: true
+
+  # Primary service area — climate / weather / utility characteristics that
+  # affect hazard mix. Used to default heat / cold / lightning / wildfire /
+  # ice-storm guidance when the user doesn't override.
+  primary_service_area:
+    region: "Pacific Northwest"
+    typical_weather:
+      january: "cold, wet, 28–48 °F, periodic ice"
+      april:   "mild, wet, 45–65 °F"
+      july:    "warm, dry, 65–95 °F, smoke season possible"
+      october: "cool, wet, 45–60 °F"
+    seasonal_hazards:
+      november_to_march: ["ice on ladders", "cold-weather glove dexterity", "early dark"]
+      june_to_september: ["heat stress", "wildfire smoke / AQI > 150", "afternoon thunderstorm"]
+    common_utilities: ["Portland General Electric (PGE)", "Pacific Power"]
+    utility_emergency_lines:
+      - "PGE outage: 503-228-6322"
+      - "Pacific Power outage: 1-877-508-5088"
+    nearest_hospital_template: "Adventist Health Portland, 10123 SE Market St (default — verify per site)"
+
+  # Hazard topics the firm has decided to surface even when not explicitly
+  # named by today's tasks (e.g., the firm had a near-miss last quarter and
+  # wants the topic refreshed for a full year).
+  recurring_focus_topics:
+    - topic: "Live-dead-live verification on line-side cut-ins"
+      reason: "Near-miss 2026-02 — apprentice almost touched an unverified conductor"
+      refresh_until: "2027-02"
+    - topic: "Spade-only zone around marked gas locates"
+      reason: "Industry-wide pattern; firm has had 2 nicks in 3 years"
+      refresh_until: "indefinite"
+
+  # NFPA 70E version anchor.
+  nfpa_70e_edition: "2024"   # bump to 2027 after publication (fall 2026)
+```
+
+**How the Pre-load Block is used:**
+
+1. **Address the crew by name and license level.** When generating the SIGN-OFF block, populate the attendee lines with the named crew from `crew_roster`. The Discussion Questions block should direct the apprentice-level question to the named apprentice ("Ari — walk us through…"). Reserve line-side / energized / >50V questions for crew members in `qualified_for`.
+2. **Default the climate / weather to the current month against `primary_service_area.typical_weather`.** If today is in October, default to "cool, wet, 45–60 °F" unless the user supplied a different reading. If today is in July, surface heat-stress and wildfire-smoke hazards even if the user didn't name them.
+3. **Surface every applicable `seasonal_hazards` entry for the current month range as a candidate hazard.** Do not invent seasonal hazards outside the configured ranges.
+4. **Always include every `recurring_focus_topics` entry whose `refresh_until` is in the future** as one of the HAZARDS & CONTROLS rows, regardless of today's primary task — these are the topics the firm has committed to keep refreshed. Mark them with a `(recurring focus topic)` tag in the talk so the crew knows why it's on every talk.
+5. **Use `utility_emergency_lines` and `nearest_hospital_template` to default the EMERGENCY PROCEDURES block** — the user can override per site, but the default lands the firm's standard numbers without re-asking.
+6. **NFPA 70E citation cycle.** Cite the edition from `nfpa_70e_edition`. When that field is `"2024"`, use §130.4 / §130.7 / §120.5 / Table 130.7(C)(15)(a) etc. as cited in the existing worked examples. When it bumps to `"2027"`, the v2.3 refresh will swap in any renumbered sections.
+7. **Never** invent crew members, license levels, or seasonal-hazard entries not in config. If the config block is absent, behave as the skill did in v2.1 (generic crew lines, user-supplied weather, no recurring topics).
 
 **Process:**
 
