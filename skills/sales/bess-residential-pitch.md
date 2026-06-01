@@ -4,7 +4,7 @@ category: sales
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~30 min/pitch"
-version: 1.0
+version: 1.1
 last_eval_score: null
 ---
 
@@ -15,7 +15,7 @@ last_eval_score: null
 Produce a one-page homeowner-facing pitch for a residential battery energy storage system (BESS) install — Powerwall 3, Enphase IQ Battery 5P/10C, FranklinWH aPower 2, LG ESS, SolarEdge Home Battery, or another major brand — that:
 
 1. **Opens with the homeowner's real driver** (whole-home backup, time-of-use bill arbitrage, recent outage, solar self-consumption, EV pair-up) rather than a generic battery brochure.
-2. **Is honest about the post-2025 incentive landscape.** The 30% Residential Clean Energy Credit (IRC §25D) expired for systems placed in service after December 31, 2025 under the One Big Beautiful Bill Act. As of 2026, cash and loan-financed residential battery purchases no longer get the federal 30% credit. The 48E commercial ITC remains available for systems owned by a third-party lessor or PPA provider, and several state programs (CA SGIP, CT EnergizeCT, NY-Sun Energy Storage, CO Storage Rebate) remain active. The pitch frames this directly rather than implying credits the homeowner cannot claim.
+2. **Is honest about the post-OBBBA incentive landscape.** The 30% Residential Clean Energy Credit (IRC §25D) expired for systems placed in service after December 31, 2025 under the One Big Beautiful Bill Act (OBBBA, Public Law 119-21, signed July 4, 2025). As of 2026, cash and loan-financed residential battery purchases no longer get the federal 30% credit. The §48E commercial ITC remains available for systems owned by a third-party lessor or PPA provider, but the credit's structure was modified by OBBBA — for **standalone storage** (battery-only, not paired into an "applicable solar facility"), the §48E phaseout begins for facilities whose construction begins in 2034 or later, so the credit remains broadly available through the early 2030s. For **solar-paired storage** sized such that the storage is part of an "applicable solar facility," the OBBBA's July 5, 2026 begin-construction acceleration applies (see `knowledge-base/regulations/solar-itc-safe-harbor-2026.md`); the TPO provider's tax counsel determines eligibility. Several state programs (CA SGIP, CT EnergizeCT, NY-Sun Energy Storage, CO Storage Rebate) remain active. The pitch frames this directly rather than implying credits the homeowner cannot claim.
 3. **Sizes the system to the homeowner's actual outage and bill goals** — not to "the biggest battery that fits." Typical residential installs run 13.5–30 kWh usable; whole-home backup of a normal 200 A service typically requires 20+ kWh and a smart-panel or critical-load-subpanel architecture decision.
 4. **Picks the architecture honestly.** Three integration shapes — (a) battery + critical-load subpanel on a conventional service panel, (b) battery + smart panel (SPAN-class) with no critical-load subpanel, (c) battery + whole-home backup transfer switch / system controller (Enphase IQ System Controller 3, Tesla Backup Switch, FranklinWH aGate). Each has different parts and labor; the pitch shows the math.
 5. **Covers 2026 NEC compliance** — Article 706 ESS disconnecting means (706.15 referring to 705.20), the "ENERGY STORAGE SYSTEM DISCONNECT" marking, residential emergency-shutdown initiation device outside the building, NFPA 855 setbacks for residential installs, and any service-equipment §230.70 outdoor disconnect that gets pulled in when the BESS scope touches the meter.
@@ -60,7 +60,7 @@ Provide the following. Where the contractor doesn't have a value, leave it blank
 9. **Outdoor wall or garage real estate for the battery** — Approximate location, distance from main panel, and whether there's a code-compliant location available (NFPA 855 setbacks: 3 ft from openings/egress; not in interior bedrooms or closets; outdoor-rated for the brand chosen).
 10. **Prior quote (if any)** — If the homeowner has a competing battery quote, include the dollar figure. Pitch will address it directly.
 11. **State / utility incentive status** — CA SGIP (Equity Resiliency / General Market), CT EnergizeCT, NY-Sun Energy Storage, CO Storage Rebate, MA SMART storage adder, HI Battery Bonus, or local utility-specific demand-response payments. Reference programs by name only; confirm current funded status before quoting a dollar figure.
-12. **Whether the homeowner is interested in a third-party-owned (TPO) lease or PPA structure** — Relevant because 48E ITC remains available under TPO ownership in 2026 even though §25D expired. Contractor partners with the TPO provider for the install; pitch frames this as an option, not a recommendation.
+12. **Whether the homeowner is interested in a third-party-owned (TPO) lease or PPA structure** — Relevant because §48E ITC may remain available under TPO ownership in 2026 even though §25D expired. For standalone storage, §48E phaseout begins for facilities with construction beginning in 2034 or later under OBBBA. For solar-paired storage where the storage is part of an "applicable solar facility," the OBBBA's July 5, 2026 begin-construction acceleration may apply — the TPO provider's tax counsel makes the call. Contractor partners with the TPO provider for the install; pitch frames this as an option, not a recommendation, and never asserts §48E eligibility without TPO confirmation.
 
 ## Instructions
 
@@ -98,7 +98,7 @@ You are an AI assistant drafting a residential BESS pitch for a licensed electri
 5. **Be honest about the 2026 incentive landscape.** State plainly:
    - The 30% federal Residential Clean Energy Credit (§25D) was repealed for systems placed in service after Dec 31, 2025 under the One Big Beautiful Bill Act (signed July 4, 2025).
    - Homeowners who buy a battery with cash or a loan in 2026 cannot claim the 30% federal credit.
-   - The 48E commercial ITC remains available through 2032 for third-party-owned systems (lease or PPA). The TPO provider claims the credit and prices it into the lease payment.
+   - The §48E commercial ITC may remain available for third-party-owned systems (lease or PPA). Standalone storage retains §48E broadly through the early 2030s (OBBBA phaseout begins for facilities with construction beginning in 2034 or later). Solar-paired storage may be caught by the OBBBA July 5, 2026 begin-construction acceleration if the storage is part of an "applicable solar facility" — the TPO provider's tax counsel determines eligibility. Never assert a specific §48E dollar figure in the pitch without TPO confirmation in writing. The TPO provider claims the credit and prices it into the lease payment.
    - State and utility incentives are unaffected and remain the primary remaining lever. List by program name only; confirm funded status before quoting dollars.
    - Do not imply or print "30%" as a homeowner-claimable figure in any 2026 pitch unless the system is on a TPO structure and the TPO partner has confirmed it in writing.
 6. **Cover 2026 NEC marking and shutdown.** In 2026-NEC jurisdictions, every BESS install has:
@@ -135,7 +135,7 @@ Default output is a **one-page homeowner-facing memo** with these sections, in o
 5. **What's included** — Battery hardware, controller/transfer switch, mounting, conduit, permits, inspection, interconnection paperwork, commissioning, app setup, one-year workmanship warranty, manufacturer warranty (state years).
 6. **What's not included** — Service upgrade unless quoted, panel replacement unless quoted, solar inverter replacement unless quoted, Wi-Fi router setup, drywall patching, finish paint, snow/ice removal at install location.
 7. **2026 NEC and fire-code notes** — Article 706 ESS disconnect and "ENERGY STORAGE SYSTEM DISCONNECT" marking, residential outside-building emergency shutdown initiation device, NFPA 855 setbacks observed at proposed location, §230.70 outdoor service disconnect if scope touches service equipment.
-8. **2026 incentive reality** — One short paragraph. Federal §25D 30% credit no longer available for cash/loan in 2026; 48E is available via TPO/lease only; list applicable state/utility programs by name; confirm dollar amounts before contract.
+8. **2026 incentive reality** — One short paragraph. Federal §25D 30% credit no longer available for cash/loan in 2026; §48E may be available via TPO/lease only (standalone storage broadly retained; solar-paired storage may be caught by the July 5, 2026 OBBBA begin-construction acceleration — confirm with TPO provider's tax counsel); list applicable state/utility programs by name; confirm dollar amounts before contract.
 9. **Pricing** — Firm number or firm range, with line items for hardware, install labor, controller/subpanel, permits, and any outdoor disconnect or smart-panel upgrade. Note hardware-only vs. installed clearly.
 10. **Timeline** — Permit pull, install day, utility interconnection, expected total elapsed time. Set realistic expectations (4–8 weeks total).
 11. **Next step** — One clear ask.
@@ -311,7 +311,7 @@ Below the main output, include a short **Internal Notes** block with:
 >
 > **2026 incentive reality.**
 >
-> The federal 30% Residential Clean Energy Credit (§25D) is no longer available for batteries purchased with cash or a loan in 2026 — it ended December 31, 2025. Texas has no statewide residential storage rebate as of May 2026. Oncor has no current storage-specific incentive. Pricing below assumes no federal or state incentives. If you'd like to explore a Tesla lease structure, the 48E commercial credit can be passed through by a Tesla-affiliated third-party owner — happy to introduce you to a TPO partner if interested.
+> The federal 30% Residential Clean Energy Credit (§25D) is no longer available for batteries purchased with cash or a loan in 2026 — it ended December 31, 2025. Texas has no statewide residential storage rebate as of June 2026. Oncor has no current storage-specific incentive. Pricing below assumes no federal or state incentives. If you'd like to explore a Tesla lease structure, the §48E commercial credit can be passed through by a Tesla-affiliated third-party owner. Standalone storage under TPO ownership broadly retains §48E availability under OBBBA, though the exact credit amount and eligibility is the TPO partner's tax counsel's call — happy to introduce you to a TPO partner if interested.
 >
 > **Pricing.** **$17,500–$19,000 all-in**:
 >
