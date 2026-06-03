@@ -4,8 +4,8 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~20 min/panel"
-version: 2.1
-last_eval_score: 8.50
+version: 2.2
+last_eval_score: 9.40
 ---
 
 # 🔌 Panel Schedule Documenter
@@ -48,6 +48,121 @@ You are an AI assistant helping a licensed electrician produce a clean, code-ali
 - Reference `knowledge-base/terminology/` for correct circuit-description conventions and standardized abbreviations
 - Reference `knowledge-base/regulations/nec-2026-key-changes.md` for §110.16(B)/(C) arc-flash labeling expansion (the 2026 cycle removed the 1,000 A trigger for non-dwellings) and any §210.8 / §210.12 deltas on AFCI/GFCI scope
 - If the user did not state the AHJ-adopted cycle, run the **NEC Cycle Check** below before flagging "missing AFCI" or "missing arc-flash label"
+
+**Panel-Template Library (config-driven, optional):**
+
+Most firms buy from one or two preferred manufacturers — the residential rough-in crew runs Square D QO most of the time, the commercial PM crew runs Eaton CH or Siemens QPF, the smart-panel retrofit crew runs Leviton Smart or SPAN. Pre-loading the firm's preferred manufacturer + the standard catalog # for each common service size eliminates the per-panel friction of "what AIC, what bus rating, what catalog number, which OCPD families list two-wire taps." The library is config-driven; if absent, the skill behaves exactly as v2.1 did.
+
+`config.yml.panel_schedule_documenter`:
+
+```yaml
+panel_schedule_documenter:
+
+  # Firm's preferred manufacturer by occupancy / size band
+  preferred_manufacturer:
+    residential_100_to_200a: "Square D QO"     # Plug-on neutral; DF available; widely stocked
+    residential_smart_panel: "SPAN"            # Smart panel retrofit lane (vs. Leviton Smart)
+    commercial_lighting_277: "Eaton CHQ"       # 277V bolt-on; rugged for office TI
+    commercial_distribution_480: "Siemens QPF" # 480Y/277V distribution boards
+    industrial_mcc: "Eaton Freedom 2100"       # MCC bucket-style
+    fallback: "Square D QO"
+
+  # Catalog # quick-reference for the most-used SKUs
+  catalog_quick_reference:
+    "Square D QO 200A 40-circuit indoor":
+      cat_number: "QO140M200PRB"
+      bus_rating_A: 200
+      max_circuits: 40
+      AIC_kA: 22
+      voltage_system: "120/240V 1Φ"
+      plug_on_neutral: true
+      dual_function_breakers_available: true
+      double_tap_listed: false              # NOT listed for two conductors on one lug
+      notes: "Indoor only; for outdoor use HOM3060L200PCAFVP-equiv"
+    "Square D QO 200A 30+30-circuit indoor (CAFI/SPD)":
+      cat_number: "HOM3060L200PCAFVP"
+      bus_rating_A: 200
+      max_circuits: 60
+      AIC_kA: 22
+      voltage_system: "120/240V 1Φ"
+      plug_on_neutral: true
+      dual_function_breakers_available: true
+      surge_protection: "integral Type 1 SPD"
+      double_tap_listed: false
+    "Eaton CH 200A 40-circuit indoor":
+      cat_number: "CH40B200J"
+      bus_rating_A: 200
+      max_circuits: 40
+      AIC_kA: 22
+      voltage_system: "120/240V 1Φ"
+      double_tap_listed: true               # Cutler-Hammer CH breakers ARE listed for two #14-#10
+      notes: "CH series breakers DOUBLE-TAP LISTED for two #14–#10 conductors"
+    "Siemens QPF 480Y/277V 1200A switchboard":
+      cat_number: "QP4FPL1200"
+      bus_rating_A: 1200
+      max_circuits: 42
+      AIC_kA: 65
+      voltage_system: "480Y/277V 3Φ 4W"
+      ground_fault_protection: "integral GFPE per §230.95"
+      notes: "Service equipment; §110.16(B) label required"
+    "SPAN Smart Panel 200A 32-circuit":
+      cat_number: "SP-200-32"
+      bus_rating_A: 200
+      max_circuits: 32
+      AIC_kA: 22
+      voltage_system: "120/240V 1Φ"
+      smart_breakers: true
+      ems_capable: true                     # §750-recognized EMS — relevant for upgrade-avoidance
+      double_tap_listed: false
+      notes: "EMS-capable per §750; circuit-level current monitoring; OTA firmware"
+    "Leviton Load Center 200A 42-circuit":
+      cat_number: "LP3MN-LE2"
+      bus_rating_A: 200
+      max_circuits: 42
+      AIC_kA: 22
+      voltage_system: "120/240V 1Φ"
+      smart_breakers: "optional 2nd-gen Smart Breakers"
+      ems_capable: true
+      double_tap_listed: false
+
+  # Header preferences for the firm's printed directory
+  printed_directory_header:
+    show_company_logo_in_header: false        # §408.4 — durability over branding
+    show_license_number: true
+    date_format: "YYYY-MM-DD"
+    include_AIC_in_header: true
+    include_fed_from_reference: true
+
+  # Convention defaults — when the user omits, the skill uses these
+  default_conventions:
+    abbreviate_dual_function_as: "DF"         # vs. "AF/GF"
+    abbreviate_dedicated_as: "(Dedicated)"
+    spare_format: "SPARE [size]A"
+    space_format: "SPACE"
+```
+
+**How the Panel-Template Library works at runtime:**
+
+1. When the user states the manufacturer + catalog # in the intake, the skill cross-references the library for any pre-known attributes (AIC, bus rating, plug-on neutral, **double-tap-listed**, integral SPD or GFPE) and surfaces them in the panel-info header *without* asking the user to re-enter them.
+2. When the user states only the manufacturer (no catalog #), the skill suggests the firm's preferred catalog # for the occupancy / service size from `preferred_manufacturer` and asks for confirmation — much faster than walking the user through every catalog field.
+3. When the user states only the occupancy / size and asks "what should we use?", the skill recommends the firm's `preferred_manufacturer` SKU.
+4. **The library's `double_tap_listed` flag is the most-leveraged data point** — if the user reports a "double-tapped lug" issue in the field, the skill checks the library: if the panel is Eaton CH (listed for two #14–#10), the flag is *informational* and the directory notes "double-tap listed per manufacturer — verify wire gauges"; if the panel is Square D QO or SPAN (NOT listed), the flag is 🔴 and lands in the Issues block as "Double-tap on a non-listed lug — re-pull conductors or add a tap block."
+5. The library's `ems_capable` flag drives a hand-off recommendation — if the user is documenting a SPAN or Leviton Smart panel and the upstream service is at or near capacity per the directory, the Internal Notes block recommends running `operations/nec-2026-load-calculation-helper.md` with the EMS/PCS variant to evaluate upgrade-avoidance.
+6. The `printed_directory_header` preferences are applied to the output header without re-asking.
+
+**Catalog-template Echo block** (always print when the library is consulted):
+
+```
+PANEL CATALOG MATCHED (from config.yml.panel_schedule_documenter)
+Catalog #:              QO140M200PRB
+Bus rating:             200 A           AIC: 22 kA
+Voltage system:         120/240V 1Φ      Max circuits: 40
+Plug-on neutral:        YES (DF breakers available)
+Double-tap listed:      NO  ← if double-tap reported in field, → Issues block as 🔴
+Integral SPD:           N/A (use HOM3060L200PCAFVP for integral Type 1 SPD)
+```
+
+The skill never invents a catalog # not in the library. If `panel_schedule_documenter` is absent from `config.yml`, the skill behaves exactly as v2.1 did and asks the user for every panel-info field.
 
 **NEC Cycle Check (always run first):**
 

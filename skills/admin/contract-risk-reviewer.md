@@ -4,7 +4,7 @@ category: admin
 tools: [claude, chatgpt]
 difficulty: advanced
 time_saved: "~60 min/contract"
-version: 1.1
+version: 1.2
 last_eval_score: 9.40
 ---
 
@@ -56,6 +56,183 @@ You are an AI assistant helping an electrical contractor spot risk in a construc
 - Reference `knowledge-base/terminology/` for standard construction contract terms
 
 **Compare against the firm's actuals, not a generic template.** When the customer's contract requires $5M GL / $10M umbrella but the firm's `insurance.gl_limit` is $2M / $5M umbrella, the review must surface that gap as a 🔴 — not silently treat the customer's number as fine because $5M sounds normal. Same for bonding capacity, warranty duration, and the firm's standard terms library: the review compares clause-by-clause and flags every clause where the customer's contract is more onerous than what the firm carries / commits to in its own standard terms.
+
+### Risk-Profile Shortcut (config-driven, optional)
+
+Most contract reviews repeat the same clause-priority pattern by project type. A subcontract on a commercial TI rarely needs the prevailing-wage / Davis-Bacon focus that a public-works prime gets; an industrial service contract needs the cyber and §232 tariff focus first; a residential remodel template is mostly indemnity and warranty. The Risk-Profile Shortcut pre-populates the matrix headings and the surfacing order for each profile, so the reviewer skips the "which clauses matter most for this contract" decision and lands directly in the right matrix.
+
+The shortcut is config-driven; if absent, the skill behaves exactly as v1.1 did and walks all eight clause families in the default order.
+
+`config.yml.contract_risk_reviewer.risk_profiles`:
+
+```yaml
+contract_risk_reviewer:
+
+  risk_profiles:
+
+    commercial_ti:
+      headline_clauses:
+        - "Pay-if-paid / pay-when-paid (state-specific)"
+        - "Indemnification scope (anti-indemnity statute)"
+        - "Liquidated damages cap"
+        - "Change-order written-authorization requirement"
+        - "Warranty start date (substantial vs. final completion)"
+      surfacing_order:
+        - payment_and_cash_flow
+        - liability_and_indemnification
+        - scope_and_change_orders
+        - warranty_callback_closeout
+        - schedule_and_scope
+        - modern_ai_era
+        - insurance_bonding_lien
+        - termination
+      typical_red_flags:
+        - "Uncapped LDs on a TI schedule"
+        - "Owner / Architect / Lender broad-form indemnity"
+        - "Procore data-feed clause without scoping (Pattern 1)"
+      default_attorney_routing: "construction_attorney"  # vs. "public_works_attorney"
+
+    public_works:
+      headline_clauses:
+        - "Pay-if-paid (often void on public)"
+        - "Prompt-payment statute compliance"
+        - "Prevailing wage / Davis-Bacon / certified payroll"
+        - "Bond form (AIA A312-2010 vs. agency-specific)"
+        - "Stop-notice / mechanics-lien preservation"
+        - "NDFD clause (often statutorily limited)"
+        - "Buy-American / FEOC procurement provisions"
+      surfacing_order:
+        - payment_and_cash_flow
+        - jurisdiction_specific_red_flags
+        - insurance_bonding_lien
+        - liability_and_indemnification
+        - scope_and_change_orders
+        - schedule_and_scope
+        - modern_ai_era
+        - warranty_callback_closeout
+        - termination
+      typical_red_flags:
+        - "Stop-notice waiver (often void)"
+        - "Agency-specific bond form not attached"
+        - "Buy-American without §232 tariff-escalation hook"
+      default_attorney_routing: "public_works_attorney"
+
+    industrial_service:
+      headline_clauses:
+        - "Cyber-incident notification window + cooperation scope"
+        - "Per-incident liability cap (arc-flash exposure)"
+        - "Section 232 / 301 / IEEPA tariff escalation"
+        - "NDFD clause (state-specific)"
+        - "Annual renewal / bond non-renewal risk"
+        - "Limitation of liability cap vs. arc-flash + BI exposure"
+      surfacing_order:
+        - liability_and_indemnification
+        - modern_ai_era
+        - payment_and_cash_flow
+        - scope_and_change_orders
+        - warranty_callback_closeout
+        - insurance_bonding_lien
+        - schedule_and_scope
+        - termination
+      typical_red_flags:
+        - "$250K LoL cap on a 480 V switchgear service contract"
+        - "Material pricing 'firm for the Term' on multi-year industrial MSAs"
+        - "24-hour cyber notification with unscoped cooperation"
+      default_attorney_routing: "construction_attorney"
+
+    msa_national_account:
+      headline_clauses:
+        - "AI / data-license patterns (Procore, ACC, BIM, productivity)"
+        - "Choice-of-law (multi-state portfolio)"
+        - "Broad-form indemnity across multiple states"
+        - "Bond renewal-condition across multi-year term"
+        - "Cyber-incident notification window + per-event cap"
+        - "Material escalation on a multi-year fixed-price MSA"
+      surfacing_order:
+        - modern_ai_era
+        - jurisdiction_specific_red_flags
+        - liability_and_indemnification
+        - payment_and_cash_flow
+        - insurance_bonding_lien
+        - scope_and_change_orders
+        - schedule_and_scope
+        - warranty_callback_closeout
+        - termination
+      typical_red_flags:
+        - "AI/ML training license (Pattern 3 of the AI-and-Data-Use Clause Library)"
+        - "California choice-of-law on multi-state portfolio (sometimes favorable to sub)"
+        - "Bond required on each property without aggregate cap"
+      default_attorney_routing: "construction_attorney"
+
+    residential_remodel:
+      headline_clauses:
+        - "Warranty length (1 yr vs. 2 yr vs. lifetime claims)"
+        - "Indemnification (homeowner vs. sub)"
+        - "Lien rights preservation (homeowner preliminary notice deadlines)"
+        - "Mandatory arbitration / attorney's fees clauses"
+        - "Permit / inspection responsibility allocation"
+      surfacing_order:
+        - warranty_callback_closeout
+        - liability_and_indemnification
+        - payment_and_cash_flow
+        - scope_and_change_orders
+        - insurance_bonding_lien
+        - schedule_and_scope
+        - jurisdiction_specific_red_flags
+        - modern_ai_era
+        - termination
+      typical_red_flags:
+        - "Lifetime workmanship warranty on a remodel template"
+        - "Mandatory arbitration with sub-funded venue"
+        - "Homeowner financing kickback / referral language"
+      default_attorney_routing: "construction_attorney"
+
+    design_build:
+      headline_clauses:
+        - "Design liability / professional E&O carve-out"
+        - "Standard of care (PE vs. design-build hybrid)"
+        - "Single-source warranty (design + build combined)"
+        - "Owner-supplied equipment language"
+        - "Coordination liability across design and construction phases"
+      surfacing_order:
+        - liability_and_indemnification
+        - scope_and_change_orders
+        - warranty_callback_closeout
+        - insurance_bonding_lien
+        - payment_and_cash_flow
+        - schedule_and_scope
+        - modern_ai_era
+        - jurisdiction_specific_red_flags
+        - termination
+      typical_red_flags:
+        - "Combined design + build warranty without E&O coverage"
+        - "Standard of care creep — 'highest professional standards' on a non-PE build"
+        - "Owner-supplied equipment with sub responsibility for performance"
+      default_attorney_routing: "construction_attorney"
+```
+
+**How the shortcut works at runtime:**
+
+1. The user passes a `project_type` in the intake (or the skill infers it from `contract type` + `project value` + presence of public-works / industrial / TI language in the contract text).
+2. The skill maps `project_type` → the matching `risk_profile` key (commercial_ti / public_works / industrial_service / msa_national_account / residential_remodel / design_build). When ambiguous, fall back to commercial_ti and note the inference in the Internal Notes block.
+3. The matrix is rendered in `surfacing_order` rather than the default order. Headline clauses go in the executive-summary "Top 3 concerns" check first, before any other 🔴.
+4. The `typical_red_flags` list is run as a *pre-emit checklist* — if any typical red flag for the profile is *missing* from the matrix after the review, the skill emits an "Expected red flag NOT found" line in the executive summary so the reviewer can confirm the absence is genuine (vs. a missed scan).
+5. `default_attorney_routing` is surfaced in the "Next Steps" block, mapped against `contract.preferred_attorney` rows in config keyed by routing type.
+
+**Profile-pre-load Echo block** (always print when the shortcut runs):
+
+```
+RISK-PROFILE SHORTCUT APPLIED
+Profile:                public_works
+Headline-clause focus:  pay-if-paid (often void); prompt-pay; prevailing wage;
+                        bond form (AIA A312 vs. agency); stop-notice; NDFD; Buy-American
+Surfacing order:        payment → jurisdiction-specific → bonding → indemnity → ...
+Typical red flags:      stop-notice waiver; agency bond form not attached; Buy-American
+                        without §232 escalation hook
+Attorney routing:       public_works_attorney (Mary Lin, Lin & Associates, Sacramento)
+```
+
+The skill never invents a profile or routes to an attorney not listed in `config.yml.contract.preferred_attorney`. If `contract_risk_reviewer.risk_profiles` is absent from config, the skill behaves exactly as v1.1 did and walks the eight clause families in default order without the Profile Echo block.
 
 **Process:**
 
