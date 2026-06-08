@@ -7,7 +7,7 @@
 - **Massachusetts — IN EFFECT.** The Board of Fire Prevention Regulations adopted 527 CMR 12.00 based on NFPA 70 (NEC 2026). **Effective April 24, 2026.** This is the first U.S. state with a confirmed in-force NEC 2026 adoption. Permits issued on or after that date follow 2026 + Massachusetts state amendments.
 - **Texas — confirmed effective September 1, 2026.** Per TDLR announcement. Local AHJ adoption may lag.
 - **Washington — effective December 31, 2026** (proposed full-by-reference with delayed effective date).
-- **Oregon — pending.** Typically follows NFPA publication within 12–18 months.
+- **Oregon — pending; anticipated October 1, 2026.** The Oregon Building Codes Division (BCD) has opened the 2026 Oregon Electrical Specialty Code (OESC) adoption process, with an anticipated effective date of **October 1, 2026** (current cycle remains the 2023 OESC, effective Oct 1, 2023, until then). **Data-quality caution:** several commercial NEC-adoption aggregators prematurely list Oregon as already "adopted" — this is not yet in force. Verify against the Oregon BCD OESC-adoption page before citing 2026 provisions on an Oregon submittal.
 - **Minnesota — pending.** NEC 2026 Adoption Review Committee meeting through 2026; no effective date set.
 - **Michigan, Connecticut, Virginia — pending / in committee review.** Adoption process initiated; no effective date set.
 - **All other states — on NEC 2023, 2020, or 2017.** Industry aggregators report ~20 states on 2023, ~20 on 2020, ~9 on 2017 as of Q2 2026.
@@ -18,7 +18,7 @@
 
 **Federal solar safe-harbor cross-reference:** Commercial solar projects racing the July 4, 2026 §48E "begin construction" deadline have NEC-cycle implications layered onto the federal-tax safe-harbor timeline. See `solar-itc-safe-harbor-2026.md` for the OBBBA / IRS Notice 2025-42 framework and contractor-side documentation checklist.
 
-**Last updated in this repo:** 2026-06-01 (landscape monitor — Massachusetts NEC 2026 confirmed effective April 24, 2026; Texas Sept 1, 2026 and Washington Dec 31, 2026 carried forward; §48E solar safe-harbor cross-reference added).
+**Last updated in this repo:** 2026-06-08 (landscape monitor — Oregon 2026 OESC anticipated effective Oct 1, 2026 per Oregon BCD; aggregator "adopted" overclaim flagged. Massachusetts in effect April 24, 2026; Texas Sept 1, 2026; Washington Dec 31, 2026 carried forward).
 
 This document is a practical summary for contractors. It is not a substitute for reading the Code. Always confirm text against the published NEC and any state/local amendments.
 
