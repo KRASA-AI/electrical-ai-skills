@@ -4,8 +4,8 @@ category: customer-service
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~15 min/after-hours call + avoided nuisance truck-rolls"
-version: 1.0
-last_eval_score: null
+version: 1.1
+last_eval_score: 9.40
 ---
 
 # 🚨 Emergency Call Triage Script
@@ -55,6 +55,44 @@ You are an AI assistant drafting a call-triage script for an electrical contract
 - Reference `knowledge-base/regulations/nec-2026-key-changes.md` if a recurring emergency pattern has a code nexus (e.g., burning smell at the service disconnect — the 2026-cycle §230.70 outdoor-disconnect provisions affect what the tech can safely de-energize from).
 - Do not load the Plain-English Translation Dictionary verbatim — this script needs plain spoken English, not the invoice-explanation register. Reach for short sentences a scared caller can understand at 10:30 PM.
 
+### Priority-Classification Pre-amble (run FIRST — lands P1 / P2 / P3 before any free-text)
+
+The #1 clarity failure in an after-hours script is that the person reading it — a tired dispatcher, an AI voice agent, a brand-new hire — has to read several paragraphs of branching dispatch language *before* they know whether this call is an emergency. By the time the answer emerges from the prose, a P1 caller has been on the line answering questions for 40 seconds. Fix this by landing a one-glance **priority classification** at the very top of every script the skill produces, before any greeting, tier table, or dispatch language.
+
+Every script the skill generates opens with a **Priority Pre-amble**: a 3-line scripted decision tree that collapses the five response tiers into **three priority classes**, so the reader knows the disposition before they read a single sentence of free text:
+
+```
+PRIORITY PRE-AMBLE  (read top to bottom; stop at the first YES)
+
+  P1 — DISPATCH NOW / 911-GATE
+       Sparks · smoke · flames · burning smell at panel/outlet/fixture ·
+       shock or tingling after contact · active arc at meter ·
+       water running onto live equipment · downed service drop.
+       → 911 gate first if fire/shock/injury, then immediate on-call dispatch.
+       (maps to Tier 1 + Tier 2)
+
+  P2 — DISPATCH ELEVATED / MEDICAL-WEATHER
+       Outage or partial outage WITH oxygen / dialysis / powered medical
+       device · extreme-heat or extreme-cold occupant · refrigerated
+       medication or food-service freezer at risk.
+       → dispatch on elevated priority even if the symptom alone is minor.
+       (maps to Tier 3)
+
+  P3 — SCHEDULE NEXT BUSINESS DAY
+       One breaker won't reset · one circuit/room dark · GFCI won't hold ·
+       flickering light · humming dimmer · single dead outlet · cosmetic.
+       → next-business-day callback window + safe-interim guidance.
+       (maps to Tier 4 + Tier 5)
+```
+
+**Rules for the pre-amble:**
+
+1. The pre-amble is the **first thing in the output**, before the greeting block. It is a routing index, not the spoken script — the dispatcher/agent uses it to know *where they are going* before they start talking.
+2. It is read **top to bottom, stop at the first YES** — a P1 flag short-circuits everything below it. This is the scripted-decision-tree shape: the most dangerous disposition is checked first.
+3. The P1 / P2 / P3 label is **stamped into the post-call log and the tech handoff** alongside the existing Tier N, so the priority class and the granular tier travel together (P1/Tier-2, P3/Tier-4, etc.). The five tiers are retained in full below the pre-amble — the pre-amble does not replace them, it indexes them.
+4. The pre-amble **never invents a fourth class** and never softens a P1 to P2/P3. When the safety screen is inconclusive, the pre-amble routes to the higher priority class (P1 over P2, P2 over P3) — the same err-toward-dispatch posture the anti-liability rules already require.
+5. If the company's `config.yml` defines a tighter dispatch posture (e.g., safety-only after a cutoff hour), the P2 class carries the time-of-night clause as a sub-line; the P1 class is **never** gated by hour.
+
 **Core process:**
 
 1. **Open with a consistent branded greeting.** "Thanks for calling [Company] — you've reached our on-call line. My name is [Name]. Before we go any further: **do you see sparks, smoke, or flames, or is anyone hurt? If yes, please hang up, call 911 first, and call us back as soon as the scene is safe.** If no, let's get some information." This greeting does two things at once: it puts the 911 gate in front of everything else, and it lets the caller self-select out of the electrical triage flow if they're in an actual fire event.
@@ -93,6 +131,7 @@ You are an AI assistant drafting a call-triage script for an electrical contract
 
 Default output is a **multi-section script package** with these sections, in order:
 
+0. **Priority Pre-amble** (the 3-line P1 / P2 / P3 routing index, read top-to-bottom, stop at first YES) — lands at the very top so the reader knows the disposition before reading any spoken script. Stamps the P-class into the log and tech handoff alongside Tier N.
 1. **Greeting block** (4–6 sentences) — The branded hello + 911 gate + the "let's get some information" pivot.
 2. **Safety screen question set** (5 ordered questions) — Each question + the yes-branch action + the no-branch action.
 3. **Tier mapping table** (5 rows) — Tier number / symptoms / action / ETA promise / rate quote / safe-interim guidance for the caller.
@@ -141,6 +180,29 @@ Below the main output, include a short **Internal Notes** block that lists:
 
 **Output — AI voice agent system prompt (abridged, Tier 1 and Tier 2 branches shown in full; Tier 3–5 summarized):**
 
+> **PRIORITY PRE-AMBLE (read top to bottom; stop at first YES — know the disposition before you speak):**
+>
+> ```
+> P1 — DISPATCH NOW / 911-GATE
+>      Sparks · smoke · flames · burning smell at panel/outlet/fixture ·
+>      shock/tingling after contact · active arc at meter ·
+>      water on live equipment · downed service drop.
+>      → 911 gate (if fire/shock/injury) → immediate on-call dispatch.   [Tier 1 / Tier 2]
+>
+> P2 — DISPATCH ELEVATED / MEDICAL-WEATHER
+>      Outage WITH oxygen / dialysis / powered medical device ·
+>      extreme heat-cold occupant · refrigerated meds or food-service freezer.
+>      → elevated-priority dispatch even if symptom alone is minor.        [Tier 3]
+>      (Ashwood posture: after 10:30 PM Sun–Thu / 12:00 AM Fri–Sat, P2 still dispatches.)
+>
+> P3 — SCHEDULE NEXT BUSINESS DAY
+>      One breaker won't reset · one room dark · GFCI won't hold ·
+>      flicker · humming dimmer · single dead outlet · cosmetic.
+>      → 7:30–8:30 AM callback window + safe-interim guidance.            [Tier 4 / Tier 5]
+> ```
+>
+> *The P-class is stamped into the post-call log and the tech handoff alongside Tier N. The full five-tier scripts below are the spoken language; the pre-amble is the router.*
+>
 > **Greeting (first sentence, always):**
 > *"Thanks for calling Ashwood Electric — you've reached our on-call line. I'm an AI assistant and a human dispatcher is listening. Before we go any further: **do you see sparks, smoke, or flames right now, or is anyone hurt? If yes, please hang up, call 911 first, and call us back as soon as the scene is safe.** If no, let's get some information."*
 >
@@ -180,9 +242,9 @@ Below the main output, include a short **Internal Notes** block that lists:
 >
 > **Post-call log template (into CRM):**
 >
-> *"Tier [N] — [symptom summary, 8 words]. [Dispatch OR Scheduled for {window}]. Safety-screen answers: injury N/Y, smoke-sparks N/Y, drop-down N/Y, water-on-panel N/Y, medical-occupant N/Y. Safe-interim given: [short list]. Rate quoted $195/$175/1-hr-min, authorized: Y/N. Tech dispatched: [Name or N/A]. ETA promised: [window or N/A]. Address/callback confirmed. Notes: [anything material — tenant/owner, insurance claim, prior contractor's work mentioned, recent storm, specific appliance/circuit]."*
+> *"[P1/P2/P3] / Tier [N] — [symptom summary, 8 words]. [Dispatch OR Scheduled for {window}]. Safety-screen answers: injury N/Y, smoke-sparks N/Y, drop-down N/Y, water-on-panel N/Y, medical-occupant N/Y. Safe-interim given: [short list]. Rate quoted $195/$175/1-hr-min, authorized: Y/N. Tech dispatched: [Name or N/A]. ETA promised: [window or N/A]. Address/callback confirmed. Notes: [anything material — tenant/owner, insurance claim, prior contractor's work mentioned, recent storm, specific appliance/circuit]."*
 >
-> **On-call tech handoff (SMS):** *"[Tier N] — [address] — [8-word symptom] — caller [name, number] — they [turned main off / tried reset / unplugged appliance] — safe-interim guidance: [given]. ETA promised: [window]. Medical flag: [Y/N]. 2026 NEC note if service-equipment touched."*
+> **On-call tech handoff (SMS):** *"[P1/P2/P3] / [Tier N] — [address] — [8-word symptom] — caller [name, number] — they [turned main off / tried reset / unplugged appliance] — safe-interim guidance: [given]. ETA promised: [window]. Medical flag: [Y/N]. 2026 NEC note if service-equipment touched."*
 
 **Internal Notes:**
 - Rate structure used ($195/$175/1-hr-min) matches the intake. If any field changes in `config.yml`, the rate-and-authorization script line needs a one-edit update.
@@ -190,6 +252,7 @@ Below the main output, include a short **Internal Notes** block that lists:
 - No after-hours credit-card collection is in this script — the intake did not authorize it; collection happens post-service. If the company flips to pre-auth charging, a new sentence is needed before "does that work for you?"
 - Tier 3 "medical occupant" is set to dispatch even without a smoke/spark flag. If the dispatch posture is tightened (e.g., "safety only after 11 PM"), the Tier 3 branch needs a time-of-night cutoff clause.
 - Excluded categories (commercial PM, new-construction rough-in, generator-service-without-contract) are handled earlier in the call when the caller states the issue — add an exclusion branch before the safety screen if the intake requests a hard gate.
+- Priority Pre-amble (P1/P2/P3) lands above the greeting as a routing index — it is read by the dispatcher/agent, not spoken to the caller. P1 is never gated by hour; the Ashwood after-cutoff posture attaches only to P2. The five tiers below the pre-amble are unchanged and remain the spoken scripts.
 - 911 gate sits in the greeting itself; this is intentional. Don't move it into the safety screen or a caller in a real fire will waste 30 seconds answering AI questions.
 - Voice-agent channel adaptation: the script reads as written. For a voicemail-override channel, collapse Tier 1 language to a 15-second recording that opens with "If you see sparks, smoke, or flames, hang up and call 911 first — then leave us a message after the tone."
 - Route tech's post-call dictation through `skills/customer-service/voice-notes-to-service-report.md` so the invoice narrative is consistent with the triage notes.

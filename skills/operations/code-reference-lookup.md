@@ -4,8 +4,8 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~10 min/lookup"
-version: 2.2
-last_eval_score: 9.30
+version: 2.3
+last_eval_score: 9.40
 ---
 
 # 📘 Code Reference Lookup
@@ -59,10 +59,15 @@ code_reference_lookup:
     adopted_nec_cycle: "2023"        # 2017 / 2020 / 2023 / 2026
     cycle_verified_on: "2026-04-12"  # last date verified against NFPA enforcement map
     verification_source: "NFPA NEC enforcement map + Oregon BCD code-adoption page"
-    local_amendments:
+    local_amendments:                # Local-Amendment Library — keyed by NEC section
       - title: "OAR Chapter 918"
-        scope: "State amendments to NEC 2023 — bonding, working space, AFCI"
+        affects_sections: ["250.x", "110.26", "210.12"]   # NEC sections touched
+        amendment_type: "supplements"   # supplements / supersedes / deletes / clarifies
+        summary: "State amendments to NEC 2023 — bonding, working space, AFCI"
+        effective_date: "2023-10-01"
+        citation_format: "OAR 918-305-XXXX alongside NEC §"
         url: "https://oregon.public.law/rules/oar_chapter_918"
+        verified_on: "2026-04-12"
     next_expected_cycle: "2026"
     expected_adoption: "2027-Q2 (pending Oregon BCD review)"
   secondary_ahjs:
@@ -73,7 +78,13 @@ code_reference_lookup:
       verification_source: "WA L&I + NFPA map"
       local_amendments:
         - title: "WAC 296-46B"
-          scope: "WA L&I supplemental electrical rules"
+          affects_sections: ["230.85", "210.8", "110.16", "labeling"]
+          amendment_type: "supplements"
+          summary: "WA L&I supplemental rules — emergency-disconnect labeling, accessibility, allowed disconnect types"
+          effective_date: "2023-07-01"
+          citation_format: "WAC 296-46B-XXX alongside NEC §"
+          url: "https://app.leg.wa.gov/wac/default.aspx?cite=296-46B"
+          verified_on: "2026-04-12"
       next_expected_cycle: "2026"
       expected_adoption: "2026-12-31 (per WA L&I bulletin 2026-03)"
     - state: "Idaho"
@@ -96,6 +107,20 @@ code_reference_lookup:
 5. **Never** invent a cached cycle. If `code_reference_lookup` is absent from config, behave as the skill did before this block existed (run the Decision Tree against the user's stated jurisdiction).
 
 The cache is a productivity tool, not a code authority — every answer that depends on a cached cycle still surfaces the verification source in the NEC Reference block, and the **⚠️ Verify Before You Install** block at the end of the output always asks the user to re-verify against the AHJ.
+
+### Local-Amendment Library (config-driven, keyed by NEC section)
+
+The AHJ-Cycle Cache answers "which cycle?" The **Local-Amendment Library** answers the harder, higher-value question the cycle alone misses: **"does this jurisdiction amend the section I'm about to cite?"** A cycle-correct base-NEC answer that ignores a state/city amendment is the most common way this skill produces a confidently-wrong citation — the firm cites NEC 2023 §210.12 in Massachusetts and gets corrected by the inspector because 527 CMR 12 retains a stricter AFCI rule. Extending the cache from *cycle-only* to *cycle + amendments* is what lifts this skill's personalization: the firm's own documented amendment set is matched against the section being cited, automatically, before the answer is written.
+
+Each `local_amendments` entry in the cache is now a structured record — `title`, `affects_sections` (the NEC sections the amendment touches), `amendment_type` (supplements / supersedes / deletes / clarifies), `summary`, `effective_date`, `citation_format` (how the firm cites the amendment alongside the base §), `url`, and `verified_on`. The skill uses the library as follows:
+
+1. **Section match.** Once the core NEC section(s) for the question are identified (Process step 1), check the matched AHJ's `local_amendments` for any entry whose `affects_sections` overlaps. A match means the amendment **must** be cited alongside the base NEC section, using the entry's `citation_format`, with the `amendment_type` made explicit ("MA 527 CMR 12 **supersedes** NEC 2023 §210.12 — stricter AFCI retained").
+2. **Local-Amendment Echo block.** When a section match is found, surface a one-line **Amendment Echo** at the top of the **Local Amendments to Watch** output block, before the prose: `Amendment Echo — [AHJ]: [title] [supplements/supersedes/clarifies] §[section] (effective [date], verified [verified_on]).` This is the same Echo / Pre-load surfacing pattern the repo's other config-driven skills use — the reader sees the amendment hit named explicitly before reading the explanation.
+3. **No-match transparency.** If the matched AHJ has a populated `local_amendments` list but **none** of the entries touch the cited section, say so explicitly: "No documented amendment in [AHJ]'s library touches §[section]; the base NEC answer stands. Other amendments on file for this AHJ: [titles]." This distinguishes "we checked the firm's amendment set and it's clean" from "we don't know" — the second is a much weaker statement and the reader needs to know which one they're getting.
+4. **Amendment freshness.** If a matched amendment's `verified_on` is older than `cache_staleness_threshold_days`, append `[amendment last verified {date} — re-confirm with the AHJ]` to the Echo line.
+5. **Never invent.** The library never fabricates an amendment, an `affects_sections` mapping, or a `citation_format`. If the `local_amendments` block is empty or absent for the matched AHJ, the skill behaves exactly as v2.2 did — it mentions amendments only "when known with confidence" from the knowledge base and otherwise emits the standard "verify with your AHJ" line. The library augments that behavior; it does not replace the verify-with-AHJ discipline.
+
+The Local-Amendment Library is a documentation aid, not a legal authority. Every amendment surfaced still routes through the **⚠️ Verify Before You Install** block, and an amendment the firm has *not* documented can still exist — the no-match line says only that the firm's own library is clean, not that the jurisdiction has no amendments.
 
 ### NEC 2026 Adoption-Status Decision Tree
 
@@ -156,7 +181,7 @@ Run this BEFORE answering the code question whenever the answer differs across c
 4. Cite the specific NEC reference(s): Article → Section → Subsection (e.g., NEC 2023 §210.8(A)(1), or NEC 2026 §210.8(A)(1) — note that section numbering moved in 2026 for some chapters).
 5. Note any relevant **exceptions**, **informational notes**, or **mandatory FPNs** that modify the base requirement.
 6. If the requirement has changed across recent cycles (2017 → 2020 → 2023 → 2026), flag the **delta** so the reader knows what to verify against their AHJ's adopted cycle.
-7. Mention common local amendments **only when known with confidence** (e.g., MA 527 CMR 12 still requires AFCI on bedroom circuits via local amendment even after the 2014 NEC AFCI expansion). Do not invent amendments.
+7. Run the **Local-Amendment Library** check (above): match the cited section against the AHJ's `affects_sections`. On a hit, cite the amendment alongside the base § using its `citation_format` and surface the Amendment Echo line. On a populated-but-no-match, say so explicitly. Mention amendments outside the library **only when known with confidence** (e.g., MA 527 CMR 12 still requires AFCI on bedroom circuits via local amendment even after the 2014 NEC AFCI expansion). Do not invent amendments.
 8. Provide **practical application guidance** — how this typically plays out in the field, what inspectors look for, what trips the most common rejections.
 9. Close with the verification block.
 
@@ -177,7 +202,7 @@ Run this BEFORE answering the code question whenever the answer differs across c
 [Only if the answer changes across cycles. State exactly what changed and when.]
 
 ## Local Amendments to Watch
-[Only if known with confidence. Otherwise: "No documented amendments in this jurisdiction. If the AHJ has supplemental rules, verify before submitting."]
+[If the Local-Amendment Library returns a section match, lead with the Amendment Echo line: "Amendment Echo — [AHJ]: [title] [supplements/supersedes/clarifies] §[section] (effective [date], verified [verified_on])." Then explain. If the library is populated but no entry touches the cited section, say so and list the AHJ's other on-file amendments. If the library is empty/absent: "No documented amendments in this jurisdiction's library. If the AHJ has supplemental rules, verify before submitting."]
 
 ## Practical Application
 [How this works in the field — common approaches, inspector expectations, typical pitfalls, who pulls the permit, what calc / drawing / label is required.]
@@ -222,7 +247,7 @@ This is an AI-generated reference. Always verify against your AHJ's adopted NEC 
 > - **NEC 2026:** Article numbering for general dwelling-unit requirements is consistent with 2023; no material change to kitchen GFCI scope itself, but the surrounding chapter reorganization places adjacent provisions in different sections — re-verify when OR adopts 2026.
 >
 > ## Local Amendments to Watch
-> No Oregon state amendment narrows §210.8(A)(6). Some Portland-area AHJs have informally accepted a "dedicated refrigerator on a non-GFCI circuit" workaround in older homes during minor repair work — **this is not code-compliant for a remodel pulling a permit**. If the work is permitted, the receptacle must be GFCI-protected.
+> No documented amendment in Multnomah/Portland's library touches §210.8; the base NEC answer stands. Other amendments on file for this AHJ: OAR Chapter 918 (affects §250.x bonding, §110.26 working space, §210.12 AFCI). No Oregon state amendment narrows §210.8(A)(6). Some Portland-area AHJs have informally accepted a "dedicated refrigerator on a non-GFCI circuit" workaround in older homes during minor repair work — **this is not code-compliant for a remodel pulling a permit**. If the work is permitted, the receptacle must be GFCI-protected.
 >
 > ## Practical Application
 > - The simplest field path is a **GFCI breaker** in the panel for the fridge circuit. Avoid GFCI receptacles in series with a fridge — modern fridges have inrush and compressor noise that nuisance-trips many GFCI receptacle devices.
@@ -257,7 +282,7 @@ This is an AI-generated reference. Always verify against your AHJ's adopted NEC 
 > - **NEC 2026:** §230.70 expanded to broaden the outdoor-disconnect requirement and clarify acceptable enclosures. Also adds the **alt-source disconnect plaque** rule under §230 / §705 / §480 cross-references when the structure has PV, BESS, or genset disconnects not adjacent to the service.
 >
 > ## Local Amendments to Watch
-> WA L&I has issued multiple "Electrical Currents" bulletins on §230.85 implementation, including allowed disconnect types (meter-main combo, separate enclosure, switch-rated breaker) and labeling requirements. King / Snohomish / Pierce inspectors enforce labeling strictly.
+> **Amendment Echo — Clark County / Vancouver (WA): WAC 296-46B supplements §230.85 (effective 2023-07-01, verified 2026-04-12).** The firm's Local-Amendment Library flags this section as amended — cite WAC 296-46B-XXX alongside NEC 2023 §230.85. WA L&I has issued multiple "Electrical Currents" bulletins on §230.85 implementation, including allowed disconnect types (meter-main combo, separate enclosure, switch-rated breaker) and labeling requirements. King / Snohomish / Pierce inspectors enforce labeling strictly.
 >
 > ## Practical Application
 > - Most efficient path is a **meter-main combination** outdoors (e.g., Siemens MC2040B1200ESC, Eaton MBE2040B200BTS, Square D SC2040M200PF). Replaces both the meter base and the outdoor disconnect in one box.
