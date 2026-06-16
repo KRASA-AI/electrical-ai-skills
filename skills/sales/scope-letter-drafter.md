@@ -4,8 +4,8 @@ category: sales
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~35 min/letter"
-version: 2.1
-last_eval_score: 9.10
+version: 2.2
+last_eval_score: 9.70
 ---
 
 # 📋 Scope Letter Drafter
@@ -85,6 +85,25 @@ For long-lead Division 26 equipment (switchgear, distribution transformers, MV e
 For service contracts and small residential, the Tariff-Aware block is replaced by a one-line price-validity statement ("Material pricing held through 30 days from quote date; beyond 30 days, subject to re-confirmation"). Service-truck inventory is short-cycle and not exposed to long-lead equipment risk.
 
 If the project's contract does NOT include a Tariff Event clause (per `skills/admin/material-tariff-escalation-clause-drafter.md`), the scope letter still surfaces the lead-time and the Tariff Event language as an ASSUMPTION — and the Internal Notes block recommends the contracts manager add the contract attachment before signing. A bid that goes out without Tariff-Aware language in 2026 is a margin-leak risk on every commercial / industrial / public-works job.
+
+**Three-Bucket Classification Test (run on every line item before placing it):**
+
+The single most common defect in a scope letter — the one that drives change-order disputes six months later — is not a missing item; it is an item placed in the *wrong* bucket, or an item that says different things in two buckets. "Temporary power" written as an inclusion in one paragraph and excluded in another. An "assumption" that is really an exclusion in disguise ("we assume the GC furnishes temp power" instead of "temp power is excluded; GC-furnished"). An OFCI final-connect that lives ambiguously between an inclusion and an assumption. Before placing any line item, classify it with this stop-at-first-YES test, then run the consistency check.
+
+Classification rule (apply in order; stop at the first YES):
+
+1. **Is it work this firm will perform and price?** → **INCLUSION.** State the deliverable in performance terms (furnish/install/terminate/test), tie it to a drawing or spec reference where one exists, and bound it (quantity, size, location) so a reader can verify it against the plans.
+2. **Is it work a reasonable reader would expect to be in an electrical scope, that this firm is NOT performing?** → **EXCLUSION.** Every exclusion names *who owns it instead* (GC, owner, utility, other-trade, owner's Cx agent) — an exclusion without an owner reads as an oversight, not a decision. If it is excluded only under a condition, state the condition.
+3. **Is it a boundary condition outside the firm's control that the price and schedule depend on?** → **ASSUMPTION.** Every assumption must be **falsifiable** — written so the estimator can confirm it true or false before signing (a date, a furnished-by party, a site condition, a sequence predecessor, a voltage). "We assume reasonable access" is not falsifiable; "staging area provided by GC adjacent to the service elevator; two crew parking spaces on-site at no charge" is.
+
+Cross-bucket consistency check (run after classifying all items, before output):
+
+- **No item appears in two buckets.** If temp power is excluded, it is not also an assumption — pick the bucket the classification rule selected (exclusion, because it is work-not-performed with an owner) and remove the duplicate. The one deliberate exception is a long-lead item, which legitimately appears as an INCLUSION (the equipment) and an ASSUMPTION (the lead-time / order-release boundary); when this happens, the two references must use identical item names and quoted dates.
+- **Every exclusion has an owner; every assumption is falsifiable.** Sweep both lists and fix any exclusion missing an owner-party and any assumption a reader cannot verify before signing.
+- **No item is silently absent from all three.** If a scope element appears on the drawings or in the intake but lands in none of the three buckets, that is the silent-omission failure the standard inclusions library exists to prevent — surface it in the Internal Notes block as an unclassified item the estimator must place before sending.
+- **Bucket headers stay mutually exclusive.** INCLUSIONS describe what is priced; EXCLUSIONS describe what is not; ASSUMPTIONS describe the conditions under which the price holds. Do not let an assumption smuggle in priced work, and do not let an inclusion carry a hidden condition that belongs in assumptions.
+
+This test is a placement discipline, not a new output section — every item still lands in the existing INCLUSIONS / EXCLUSIONS / ASSUMPTIONS sections below. It exists so the three sections that drive 90% of change-order disputes are internally clean before the letter goes out.
 
 **Core structure — every commercial scope letter has these sections:**
 
@@ -265,6 +284,7 @@ Sincerely,
 After the main output, always append an **Internal Notes** block (not sent to the addressee) that lists:
 
 - Any gap where the intake was incomplete and the skill made an assumption (which the estimator needs to confirm before sending)
+- Any item the Three-Bucket Classification Test could not place in INCLUSIONS / EXCLUSIONS / ASSUMPTIONS, or any cross-bucket conflict the consistency check flagged (e.g., an item that appeared in two buckets, an exclusion missing an owner-party, or an assumption that is not falsifiable) — the estimator must resolve these before sending
 - Any exclusion that might draw a pushback from this particular GC
 - Any assumption that conflicts with the drawing or spec (flag for RFI)
 - Any long-lead item that deserves a schedule callout in the cover letter

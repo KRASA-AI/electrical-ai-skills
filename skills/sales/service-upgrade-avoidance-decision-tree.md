@@ -4,8 +4,8 @@ category: sales
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~30 min/job"
-version: 1.0
-last_eval_score: null
+version: 1.1
+last_eval_score: 9.70
 ---
 
 # Service-Upgrade-Avoidance Decision Tree
@@ -70,9 +70,21 @@ You are an AI assistant building a service-upgrade-avoidance decision memo for a
 - If the jurisdiction is on NEC 2023 or older, frame 2026-only provisions as "the next code cycle will…" — never as "required today." Do not cite UL 3141 as mandatory in a non-2026 jurisdiction; cite it as best practice instead.
 - If a `skills/operations/nec-2026-load-calculation-helper.md` run exists for this customer, use that result as the load-calc source of truth. Otherwise, compute a rough range inline and clearly say so.
 
+**Path Pre-amble (routing index — read top-to-bottom, stop at the first YES):**
+
+Before walking the full six-step trace, place the job on the three-path map so the reader knows where the analysis is heading. This pre-amble is an **index, not the analysis** — it never replaces the load math in Steps 1–6, which remain the source of truth and can move the job to a different path than the pre-amble's first read. It exists so a contractor scanning the memo (or a homeowner reading it) lands the likely path before the detail, the same way `skills/sales/ev-charger-residential-pitch.md` and `skills/operations/nec-2026-load-calculation-helper.md` lead with a short ordered classification.
+
+Read these three lines in order and stop at the first YES; that is the **provisional path**, which Step 6 confirms or overrides:
+
+1. **Does even the peak-coincident load (only the loads that actually run together) exceed the existing service?** → **provisional Path C (Service / panel upgrade).** The load does not fit; Steps 1–4 size and price it honestly with the 2026 outdoor-disconnect premium disclosed. (A bad-panel case — FPE/Zinsco/Challenger/Pushmatic/Sylvania — that also fails the load test lands here naturally; the panel leaves regardless per Step 5.)
+2. **Does the full post-add load exceed the existing service, but the peak-coincident load fit — AND is the load that would need shedding actually sheddable without occupant impact, with a UL-listed device that costs less than the upgrade?** → **provisional Path B (Managed-load).** Steps 1–3 confirm the three honesty conditions before this path is final.
+3. **Otherwise — does the post-add load sit below the existing service minus the 10 A safety buffer?** → **provisional Path A (Direct).** It fits; no avoidance device needed. Steps 1–2 confirm the headroom.
+
+Rules for the pre-amble: it is provisional and **never short-circuits the load math** — if Step 1's computed number contradicts the pre-amble's first read, the computed number wins and the memo follows the step-selected path (note the move in Internal reasoning). A bad-panel case still runs the full check even when the panel is leaving regardless (the question is like-for-like amperage vs. upsize, per Step 5). An inconclusive input (unknown service rating or unknown major-load nameplate) routes to the **more conservative** provisional path and lists the first-visit task that resolves it. The provisional path is never stamped into the homeowner memo as the answer — only the Step-6-confirmed path is. The provisional class and the confirmed path travel together in any internal hand-off (e.g., "prov-C / confirmed-C").
+
 **Core decision tree:**
 
-Run the steps in order. Do not skip step 1 to make the answer come out a certain way.
+Run the steps in order. Do not skip step 1 to make the answer come out a certain way. The Path Pre-amble above is a routing index; Steps 1–6 are the binding analysis.
 
 **Step 1 — Compute the post-add load** under the AHJ's NEC cycle:
 
@@ -217,4 +229,4 @@ Default output is a **one-page homeowner-facing decision memo** with these secti
 
 ## Anti-Plagiarism Notes
 
-The decision-tree structure (compute load → compare service → test managed-load → outdoor-disconnect disclosure → bad-panel handling → write memo) is original to this skill but follows the same logical order any honest contractor would walk a job through; the order is not copyrightable. The cost bands and price ranges are aggregated industry-wide ranges (verified across multiple independent contractor and aggregator sources including ChargeRight, simpleSwitch, Black Box Innovations, downeastelectrical, electelectric, akaielectric, Canary Media, Rainforest Automation, GreenBuildingAdvisor, and Span/Eaton/Lumin product pages); they are not lifted from any single vendor's pricing sheet. Specific NEC section references (§120.42, §120.82, §220.82, §625.42, §705, §750, §230.70(B)(2)) are uncopyrightable code citations. UL standard references (UL 916, UL 3141) and product category names (PCS, EMS, branch-circuit load controller, DCC) are uncopyrightable industry terms. Worked-example customer names ("Hannah Bowers," "Robert and Mei Trinh"), addresses ("1142 Iron Mountain Way," "587 Hazel Park Ave"), and prior-quote dollar amounts are fictional. Real utility-name references (Xcel Energy in Minnesota, no rate-class number given) and real heat-pump model designation ("Mitsubishi M-Series cold-climate") are uncopyrightable manufacturer names. The federal 25C / 25D / 30C credit caps and category structures are public IRS / IRA program facts, not vendor marketing copy; the skill output rules explicitly forbid quoting a final dollar figure on any rebate or credit without a pre-approval letter to protect against accidental phrase-collision with vendor marketing claims.
+The decision-tree structure (Path Pre-amble routing index → compute load → compare service → test managed-load → outdoor-disconnect disclosure → bad-panel handling → write memo) is original to this skill but follows the same logical order any honest contractor would walk a job through; the order is not copyrightable. The stop-at-first-YES pre-amble is a navigational restatement of the same three paths, not new technical content. The cost bands and price ranges are aggregated industry-wide ranges (verified across multiple independent contractor and aggregator sources including ChargeRight, simpleSwitch, Black Box Innovations, downeastelectrical, electelectric, akaielectric, Canary Media, Rainforest Automation, GreenBuildingAdvisor, and Span/Eaton/Lumin product pages); they are not lifted from any single vendor's pricing sheet. Specific NEC section references (§120.42, §120.82, §220.82, §625.42, §705, §750, §230.70(B)(2)) are uncopyrightable code citations. UL standard references (UL 916, UL 3141) and product category names (PCS, EMS, branch-circuit load controller, DCC) are uncopyrightable industry terms. Worked-example customer names ("Hannah Bowers," "Robert and Mei Trinh"), addresses ("1142 Iron Mountain Way," "587 Hazel Park Ave"), and prior-quote dollar amounts are fictional. Real utility-name references (Xcel Energy in Minnesota, no rate-class number given) and real heat-pump model designation ("Mitsubishi M-Series cold-climate") are uncopyrightable manufacturer names. The federal 25C / 25D / 30C credit caps and category structures are public IRS / IRA program facts, not vendor marketing copy; the skill output rules explicitly forbid quoting a final dollar figure on any rebate or credit without a pre-approval letter to protect against accidental phrase-collision with vendor marketing claims.

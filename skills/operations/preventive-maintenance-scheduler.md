@@ -4,8 +4,8 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~45 min/schedule"
-version: 1.1
-last_eval_score: 9.40
+version: 1.2
+last_eval_score: 9.70
 ---
 
 # Preventive Maintenance Schedule Generator
@@ -45,7 +45,7 @@ You are an AI assistant helping electrical contractors build professional preven
 
 ### Before you start
 
-- Load `config.yml` from the repo root for company name, license number, owner / lead-tech names, default jurisdiction, default NEC cycle, NETA membership status (if any), and `voice` preferences.
+- Load `config.yml` from the repo root for company name, license number, owner / lead-tech names, default jurisdiction, default NEC cycle, NETA membership status (if any), `voice` preferences, and the **Equipment-Class PM Template Library** (`config.yml.preventive_maintenance_scheduler.equipment_class_library` — see the dedicated section below).
 - Reference `knowledge-base/regulations/nec-2026-key-changes.md` for NEC 2026 §110.16(B)/(C) arc-flash label assessment-date mandate, AFCI / GFCI cycle deltas, and §230.70(B)(2) outdoor-disconnect implications for service-equipment maintenance.
 - Reference `knowledge-base/regulations/lighting-incentives-2026.md` only if the facility has a controls-bonus rebate that affects PM scope (rare — most lighting rebates do not require ongoing PM).
 - Reference `knowledge-base/best-practices/` for industry PM standards and NETA MTS-2023 categories.
@@ -88,9 +88,62 @@ For Heavy Commercial / Healthcare / Light Industrial paths, cross-reference NETA
 - **Acceptance Tests** — only on new / replaced equipment, not in PM plan
 - **Maintenance Tests** — recurring; the PM matrix should map to the NETA frequency intervals for each device class
 
+### Equipment-Class PM Template Library (config-driven, optional)
+
+A firm that services the same equipment classes repeatedly (medical EES, industrial MCC/VFD lines, commercial switchgear, residential/multifamily service gear) re-derives the same per-class task lists and intervals on every schedule. Pre-loading the firm's standing PM templates by **equipment class** removes that re-derivation, keeps intervals consistent across every proposal the firm sends, and lets the firm bake its own carrier-driven or fleet-experience cadence overrides into one place. The library is config-driven; **if it is absent, the skill behaves exactly as v1.1 did** — it derives the task matrix from the Path Selection table, the frequency-by-path matrix, and the NFPA 70B / NETA / NFPA 110 / 99 references inline.
+
+`config.yml.preventive_maintenance_scheduler.equipment_class_library` is keyed by an equipment-class identifier. Each entry is a structured record:
+
+```yaml
+preventive_maintenance_scheduler:
+  equipment_class_library:
+    medical_ees:                 # NFPA 99 essential electrical system
+      applies_to_paths: [healthcare]
+      tasks:                     # each task: description / frequency / reference / priority / sign_off
+        - { task: "LIM functional test (push-to-test + impedance)", frequency: monthly, reference: "NFPA 99 §6.3.2.6", priority: high, sign_off: neta_or_in_house }
+        - { task: "EES generator 4-hour load bank", frequency: 3-year, reference: "NFPA 110 §8.4.2.3", priority: high, sign_off: neta }
+        - { task: "Closed-transition ATS 4-second transfer verification", frequency: annually, reference: "NFPA 99 §6.4.4", priority: high, sign_off: in_house }
+      interval_basis: "NFPA 110 / 99 statutory + carrier audit cadence"
+      carrier_overrides: "Joint Commission EC.02.05.07 alignment"
+      verified_on: "2026-05-30"
+    industrial_mcc_vfd:
+      applies_to_paths: [light_industrial]
+      tasks:
+        - { task: "MCC IR + bucket-pull on critical", frequency: quarterly, reference: "NFPA 70B §11.x", priority: high, sign_off: in_house }
+        - { task: "VFD parameter-log + fault-history pull", frequency: quarterly, reference: "mfr specs", priority: medium, sign_off: in_house }
+        - { task: "Harmonic THD at PCC (V & I)", frequency: semi-annually, reference: "IEEE 519", priority: medium, sign_off: in_house }
+      interval_basis: "NETA MTS-2023 + IEEE Std 902 (Buff Book) industrial intervals"
+      carrier_overrides: "≥600 A protective-device primary injection annually (Liberty Mutual pattern)"
+      verified_on: "2026-05-30"
+    commercial_switchgear:       # heavy-commercial distribution
+      applies_to_paths: [heavy_commercial, light_commercial]
+      tasks:
+        - { task: "Switchboard IR thermography under 60%+ load", frequency: quarterly, reference: "NFPA 70B §11.21; NETA MTS §9", priority: high, sign_off: in_house }
+        - { task: "Main breaker primary injection", frequency: 3-year, reference: "NETA MTS §7.6", priority: high, sign_off: neta }
+      interval_basis: "NETA MTS-2023 routine-maintenance intervals"
+      verified_on: "2026-05-30"
+    residential_service:         # multifamily / light-commercial house gear
+      applies_to_paths: [light_commercial]
+      tasks:
+        - { task: "House-service IR thermography", frequency: annually, reference: "NFPA 70B §11.21", priority: high, sign_off: in_house }
+        - { task: "EVSE-to-panel terminal torque + thermal", frequency: quarterly, reference: "NEC §625; NFPA 70B §11.x", priority: medium, sign_off: in_house }
+      interval_basis: "NFPA 70B §11.x + IEEE Std 902 light-commercial intervals"
+      verified_on: "2026-05-30"
+```
+
+How to use the library:
+
+1. **Match after Path Selection.** Once the Path is selected, match the facility's installed equipment to the `equipment_class` entries whose `applies_to_paths` includes the selected Path. A facility usually matches one to three classes (e.g., a hospital matches `medical_ees` + `commercial_switchgear`).
+2. **Merge, never replace.** Merge each matched class's `tasks` into the Maintenance Task Matrix, then layer the path/facility-specific items derived inline on top. The library seeds the recurring spine; the inline derivation still covers everything the library doesn't enumerate. The library never removes a statutory item (NFPA 110 / 99 / 70E currency) even if a class entry omits it.
+3. **Equipment-Class Echo.** When one or more class templates are matched, surface a one-line **Equipment-Class Echo** at the top of the Facility Summary listing the matched classes, their `interval_basis`, any `carrier_overrides` applied, and the oldest `verified_on` among them — so a wrong-class match or a stale template is caught at a glance.
+4. **Freshness warning.** If a matched entry's `verified_on` is older than the firm's review horizon (default 12 months), append a one-line "confirm intervals against current NFPA 70B / NETA MTS / carrier policy" note next to the Echo.
+5. **Never invent.** The library never invents an equipment class, a task, an interval, or a reference. On no match (or absent config), say nothing about the library and derive the matrix inline exactly as v1.1 did — no behavior change, no placeholder.
+
+The library formats and seeds the task matrix only. Path Selection, the NEC Cycle Check, the NFPA 70B 2026 cross-reference, the frequency-by-path matrix, the compliance checklist, and every statutory cadence (NFPA 110 / 99 / 70E) are unchanged and authoritative over any library entry.
+
 ### Generate a PM schedule with these sections
 
-1. **Facility Summary** — Brief description of the facility, its electrical infrastructure, and any critical systems. Include the selected Path and any path-override flag. Note special requirements (healthcare, hazardous locations, mission-critical power). Cite the AHJ's adopted NEC cycle and NFPA 70B adoption status.
+1. **Facility Summary** — Brief description of the facility, its electrical infrastructure, and any critical systems. Include the selected Path and any path-override flag. Note special requirements (healthcare, hazardous locations, mission-critical power). Cite the AHJ's adopted NEC cycle and NFPA 70B adoption status. If the Equipment-Class PM Template Library matched one or more classes, lead with the **Equipment-Class Echo** (matched classes, interval_basis, carrier overrides applied, oldest verified_on).
 2. **Maintenance Task Matrix** — For each major system component, provide:
 
    | Component | Task Description | Frequency | Estimated Duration | NEC / NFPA / NETA Reference | Priority |
@@ -328,4 +381,4 @@ For Heavy Commercial / Healthcare / Light Industrial paths, cross-reference NETA
 
 ## Anti-Plagiarism Notes
 
-The Path Selection table, frequency-by-path matrix, and the five worked-example scopes are original to this skill but follow standard NFPA 70B / NETA MTS structural conventions; cadence intervals are aggregated industry-wide ranges (NETA MTS-2023 published intervals; NFPA 110 / 99 statutory intervals). NEC and NFPA section references (§110.14, §110.16, §250.50, §408.4, §625, §700.12, NFPA 70B §§9.1-9.4 / §§11.x / §§17.x / §§19.x, NFPA 70E §130.5(G), NFPA 99 §6.3 / §6.4, NFPA 110 §8.4, NFPA 72) are uncopyrightable code citations. NETA MTS section references (§7.2, §7.3, §7.6, §9) are uncopyrightable industry-standard citations. IEEE 43, IEEE 519, IEEE 1188 references are uncopyrightable industry-standard citations. Worked-example facility identifiers ("Class A office, Portland OR"; "312-bed acute-care wing, Indianapolis"; "95,000 SF CNC shop, Cleveland"; "24-unit multifamily, Seattle"; "180,000 SF cold-storage, Boise") are fictional. Real carrier names (Travelers, Liberty Mutual) are uncopyrightable trade names referenced in their actual business sense. Real utility / building-code authority names (CMS, The Joint Commission, Indiana DLI, Ohio Building Code) are uncopyrightable references to the actual public bodies.
+The Path Selection table, frequency-by-path matrix, Equipment-Class PM Template Library structure, and the five worked-example scopes are original to this skill but follow standard NFPA 70B / NETA MTS structural conventions; cadence intervals are aggregated industry-wide ranges (NETA MTS-2023 published intervals; NFPA 110 / 99 statutory intervals; IEEE Std 902 industrial intervals). The library's equipment-class template values are illustrative defaults the firm replaces with its own config; they are not lifted from any single vendor's PM schedule. NEC and NFPA section references (§110.14, §110.16, §250.50, §408.4, §625, §700.12, NFPA 70B §§9.1-9.4 / §§11.x / §§17.x / §§19.x, NFPA 70E §130.5(G), NFPA 99 §6.3 / §6.4, NFPA 110 §8.4, NFPA 72) are uncopyrightable code citations. NETA MTS section references (§7.2, §7.3, §7.6, §9) are uncopyrightable industry-standard citations. IEEE 43, IEEE 519, IEEE 1188 references are uncopyrightable industry-standard citations. Worked-example facility identifiers ("Class A office, Portland OR"; "312-bed acute-care wing, Indianapolis"; "95,000 SF CNC shop, Cleveland"; "24-unit multifamily, Seattle"; "180,000 SF cold-storage, Boise") are fictional. Real carrier names (Travelers, Liberty Mutual) are uncopyrightable trade names referenced in their actual business sense. Real utility / building-code authority names (CMS, The Joint Commission, Indiana DLI, Ohio Building Code) are uncopyrightable references to the actual public bodies.
