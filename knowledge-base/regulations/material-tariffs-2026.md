@@ -2,7 +2,7 @@
 
 **Scope:** Practical reference for an electrical contractor pricing or negotiating any project — residential service work, commercial TI, public works, data-center build, or industrial retrofit — under the post-April-2026 Section 232 tariff regime. Pulls together the federal trade driver (Section 232 on steel, aluminum, copper, and metal-intensive electrical equipment), the cascading lead-time effect on switchgear / panelboards / transformers, and the contract-language framework an electrical contractor can use to keep margin from leaking out the back of a quote.
 
-**Last updated in this repo:** 2026-04-27 (landscape monitor — Section 232 restructure effective April 6, 2026; Q1 2026 input-price run-up; switchgear / panelboard / transformer lead-time snapshot).
+**Last updated in this repo:** 2026-06-22 (landscape monitor — added §1.4 for the June 1, 2026 follow-on proclamation effective June 8, 2026: expanded 15% category, broadened derivative coverage, U.S.-content threshold lowered 95% → 85%). Prior update 2026-04-27 (Section 232 restructure effective April 6, 2026; Q1 2026 input-price run-up; switchgear / panelboard / transformer lead-time snapshot).
 
 This document is a working summary, not legal or tax advice. Verify the duty rate for any specific HTS code with a customs broker, and have any contract clause drafted from this framework reviewed by a construction attorney before sending it to a customer.
 
@@ -26,6 +26,16 @@ A 50% duty on copper-rod input cascades into the wholesale price of every wire a
 ### 1.3 Sunset / extension status
 
 The 15% finished-equipment tier is published with a 2027 sunset date. Do not assume it expires on time. Do not assume it will be extended. Contract language should accommodate either outcome.
+
+### 1.4 June 8, 2026 refinement — what an estimator needs to know
+
+A follow-on proclamation issued June 1, 2026 (entries on or after June 8, 2026) tuned the April framework without tearing it down. The 50% / 25% / 15% tier structure and the end-of-2027 sunset on the 15% relief tier are unchanged. Three adjustments matter when pricing imported electrical gear:
+
+- **The 15% category got bigger.** More categories of finished industrial equipment were pulled into the 15% relief tier, and derivative-product coverage was broadened. The practical read for a contractor: more of the imported equipment on a typical Division 26 BoM is now explicitly inside the §232 net rather than in a gray zone — so a "no tariff applies" assumption on a borderline item is now riskier than it was in April.
+- **The U.S.-content threshold dropped from 95% to 85%.** The carve-out for product made abroad from American-sourced metal now triggers at 85% domestic content instead of 95%. That is a modest *loosening* — a few more imported items may qualify for the reduced (rebated) treatment — but it is the supplier's classification call, not the contractor's. Treat any rebated-tier price as something the supply house must substantiate, not something to assume into a bid.
+- **Classification, not product use, sets the rate.** Duty follows the item's HTS subheading and its assigned annex (Annex I-A = 50%, I-B = 25%, I-C = modified, II = excluded, III = 15% through 2027, IV = the content/scope rules), and CBP applies the duty to the full entered value. Two near-identical fittings can land in different tiers on classification alone. This is why the escalation framework in §4 keys to *categories the contractor buys* and to a documented supplier pass-through, not to a single assumed rate.
+
+Net effect on the margin math in §3: the exposure direction is unchanged and the tier rates are unchanged; what shifted is that the dutiable scope is now broader and harder to predict line-by-line. That strengthens, not weakens, the case for a Tariff Event escalation clause on any quote with imported switchgear, panelboards, transformers, or copper-heavy feeder.
 
 ---
 
