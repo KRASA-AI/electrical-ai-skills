@@ -4,8 +4,8 @@ category: customer-service
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~20 min/ticket"
-version: 1.1
-last_eval_score: 9.20
+version: 1.2
+last_eval_score: 9.70
 ---
 
 # 🎙️ Voice Notes to Service Report
@@ -53,6 +53,78 @@ You are an AI assistant converting a field electrician's voice-recorded dictatio
 - Load `knowledge-base/terminology/` for trade terms — use these if the transcript uses shorthand the skill recognizes.
 - Load the **Electrical Plain-English Translation Dictionary** from `customer-explanation-generator.md` and reuse it so plain-English translations stay consistent across the repo.
 - Reference `knowledge-base/regulations/nec-2026-key-changes.md` if the transcript mentions a 2026-cycle change — do not assume the tech meant the 2026 version unless they said so or the jurisdiction is confirmed to be on 2026.
+
+**Tech-Voice & Output-Channel Profile Library (config-driven, optional):**
+
+The same two variables recur on every ticket: *who dictated it* and *which channel it goes to*. A given tech mumbles the same shorthand the same way every time ("the QO" for the Square D QO, "I-line" that the phone's speech-to-text reliably renders as "online," "five-fifty-five-T" for a PowerFlex 755T); a given firm wants its invoice narratives, follow-up emails, and CRM closeouts to come out in one house voice with one sign-off and one set of CRM field names. Pre-loading the firm's tech roster quirks and per-channel formatting defaults removes the per-run guessing that otherwise produces an inconsistent artifact. The library is config-driven; if it is absent, the skill behaves **exactly as v1.1 did** — it infers from the transcript and uses the generic channel formats below.
+
+`config.yml.voice_notes_to_service_report`:
+
+```yaml
+voice_notes_to_service_report:
+
+  # Per-tech dictation profiles, keyed by the name the platform attaches to the ticket
+  tech_profiles:
+    "Mike Torres":
+      license_number: "EC-00842"
+      default_signoff: "— Mike Torres, Torres Electric (EC-00842) · (503) 555-0142"
+      known_shorthand:                       # tech's recurring shorthand → canonical term
+        "the QO": "Square D QO panel"
+        "I-line": "Square D I-Line switchboard"
+        "seven-fifty-five-T": "Allen-Bradley PowerFlex 755T"
+      asr_substitutions:                     # speech-to-text garbles this tech reliably produces
+        "online switchboard": "I-Line switchboard"
+        "double tab": "double-tap"
+    "Daniela Reyes":
+      license_number: "AZ ROC-289044"
+      default_signoff: "— Daniela Reyes, Sonoran Electric (ROC-289044)"
+      known_shorthand:
+        "the AK": "GE AKD-8 switchboard"
+
+  # Per-channel house style, keyed by the output format requested
+  output_channel_defaults:
+    invoice_narrative:
+      word_cap: 300
+      lead_with: "what was wrong, in plain terms"
+      no_salutation: true
+    followup_email:
+      word_cap: 300
+      opener_template: "Hi {audience_name}, I visited {site} this {time_of_day} after {reason}."
+      signoff_uses_tech_profile: true
+    service_report:
+      sections: ["Customer-Facing Summary", "Internal Notes"]
+    estimate_request:
+      route_to: "sales/scope-letter-drafter.md"   # after estimator returns numbers
+    crm_field_map:                            # where each piece lands in the firm's platform
+      customer_summary_field: "ticket.public_note"
+      internal_notes_field: "ticket.internal_note"
+      parts_field: "ticket.materials"
+
+  # Firm warranty windows — consolidates the values the Warranty-Callback block already reads
+  warranty:
+    labor_window: "1 year"
+    parts_window: "1 year"
+    install_defect_window: "2 years"
+```
+
+**How the Profile Library works at runtime:**
+
+1. When the ticket names a tech in `tech_profiles`, apply that tech's `known_shorthand` and `asr_substitutions` during the silent normalize step *before* generic cleaning — so the tech's recurring garbles resolve deterministically instead of being guessed per-run. This never overrides a value the tech explicitly stated; it only resolves the tech's known patterns.
+2. When the output channel matches `output_channel_defaults`, apply that channel's house style (word cap, opener template, sign-off source, section list) instead of the generic format below.
+3. Pull the tech's `license_number` and `default_signoff` for any signed channel (follow-up email, service report) without re-asking.
+4. Read warranty windows for the Warranty-Callback-Trigger Detection Block from `config.yml.voice_notes_to_service_report.warranty` (falling back to the `config.yml.warranty.*` values the block already references, then to the 1-yr labor / 1-yr parts defaults).
+5. **Never invent a profile value.** If the tech is not in `tech_profiles`, or the channel is not in `output_channel_defaults`, fall back to v1.1 behavior for that piece and note the fallback in Internal Notes. A `known_shorthand` or `asr_substitution` entry is applied only on an actual match — it never forces a substitution the transcript does not support.
+
+**Profile Echo** (print at the top of the Internal Notes block whenever the library is consulted):
+
+```
+PROFILE MATCHED (from config.yml.voice_notes_to_service_report)
+Tech profile:     Mike Torres (EC-00842) — 3 shorthand + 2 ASR rules applied
+Output channel:   invoice_narrative (house style: 300-word cap, no salutation)
+Warranty window:  1 yr labor / 1 yr parts / 2 yr install-defect
+```
+
+The Echo lets the dispatcher confirm at a glance that the right tech profile and channel style were applied — a wrong-tech or wrong-channel match is caught before the artifact ships. If `voice_notes_to_service_report` is absent from `config.yml`, skip the Echo and behave exactly as v1.1 did.
 
 **Core process:**
 
@@ -117,6 +189,7 @@ The customer-facing output never names the warranty trigger directly ("we think 
 **Incident / near-miss note** — Strictly chronological. Times if dictated. What the tech saw, readings taken, actions taken, who was notified. No opinion. Tag any speculation in the internal notes block.
 
 After the main output, always append an **Internal Notes** block that lists:
+- The **Profile Echo** (tech profile + output channel + warranty window applied) whenever the Tech-Voice & Output-Channel Profile Library was consulted, plus a one-line note on any fallback (tech not in `tech_profiles`, or channel not in `output_channel_defaults`)
 - Any transcript gaps or unclear words (with the `[unclear: ___]` tags)
 - Any assumption the skill had to make and what it assumed
 - Any section of the implicit structure that was missing and was therefore not filled in

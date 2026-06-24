@@ -4,8 +4,8 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~20 min/panel"
-version: 2.2
-last_eval_score: 9.40
+version: 2.3
+last_eval_score: 9.70
 ---
 
 # 🔌 Panel Schedule Documenter
@@ -215,6 +215,21 @@ The skill never invents a catalog # not in the library. If `panel_schedule_docum
    - For commercial: include room number, panel fed-from reference, connected load in VA/kVA
 10. Append the **footer block** with company name, license #, documented-by, date, AHJ cycle assumed, and a note about §408.4 directory durability.
 
+**Directory Reconciliation Check (run after the directory is assembled, before output):**
+
+A panel directory has one failure mode that matters more than any single mis-typed breaker: it **does not reconcile to the physical panel**. The slot numbers run past the panel's circuit count; the spaces, spares, and used positions do not sum to the bus's `max_circuits`; a flagged field issue contradicts the catalog data the library already supplied; the arc-flash trigger contradicts the stated occupancy and cycle. Each of these is internally inconsistent on the page — and an inconsistent directory gets a circuit energized wrong, fails a §408.4 close-out, or sends a tech to the wrong slot. This is the panel-schedule analogue of the cross-field consistency check in `sales/scope-letter-drafter.md` and the Bid Reconciliation Pass in `sales/bid-summary-writer.md`: a short, ordered sweep that runs after the draft is assembled and before output, fixing what it can in place and surfacing what it cannot in Internal Notes.
+
+It is a **consistency discipline, not a new output section** — every line still lands in the existing directory grid, Issues block, and arc-flash cross-reference. Sweep these six checks in order:
+
+1. **Slot count reconciles to the panel.** The highest slot number used does not exceed the catalog `max_circuits` (when the Panel-Template Library supplied it) or the user-stated bus size. SPACES + SPARES + used positions = the panel's total positions; if they do not sum, a circuit is missing or duplicated — find it.
+2. **Pole accounting is consistent.** Every 2-pole and 3-pole breaker occupies the correct number of adjacent bus positions and is shown with its lower pole(s); no two breakers claim the same slot; no 2-pole load is shown on a single position.
+3. **Phase balance arithmetic is internally consistent.** When per-circuit VA was supplied, the per-phase sums add up to the stated total connected load, and any imbalance >15% flagged in the Issues block actually matches the numbers shown — a flagged imbalance that the arithmetic does not support (or an unflagged imbalance the arithmetic does support) is the inconsistency to fix.
+4. **Every field-reported issue is consistent with the catalog data.** The most common contradiction: a "double-tap" flagged 🔴 on a breaker family the Panel-Template Library lists as `double_tap_listed: true` (Eaton CH), or flagged merely informational on a family listed `double_tap_listed: false` (Square D QO, SPAN). The Issues-block severity must match the library flag; reconcile any mismatch against the catalog before output.
+5. **The arc-flash trigger is consistent with the stated occupancy and NEC cycle.** A "label required: YES" on a dwelling occupancy, or a "label required: NO" on a non-dwelling service that exceeds the cycle's threshold, is a contradiction between the directory header and the arc-flash cross-reference — the NEC Cycle Check output and the occupancy field must agree with the label determination.
+6. **No circuit is silently absent from all of {directory, SPACE, SPARE, UNKNOWN}.** Every physical position the panel has is accounted for in exactly one state; a position that appears nowhere is the silent-omission failure — surface it as `UNKNOWN — NEEDS IDENTIFICATION` rather than dropping it.
+
+Land every unresolved flag in the Internal Notes block as a "Reconciliation flag — resolve before close-out" item. A directory that does not reconcile to the physical panel is exactly the defect this check exists to catch before it reaches the panel door.
+
 **Output format:**
 
 ```
@@ -263,6 +278,7 @@ NEC cycle assumed: [cycle] — verify against the AHJ
 ```
 
 After the directory, include a short **Internal Notes** block listing:
+- Any **Reconciliation flag** the Directory Reconciliation Check raised but could not resolve from the input (a slot count that does not reconcile to the panel size, positions that do not sum to the bus max, a phase-balance figure the arithmetic does not support, a field-issue severity that contradicts the catalog `double_tap_listed` flag, an arc-flash trigger that contradicts the occupancy/cycle, or a position absent from all of directory/SPACE/SPARE/UNKNOWN) — resolve each before close-out
 - Any circuit you tagged `UNKNOWN — NEEDS IDENTIFICATION` and the recommended trace method (continuity, plug-in tracer, voltage-drop method)
 - Any assumption made when input was ambiguous
 - A pointer to `operations/arc-flash-label-generator.md` if the panel triggers a label

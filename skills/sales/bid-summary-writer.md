@@ -4,8 +4,8 @@ category: sales
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~30 min/bid"
-version: 2.1
-last_eval_score: 9.50
+version: 2.2
+last_eval_score: 9.70
 ---
 
 # ⚡ Bid Summary Writer
@@ -168,6 +168,24 @@ TOTAL BASE BID                        $  X
 - If the bid form requires acceptance of prime contract terms, note "subject to mutually acceptable subcontract" if unresolved
 - Never accept liability for pre-existing or unforeseen conditions in the bid
 
+### Bid Reconciliation Pass (run after the draft is assembled, before output)
+
+The single most common defect in a bid summary — the one that surfaces as a change-order fight or a margin leak after award — is not an arithmetic error; it is a **cross-section contradiction**: a scope element that lives in the Base Bid scope summary *and* in the EXCLUSIONS list; an alternate that re-prices work already carried in the base; a unit price the scope references but the UNIT PRICES table never defines; a long-lead item shown in the SCHEDULE with no matching Tariff-Aware escalation line; an addendum acknowledged in the header but not reflected anywhere in scope or assumptions. Each of these is internally inconsistent on the page and reads — to a GC, an owner's attorney, or your own PM six months later — as either an oversight or a hidden out. This is the bid-summary analogue of the Three-Bucket consistency check in `sales/scope-letter-drafter.md` (the two skills already share the standard-exclusions library; they should also share this discipline so a GC reading both documents sees one self-consistent voice).
+
+This is a **placement-and-consistency discipline, not a new output section** — every line still lands in the existing BASE BID / ALTERNATES / ALLOWANCES / UNIT PRICES / EXCLUSIONS / ASSUMPTIONS / SCHEDULE / BID TERMS structure. Run the sweep after the draft is assembled and before output; anything it catches is fixed in place, and anything that cannot be resolved from the intake is surfaced in the Internal Notes block as a must-confirm-before-submission item.
+
+Sweep these seven cross-section checks in order:
+
+1. **No scope element is in two sections that contradict each other.** If an item appears in the Base Bid scope summary it must NOT also appear in EXCLUSIONS, and vice versa. The one deliberate cross-reference is a long-lead item, which legitimately appears in the Base Bid scope (the equipment), the SCHEDULE (its lead time), and the BID TERMS Tariff-Aware line (its escalation exposure) — when this happens, all three references must use the same item name and the same quoted lead-time date.
+2. **Every alternate is a true delta against the base.** An ADD alternate must describe work *not* in the base bid; a DEDUCT alternate must describe work that *is* in the base. An alternate that re-prices base scope (double-count) or deducts work the base never carried (phantom deduct) is the classic post-award dispute — flag and fix.
+3. **Every unit price the scope or allowances reference is defined in the UNIT PRICES table, and every unit price in the table maps to a real add/delete the owner could direct.** No dangling reference in either direction.
+4. **Every allowance has reconciliation language** (at-cost-plus-markup, via CO) and a markup percentage that matches the config/`pricing` markup used elsewhere in the bid — an allowance reconciled at a different markup than the base bid is an internal inconsistency.
+5. **Every long-lead item in the SCHEDULE has a matching Tariff-Aware escalation treatment in BID TERMS** (and vice versa: every escalation-rider line names the equipment that drives it). A switchgear lead-time callout with no escalation line is the 2026 margin-leak failure the Tariff-Aware block exists to prevent.
+6. **Every addendum, RFI, and substitution acknowledged in the header is reflected in scope, exclusions, or assumptions** — an acknowledged addendum that changed nothing in the body is either an un-incorporated scope change or a stray acknowledgment. Confirm which.
+7. **The BID TERMS block carries all four mandatory lines: bid validity, material-escalation/price-lock, bond (included or excluded with the add price), and sales tax (included or excluded with the certificate condition).** A silently missing bond or tax line is the single most expensive first-time-bidder omission. None of the four may be absent.
+
+Land every unresolved flag in the Internal Notes block as a "Reconciliation flag — confirm before submission" item. A bid that goes out with an unreconciled cross-section contradiction is the defect this pass exists to catch.
+
 **What NOT to do:**
 
 - Do not bundle alternates into the base bid — owner wants them separated
@@ -260,6 +278,7 @@ Date: [YYYY-MM-DD]
 ```
 
 After the bid summary, include a short **Internal Notes** block covering:
+- Any **Reconciliation flag** the Bid Reconciliation Pass raised but could not resolve from the intake (a scope item that appeared in two contradictory sections, an alternate that double-counted or phantom-deducted base scope, an undefined unit-price reference, a long-lead item with no matching escalation line, an acknowledged addendum not reflected in the body, or a missing BID TERMS line) — the estimator must resolve each before submission
 - Unverified items the user should confirm before submission (supplier quote expiration, sub quote coverage, addenda received, bond rate with surety, prevailing wage determination)
 - Items the user should attach (list of addenda acknowledgment, current COI, license copy, bond letter, W-9, list of key subs, schedule bar chart)
 - Suggested follow-up immediately after submission (call GC PM day of, confirm receipt, ask when award is expected)
