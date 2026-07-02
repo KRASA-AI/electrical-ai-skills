@@ -4,7 +4,7 @@ category: sales
 tools: [claude, chatgpt]
 difficulty: advanced
 time_saved: "~90 min/package"
-version: 1.1
+version: 1.2
 last_eval_score: 9.60
 ---
 
@@ -63,6 +63,36 @@ If the target GC is one of the four hyperscaler GC firms listed below, load `con
 | **HITT Contracting** | First-name | $5M GL + $10M umbrella typical (varies by campus owner) | HITT proprietary portal | Typically Division 26 sub-bid value as single bond | ≤350 words | Prose + table hybrid | Requires a self-perform MV statement even if the answer is "MV routed to [named sub]"; silence on MV scope is read as evasion and triggers a clarification hold that delays pre-qualification |
 
 If `config.yml.datacenter.gc_templates` is not populated, note in Internal Notes that GC-specific tailoring was not applied and recommend the user populate the config keys for their firm's active GC relationships.
+
+**Before you start — Config-Driven Owner & Utility Profile Block:**
+
+The GC template block above tailors the package to the *contractor's counterparty* (the GC). This block tailors it to the two parties standing *behind* the GC — the campus **owner/operator** and the serving **utility** — because a data-center package that names the owner's actual commissioning standard and the utility's real interconnection reality reads like a firm that has built on that campus before.
+
+If the project's owner/operator matches an entry in `config.yml.datacenter.owner_profiles`, load it and weave its facts into the cover letter's "we understand your standards" paragraph and the constructability notes. If the serving utility matches `config.yml.datacenter.utility_territories`, load it for the long-lead / interconnection discussion. Example shape:
+
+```yaml
+datacenter:
+  owner_profiles:
+    "<Hyperscaler/Colo owner>":
+      commissioning_expectation: "L1–L5 IST, owner witnesses L4/L5; CxA-led scripts"
+      preferred_ups_topology: "distributed static + lithium; no rotary"
+      reference_disclosure: "NDA on contractor list — do NOT name this owner as a reference without written release"
+      security: "CUI handling + badged-escort campus; cleared-staff roster requested at pre-qual"
+      sustainability_target: "PUE ≤ 1.30 design; owner ESG report references electrical loss budget"
+      insurance_passthrough: "owner spec supersedes GC minimums — confirm the campus rider"
+  utility_territories:
+    "<Utility name / region>":
+      primary_voltage: "12.47 kV / 34.5 kV typical"
+      interconnection_lead_band: "primary service 60–90 wks from executed agreement"
+      capacity_note: "substation capacity constrained in <region>; owner may stage energization by hall"
+      standby_permitting: "air-quality permit for genset farm runs 16–24 wks in <AQMD>"
+```
+
+**How the block is used:**
+1. **Owner standards in the cover letter.** When the owner matches, state two owner-specific facts the firm can actually meet (commissioning level, UPS topology, security posture) as part of the credibility opener — never as a promise the intake didn't support.
+2. **Reference-disclosure guardrail.** If the matched owner's `reference_disclosure` carries an NDA, the skill must NOT name that owner in the references table and must flag the rule in Internal Notes. This hardens the existing "do not reference hyperscaler customers by name" rule into a per-owner switch.
+3. **Utility reality in the long-lead / constructability notes.** When the utility matches, anchor the interconnection discussion to `interconnection_lead_band` and surface `capacity_note` / `standby_permitting` as pre-con items rather than generic "long-lead switchgear" language.
+4. **Never invent** an owner standard, a PUE target, a clearance requirement, or a utility lead band not in config. If neither block matches, draft the standard package and note in Internal Notes that no owner/utility profile was applied — behaving exactly as v1.1 did.
 
 **Before you start — 2026 Hyperscaler Pricing Math Anchor:**
 

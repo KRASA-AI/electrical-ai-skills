@@ -4,7 +4,7 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: beginner
 time_saved: "~10 min/talk"
-version: 2.2
+version: 2.3
 last_eval_score: 9.20
 ---
 
@@ -97,6 +97,25 @@ safety_toolbox_talk:
 
   # NFPA 70E version anchor.
   nfpa_70e_edition: "2024"   # bump to 2027 after publication (fall 2026)
+
+  # Firm safety profile — the firm's ACTUAL rated equipment, study data, and
+  # program facts, so PPE callouts and emergency lines reference real gear the
+  # crew can put hands on, not a generic "Cat 2 kit." Pure personalization; it
+  # does not change any NFPA 70E citation or the edition anchor above.
+  firm_safety_profile:
+    ppe_inventory:
+      arc_rated:
+        - "Cat 2 kit (rated 12 cal/cm²): AR shirt, AR pants, balaclava, face shield — 4 sets on the truck"
+        - "Cat 4 kit (rated 40 cal/cm²): full AR suit + arc hood — 1 set, reserved for large-service / MV cut-ins"
+      voltage_rated_gloves:
+        - { class: "00 (500 V)", count: 2, last_test: "2026-05-01" }
+        - { class: "2 (17,000 V)", count: 2, last_test: "2026-01-12" }
+      meters: ["Fluke 1587", "Fluke T6-1000"]
+    arc_flash_study: { software: "SKM PowerTools", last_refresh: "2025-03" }
+    glove_test_cycle_months: 6   # NFPA 70E §130.7(C)(7)(b) electrical test interval
+    emr: "0.78 (2025)"
+    default_eyewash: "2 sealed eyewash bottles on each truck"
+    default_extinguisher: "5-lb ABC in the cab; second staged at any energized cut-in"
 ```
 
 **How the Pre-load Block is used:**
@@ -107,7 +126,9 @@ safety_toolbox_talk:
 4. **Always include every `recurring_focus_topics` entry whose `refresh_until` is in the future** as one of the HAZARDS & CONTROLS rows, regardless of today's primary task — these are the topics the firm has committed to keep refreshed. Mark them with a `(recurring focus topic)` tag in the talk so the crew knows why it's on every talk.
 5. **Use `utility_emergency_lines` and `nearest_hospital_template` to default the EMERGENCY PROCEDURES block** — the user can override per site, but the default lands the firm's standard numbers without re-asking.
 6. **NFPA 70E citation cycle.** Cite the edition from `nfpa_70e_edition`. When that field is `"2024"`, use §130.4 / §130.7 / §120.5 / Table 130.7(C)(15)(a) etc. as cited in the existing worked examples. When it bumps to `"2027"`, the v2.3 refresh will swap in any renumbered sections.
-7. **Never** invent crew members, license levels, or seasonal-hazard entries not in config. If the config block is absent, behave as the skill did in v2.1 (generic crew lines, user-supplied weather, no recurring topics).
+7. **Pull PPE callouts from `firm_safety_profile`, not generic categories.** When a hazard row requires arc-rated PPE, name the firm's actual kit from `ppe_inventory.arc_rated` by cal rating (e.g., "Cat 2 kit, rated 12 cal/cm² — 4 sets on the truck") instead of a bare "Cat 2." When voltage-rated gloves are required, name the class on the truck from `voltage_rated_gloves`. Cite the firm's actual meter from `meters` in every live-dead-live step. Default the EMERGENCY PROCEDURES eyewash and extinguisher lines from `default_eyewash` / `default_extinguisher`.
+8. **Run the glove-retest check.** For any glove class the talk calls for, if `last_test + glove_test_cycle_months` falls within 30 days of today (or has passed), add a `⚠ glove retest due [date]` line to that hazard's control so an out-of-test glove is caught before it goes on a hand. Per NFPA 70E §130.7(C)(7)(b), rubber insulating gloves must be electrically tested on the configured interval. If `last_test` is absent for a class, do not run the check for that class.
+9. **Never** invent crew members, license levels, PPE the firm doesn't own, glove test dates, or seasonal-hazard entries not in config. If the `firm_safety_profile` block is absent, fall back to generic category references exactly as v2.2 did. If the whole config block is absent, behave as the skill did in v2.1 (generic crew lines, user-supplied weather, no recurring topics).
 
 **Process:**
 

@@ -4,7 +4,7 @@ category: sales
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~45 min/pitch"
-version: 1.0
+version: 1.1
 last_eval_score: null
 ---
 
@@ -75,9 +75,23 @@ You are an AI assistant drafting a commercial-lighting retrofit pitch for a lice
 - If the AHJ is on Title 24 2025 or ASHRAE 90.1-2026, the controls scope is mandatory and the pitch must price it in. If the AHJ is on an older code, downscope and say so.
 - If construction will not begin before June 30, 2026, **do not include 179D urgency framing.** It will read as desperate or worse — dishonest. Drop section 4 below entirely in that case.
 
+### Pitch-Shape Selector (read first)
+
+This skill produces five different pitch shapes from the same intake. Pick the shape FIRST, then run the core process. The table below maps the opportunity to the shape, what to lead with, which output section carries the weight, and which sections compress or drop. (Output sections are numbered per the **Output Format** list below.)
+
+| If the opportunity is… | Pitch shape | Lead with | Expand | Compress to one line / drop | Format / length |
+|---|---|---|---|---|---|
+| Deadline-driven outreach to an existing or prospective customer, construction can start ≤ June 30, 2026 | **Pre-deadline outreach** | §2 the 179D deadline math + the authorize-by date | §1, §2 | §3, §6, §7, §8 → one line each | Two paragraphs max |
+| GC or PM has a tenant space being reconfigured and needs a code-compliant controls package priced | **TI bid** | §3 scope of work + ATT deliverables; name the AHJ | §3 → Division 26 56 00 / 26 09 23 sub-table for the pre-con file | §2 only if 179D is on the table | One page + sub-table |
+| Customer is pre-qualified for a specific utility program | **Utility-rebate-led** | §4 program name + filing-window dates + pre-approval status | §4, §6 (net-of-rebate) | — | One page |
+| Sub-5,000-sq-ft small business, direct-install eligible, simple LED swap | **LED-only swap** | §4 payback math + direct-install eligibility | §4, §6 | §5 controls long-form (state which provisions are mandatory, do not over-build) | Short-form |
+| Original quote was a fixture-only LED swap; offering an add-on controls bundle to unlock the bonus tier | **Controls-bonus add-on** | the *delta* over the original quote, not the gross | the cost-delta / rebate-delta side-by-side | everything except §5, §6, §9 | Delta-led, half page |
+
+If construction will NOT begin by June 30, 2026, drop §2 entirely regardless of shape (see "Before you start").
+
 ### Core process
 
-1. **Pick the pitch shape based on input.**
+1. **Pick the pitch shape** using the Pitch-Shape Selector above before drafting. The five shapes and their lead sections:
    - **Pre-deadline outreach:** lead with the 179D deadline math and a 90-day-to-start ask. Short.
    - **TI bid:** lead with controls scope and Acceptance-Test-Technician deliverables. Reference the AHJ by name.
    - **Utility-rebate-led:** lead with the program name + filing-window dates + pre-approval status.
