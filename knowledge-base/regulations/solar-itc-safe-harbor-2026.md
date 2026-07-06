@@ -1,10 +1,10 @@
 # Solar ITC Safe Harbor — July 4, 2026 Deadline (§§ 48E / 45Y under OBBBA)
 
-**Status:** Time-sensitive. July 4, 2026 is the OBBBA-imposed "begin construction" cutoff for applicable solar (and wind) facilities that want to retain the pre-OBBBA §48E investment tax credit timeline. **33 days from the date of this doc's creation (2026-06-01).**
+**Status:** The July 4, 2026 OBBBA "begin construction" cutoff **has now passed (this doc updated 2026-07-06).** Applicable solar (and wind) facilities that established beginning of construction **on or before July 4, 2026** retain the pre-OBBBA §48E investment tax credit timeline (four-year continuity window). Projects that begin construction **after July 4, 2026** must be placed in service by **December 31, 2027** to claim §48E at all — otherwise there is no credit. The rest of this doc (documentation discipline, Physical Work Test, FEOC procurement evidence) remains directly relevant to any project that mobilized before the cutoff and is now building toward its placed-in-service date, and to advising owners on the post-cutoff reality.
 
-This doc is contractor-facing. It is not tax advice. Electrical contractors do not certify a project as having "begun construction" — that is the taxpayer / owner / tax counsel's determination. But contractors are the source of the underlying physical-work evidence, so understanding the rule changes the way bids, mobilization plans, photo logs, and signed daily logs should be structured for any commercial solar project hoping to safe-harbor before the deadline.
+This doc is contractor-facing. It is not tax advice. Electrical contractors do not certify a project as having "begun construction" — that is the taxpayer / owner / tax counsel's determination. But contractors are the source of the underlying physical-work evidence, so understanding the rule changes the way bids, mobilization plans, photo logs, and signed daily logs should be structured for any commercial solar project that safe-harbored before the deadline.
 
-**Last updated in this repo:** 2026-06-01 (landscape monitor cycle — OBBBA §48E begin-construction deadline, IRS Notice 2025-42 PWT-only rule).
+**Last updated in this repo:** 2026-07-06 (landscape monitor cycle 20 — post-cutoff status refresh; "on or before July 4, 2026" wording harmonized throughout to match the authoritative begin-construction framing). Prior update 2026-06-01 (OBBBA §48E begin-construction deadline, IRS Notice 2025-42 PWT-only rule).
 
 ---
 
@@ -12,12 +12,12 @@ This doc is contractor-facing. It is not tax advice. Electrical contractors do n
 
 The One Big Beautiful Bill Act (Public Law 119-21, signed July 4, 2025) restructured the §48E Clean Electricity Investment Credit (and §45Y Production Credit) for **applicable wind and solar facilities**:
 
-- **Termination on accelerated schedule.** §48E is terminated for an applicable wind or solar facility placed in service **after December 31, 2027**, UNLESS construction begins before **July 5, 2026**.
-- **If construction begins before July 5, 2026:** the placed-in-service deadline reverts to the pre-OBBBA four-year continuity window (placed in service by Dec 31, 2030 for a 2026-BoC project, with continuous-construction safe harbor).
-- **If construction begins on or after July 5, 2026:** the facility must be placed in service by **December 31, 2027** to claim §48E at all.
-- **For all non-solar / non-wind §48E technologies (storage, geothermal, fuel cells, etc.):** §48E retains its original framework with phaseout beginning for facilities whose construction begins in 2034 or later. Standalone storage (not paired into an "applicable solar facility") is NOT subject to the July 5, 2026 acceleration.
+- **Termination on accelerated schedule.** §48E is terminated for an applicable wind or solar facility placed in service **after December 31, 2027**, UNLESS construction began **on or before July 4, 2026**.
+- **If construction began on or before July 4, 2026:** the placed-in-service deadline reverts to the pre-OBBBA four-year continuity window (placed in service by Dec 31, 2030 for a 2026-BoC project, with continuous-construction safe harbor).
+- **If construction begins after July 4, 2026:** the facility must be placed in service by **December 31, 2027** to claim §48E at all.
+- **For all non-solar / non-wind §48E technologies (storage, geothermal, fuel cells, etc.):** §48E retains its original framework with phaseout beginning for facilities whose construction begins in 2034 or later. Standalone storage (not paired into an "applicable solar facility") is NOT subject to the July 4, 2026 acceleration.
 
-**Bright-line trigger for contractors:** any commercial solar (and any solar+storage system where the storage is part of the "applicable solar facility") sized above 1.5 MW (AC) must establish beginning of construction before July 5, 2026 via the **Physical Work Test (PWT)** to preserve the pre-OBBBA timeline.
+**Bright-line trigger for contractors:** any commercial solar (and any solar+storage system where the storage is part of the "applicable solar facility") sized above 1.5 MW (AC) had to establish beginning of construction **on or before July 4, 2026** via the **Physical Work Test (PWT)** to preserve the pre-OBBBA timeline.
 
 ---
 
@@ -25,7 +25,7 @@ The One Big Beautiful Bill Act (Public Law 119-21, signed July 4, 2025) restruct
 
 Treasury and IRS issued Notice 2025-42 in August 2025 with two material changes:
 
-- **5% safe harbor eliminated** for §48E and §45Y "applicable wind and solar" facilities going forward. The 5% safe harbor remains available only for small solar facilities of **1.5 MW (AC) or less**, and only if construction begins no later than July 5, 2026.
+- **5% safe harbor eliminated** for §48E and §45Y "applicable wind and solar" facilities going forward. The 5% safe harbor remained available only for small solar facilities of **1.5 MW (AC) or less**, and only if construction began no later than July 4, 2026.
 - **Physical Work Test is now the exclusive method** to establish beginning of construction for all other applicable wind and solar facilities. There is no longer a procurement-cost path.
 
 This is the single biggest operational change for electrical contractors: it shifts the burden of "begin construction" evidence from invoice trails (5% test) to documentable physical work — which is exactly the contractor's domain.
@@ -66,7 +66,7 @@ When a commercial solar project owner is racing the July 4, 2026 deadline, the e
 ### Pre-mobilization (do before any work starts on a safe-harbor project)
 
 1. **Binding written contract or task order** specifically referencing the named facility (address, project ID, kW DC / kW AC, site coordinates). Master agreements alone are insufficient.
-2. **Approved scope of physical work** committed before July 5, 2026. Internal record-keeping must show the scope was agreed in writing before mobilization.
+2. **Approved scope of physical work** committed on or before July 4, 2026. Internal record-keeping must show the scope was agreed in writing before mobilization.
 3. **Project-specific photo log template** — every photo timestamped, geotagged, captioned with what is shown and to which work-package it ties.
 4. **Daily field-report template** — signed by the on-site foreperson with date, weather, crew size, hours, work performed, materials installed (with manufacturer / lot / serial numbers where applicable), and reference to the specific spec and drawing sheet.
 5. **Equipment serial-number log** — track every long-lead component as it arrives (transformers, inverters, switchgear) with origin documentation (helps the FEOC determination, see §5).
@@ -100,7 +100,7 @@ Most contractors will not be classifying FEOC status — owner / tax counsel wil
 
 ## 6. Small-Project Exception (1.5 MW AC or less)
 
-Solar facilities ≤ 1.5 MW (AC) may continue to use the 5% safe harbor under IRS Notice 2025-42, provided construction begins no later than July 5, 2026. For these projects:
+Solar facilities ≤ 1.5 MW (AC) may use the 5% safe harbor under IRS Notice 2025-42, provided construction began no later than July 4, 2026. For these projects:
 
 - The 5% test is met by paying or incurring at least 5% of total facility cost before the cutoff.
 - "Paid or incurred" follows the taxpayer's method of accounting; under an accrual method, payment is not required but a fixed liability for the cost must exist.
@@ -124,7 +124,7 @@ For a contractor whose owner client is on the small-project path, the documentat
 
 If an owner asks the contractor to "mobilize for safe harbor" on a project where the §48E deadline is the driver:
 
-1. **Confirm the binding-contract status.** A handshake or LOI is not enough. The owner needs an executed contract or task order naming the facility before July 5, 2026.
+1. **Confirm the binding-contract status.** A handshake or LOI is not enough. For a project that safe-harbored, the owner needed an executed contract or task order naming the facility on or before July 4, 2026.
 2. **Confirm the work package.** Identify the specific physical work the crew will execute — racks / piles / pours / conduit / trenching — and ensure the scope is something the owner's tax counsel will be willing to defend as "physical work of a significant nature."
 3. **Confirm continuity intent.** Is this a real start-and-continue, or a one-day "safe harbor token"? IRS Notice 2025-42 and prior PWT guidance disfavor one-day tokens; the continuity requirement is a facts-and-circumstances analysis.
 4. **Confirm the documentation cadence.** Daily field reports, photo log discipline, signed timesheets, delivery tickets — establish the cadence on day one. Retroactive documentation is the weakest defense.
