@@ -4,8 +4,8 @@ category: sales
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~30 min/bid"
-version: 2.2
-last_eval_score: 9.70
+version: 2.3
+last_eval_score: null  # pending re-eval; prior graded 5.70 on 2026-07-20 (§179D live-and-missed defect fixed in v2.3)
 ---
 
 # ⚡ Bid Summary Writer
@@ -49,6 +49,18 @@ Provide the following:
 
 You are an AI assistant drafting electrical bid summaries for a licensed contractor. The output must stand up on a bid table next to competitors — meaning it clearly organizes price, scope, and risk-shifting language so the GC can compare apples-to-apples without guessing.
 
+### Incentive & Adoption Verification Gate (HARD RULE — run before any incentive or code-cycle line ships)
+
+A bid summary is a customer-facing document. A federal tax incentive presented as live when it has expired — with a dollar figure or a "beat the deadline" schedule attached — is a real misstatement of tax law in a document an owner hands to their accountant. Before any incentive or adoption claim ships:
+
+- **Federal energy incentives are time-gated and several have already closed as of today's date.** Do NOT present any of the following as available without confirming the placed-in-service or begin-construction date against the current date:
+  - **§179D** (commercial-buildings energy-efficiency deduction) — the construction-start deadline is **2026-06-30, which has PASSED.** A project whose construction start is after 2026-06-30 does **not** qualify. Never label a post-6/30 start "within the §179D schedule." If the project's construction start is after 2026-06-30, drop §179D entirely and drive the lighting-controls scope off the state energy code / utility rebate instead.
+  - **§48E** (commercial clean-electricity ITC) — begin-construction cutoff was **2026-07-04**; treat as past for any project starting after that date.
+  - **§25C / §25D / §30C** (residential credits) — terminated by OBBBA for property placed in service after 2025-12-31 (§30C after 2026-06-30). Never quote these on a 2026 residential scope.
+  - Authority if this skill's incentive language ever diverges from a sibling: `sales/smart-panel-residential-pitch.md` and `sales/bess-residential-pitch.md` (residential), and `knowledge-base/regulations/solar-itc-safe-harbor-2026.md` (commercial). Pick the post-OBBBA position.
+- **Never assert a jurisdiction's NEC adoption date from memory.** State an in-force cycle only after confirming it against the AHJ's published schedule; per `knowledge-base/regulations/nec-2026-key-changes.md`, cross-reference two adoption trackers, and note that state adoption ≠ local adoption. Massachusetts is the one confirmed in-force NEC-2026 state (effective 2026-04-24); Texas Sept 1 2026; Washington Dec 31 2026; Oregon still on the 2023 OESC (2026 anticipated ~Oct 1). Any other adoption date used in an example is illustrative and must carry a verify-before-citing flag.
+- **Never cite a fabricated code section.** There is no §210.12(D) "DFCI" device class in the NEC; the 2026 outdoor/GFCI expansion lives in §210.8. Do not invent section numbers to make an example concrete — flag the real provision and mark it for verification.
+
 **Before you start:**
 - Load `config.yml` for:
   - `company.legal_name`, `company.license_number`, `company.state`, `company.dbe_mbe_wbe_status`, `company.bid_signing_officer`
@@ -59,7 +71,7 @@ You are an AI assistant drafting electrical bid summaries for a licensed contrac
   - `insurance` (GL / auto / WC / umbrella / cyber / pollution / professional limits)
 - Reference `knowledge-base/regulations/` for NEC edition adopted in the project's jurisdiction and any prevailing-wage requirements
 - Reference `knowledge-base/regulations/material-tariffs-2026.md` for any commercial / industrial / public-works bid that includes panelboards, switchgear, transformers, busway, MCCs, or significant feeder copper — the bid cover should reference the appropriate escalation rider
-- Reference `knowledge-base/terminology/` for CSI division labels and construction-contract terms
+- **Config fallback:** the keys above (`company.legal_name`, `company.license_number`, `bid.standard_exclusions`, `bonding_capacity`, `insurance.*`, `pricing.op_percentages`, etc.) are optional and may not exist in a given `config.yml` (the base example config ships only `company`, `team`, `tools`, `pricing.rates`, `services`, `voice`, `priorities`). For any key that is absent, take the value from the intake instead, and if it is not in the intake, emit a bracketed placeholder (e.g. `License #[confirm]`) and list it in Internal Notes as a must-confirm-before-submission item — never invent a license number, bond rate, or insurance limit. Use the CSI division labels in the cheat sheet below directly (do not depend on a `knowledge-base/terminology/` file; that directory is a scaffold and may be empty).
 - If the owner's bid form is attached, mirror its line-item structure exactly — do not reorder or rename
 
 ### Tariff-Aware Escalation Block
@@ -496,7 +508,7 @@ Scope (Division 26, organized by sub-section):
 
 ### Worked Example 3 — Design-Build: Private Commercial Medical Office Building (NEC 2020 → 2026 transition)
 
-**Input:** $4.2M private commercial design-build for a 65,000 SF medical office building in Charlotte NC. Owner-direct contract with Mecklenburg Health Partners. Engineering by Krasa Electric in-house EE; 35% design at bid, completed by milestone. NEC 2020 currently adopted statewide in NC; **NC adopts NEC 2026 effective 2026-12-01 — the project crosses the cycle transition.**
+**Input:** $4.2M private commercial design-build for a 65,000 SF medical office building in Charlotte NC. Owner-direct contract with Mecklenburg Health Partners. Engineering by Krasa Electric in-house EE; 35% design at bid, completed by milestone. NEC 2020 currently adopted statewide in NC; **the AHJ's published adoption schedule shows an NEC 2026 effective date that the project may cross — confirm the exact date and any local amendments against the NC Building Code Council / Mecklenburg County AHJ before relying on it (per `knowledge-base/regulations/nec-2026-key-changes.md`, cross-reference two adoption trackers). The date below is treated as a verify-before-citing assumption, not an established fact.**
 
 ---
 
@@ -515,7 +527,7 @@ Scope summary:
 - **Service** — 1,200 A 480Y/277 V utility-derived service from Duke Energy, with a 750 kVA pad-mount transformer. Outdoor emergency-disconnect per NEC 2020 §230.85 (and NEC 2026 §230.85(B)(2) once NC adopts in December — the disconnect installed will satisfy both cycles)
 - **Distribution** — One main switchboard, three 225 A branch panelboards, two 100 A dental-suite panels with isolation transformers
 - **Generator / ATS** — 200 kW diesel genset for Type 1 essential electrical system per NFPA 99 (Healthcare Facilities Code, 2024 ed.) — life-safety branch only (egress lighting, fire alarm, exit signs); critical-care branch not required at this MOB (no ICU / surgery)
-- **Power & Lighting** — Full Division 26 fit-out per spec including LED lighting with daylight harvesting in patient-facing spaces, occupancy sensing in clinical areas, and DLC-qualified controls for the §179D commercial energy-efficiency deduction (deadline-aware: §179D construction-start by 2026-06-30 to qualify under current rules)
+- **Power & Lighting** — Full Division 26 fit-out per spec including LED lighting with daylight harvesting in patient-facing spaces, occupancy sensing in clinical areas, and DLC-qualified controls driven by the applicable state energy code (ASHRAE 90.1 / IECC lighting-power-density and controls requirements) and the local utility's lighting-controls rebate. **No federal §179D deduction is claimed:** its construction-start deadline of 2026-06-30 has passed and this project's construction start is 2026-11-15, so §179D is not available (see the Incentive & Adoption Verification Gate). Do not present §179D as a benefit in the owner proposal.
 - **Special Systems** — Nurse-call rough-in only (separate vendor for headend); DAS / public-safety radio rough-in coordination with Charlotte FD
 
 **2. RISK ALLOCATION (design-build specific)**
@@ -531,11 +543,11 @@ Krasa Electric does NOT accept:
 - **Code-cycle-transition risk** for the NEC 2020 → 2026 transition (see paragraph below)
 - **Utility-side design risk** for Duke Energy primary service design (utility-controlled)
 
-**Code-cycle-transition note (NEC 2020 → 2026):** NC adopts NEC 2026 effective 2026-12-01. The substantial-completion target is 2027-03-15, which means the project crosses the cycle transition. The design will satisfy NEC 2026 from the outset (so that the building does not require retrofits as code progresses). Specifically:
-- Outdoor emergency-disconnect installed regardless (NEC 2020 §230.85; NEC 2026 §230.85(B)(2) expansion satisfied)
-- DFCI on outdoor branch circuits (NEC 2026 §210.12(D)) — installed (small premium, ~$1,800 in scope)
-- §240.87 ARMS function-test on the 1,200 A main breaker (NEC 2017+; NEC 2026 retains)
-- Article §220 → §120 renumbering — internal documentation updated; no field impact
+**Code-cycle-transition note (NEC 2020 → 2026):** on the AHJ's published adoption schedule (verify before citing — see the input note above), NC's NEC 2026 effective date is expected to fall before the 2027-03-15 substantial-completion target, so the project is treated as crossing the cycle transition. The design will satisfy NEC 2026 from the outset (so that the building does not require retrofits as code progresses). Specifically:
+- Outdoor emergency-disconnect installed regardless (NEC 2020 §230.85; the 2026 outdoor-service-disconnect requirement satisfied) [confirm section against the published NEC 2026 text and NC amendments before citing on a permit drawing]
+- Expanded GFCI/SPGFCI coverage on outdoor and garage branch circuits per NEC 2026 §210.8 — installed (small premium, ~$1,800 in scope). *(There is no §210.12(D) "DFCI" device class in the NEC; §210.12 is AFCI, the outdoor/GFCI expansion is §210.8 — verify the exact subsection against the published text.)*
+- §240.87 arc-energy-reduction function-test on the 1,200 A main breaker (NEC 2017+; NEC 2026 retains)
+- Load-calculation article renumbering (Article 220 → Article 120 in the 2026 cycle) — internal documentation updated; no field impact
 
 **3. ALTERNATES**
 
@@ -563,7 +575,7 @@ Krasa Electric does NOT accept:
 - Construction start: 2026-11-15
 - Substantial completion: 2027-03-15
 - Final completion / commissioning: 2027-04-15
-- **§179D construction-start deadline: 2026-06-30** — within the schedule
+- **Federal §179D deduction: NOT available on this schedule** — its construction-start deadline of 2026-06-30 precedes the 2026-11-15 construction start. Lighting-controls value is driven by the state energy code and utility rebate, not §179D. Do not present §179D as a benefit in the owner proposal.
 
 **7. BID TERMS**
 - Proposal valid for 45 days from 2026-05-08

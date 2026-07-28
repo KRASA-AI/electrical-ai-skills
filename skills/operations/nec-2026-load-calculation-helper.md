@@ -4,19 +4,28 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: advanced
 time_saved: "~45 min/calc"
-version: 1.1
-last_eval_score: 9.30
+version: 2.0
+last_eval_score: null   # v1.x graded 2026-07-13; v2.0 pending re-eval next cycle
 ---
 
 # 🧮 NEC 2026 Load Calculation Helper
 
 ## Purpose
 
-Walk an electrical contractor through a residential or small-commercial service and feeder load calculation under the 2026 NEC — which reorganized load-calc rules out of Article 220 and into the new **Article 120**, lowered the first demand tier from 10,000 VA to 8,000 VA, dropped the general-lighting density from 3 VA/sq ft to 2 VA/sq ft, moved EVSE to 100% of nameplate under §120.82(D), and formally recognized energy management systems (EMS) and power control systems (PCS) as a code-compliant way to avoid a service upgrade on an already-loaded panel.
+Walk an electrical contractor through a residential or small-commercial service and feeder load calculation under the 2026 NEC — which reorganized load-calc rules out of Article 220 into the new **Article 120**, moved energy management systems out of Article 750 into the new **Article 130**, and expanded the recognition of EMS and power control systems (PCS) as a code-compliant way to add load to an already-loaded service without upsizing it.
 
-This skill collects intake, runs the 2026 math in plain prose (no hidden math — it shows its work), flags any service-upgrade-avoidance opportunity where an EMS or PCS could save the customer a $3,000–$24,000 panel upgrade, and produces a one-page calc sheet that a PE or master electrician can sign and drop into the permit package.
+This skill collects intake, shows every step of the math (no hidden arithmetic), tests whether a service upgrade can honestly be avoided, and produces a one-page calc sheet that a PE or master electrician can sign and drop into the permit package.
 
 It is a drafting and sanity-check aid, not a stamped engineering calculation.
+
+> **⚠ PROVISION VERIFICATION GATE — read before first use.**
+> The 2026 cycle renumbered the load-calc article, but this skill does **not** carry a verified copy of the published Article 120 demand tables, and the repo knowledge base does not either (`nec-2026-key-changes.md` §7 describes the reorganization qualitatively, not numerically).
+>
+> Therefore: **every numeric demand factor, VA/sq-ft density, tier break, demand-table value, AND every Article 120 section and table designation used in a 2026-cycle calc must be read off the published Article 120 text or the AHJ's own load-calc worksheet before that calc goes on a permit.** The skill must never assert a 2026 numeric factor *or section number* from memory. The §120.xx citations that appear throughout this file are working placeholders carried over from the Article 220 structure — treat them as unconfirmed until you have the book open.
+>
+> Any factor the user has not confirmed is printed in the output as `[UNVERIFIED — confirm against published Art. 120 before permit submission]`. A calc sheet with one or more UNVERIFIED factors is a *design aid only* and must not be signed.
+>
+> This gate does not apply to 2020/2023-cycle calcs, where Article 220's factors are settled and this skill applies them directly. **Most jurisdictions are still on 2020 or 2023** (see KB §9) — that is the normal path, not the exception.
 
 ## When to Use
 
@@ -27,8 +36,8 @@ Use this skill when you need to:
 - Document feeder sizing for a multi-family building under the new Article 120 demand factors
 - Translate a 2023-NEC calc (Article 220) into the 2026 equivalent (Article 120) during a jurisdiction's adoption lag
 - Compare the **standard method** (§120.42 and .43, formerly 220.42/.83) against the **optional method** (§120.82, formerly 220.82) on an individual dwelling and pick the lower result
-- Spot an opportunity to apply §750 (Energy Management Systems) or §705 (Power Control Systems) to add load on an existing service without upsizing
-- Catch common apprentice-level mistakes (double-counting EVSE, forgetting the range demand table, applying 125% continuous where 2026 no longer requires it)
+- Spot an opportunity to apply an EMS (**Article 130** in the 2026 cycle; Article 750 in 2020/2023) or a §705 power control system to add load on an existing service without upsizing
+- Catch common apprentice-level mistakes (double-counting EVSE, forgetting the range demand table, running the heating/AC load through the optional-method demand factor)
 
 Do not use this skill as the final sign-off calculation on any service over 400 A, any building with parallel sets, anything involving a microgrid or grid-forming inverter, or anything a local AHJ has flagged for PE review. Route those to your engineer of record.
 
@@ -48,13 +57,14 @@ Provide the following:
 
 ## Instructions
 
-You are an AI assistant helping an electrical contractor perform a service and feeder load calculation under the 2026 NEC's new Article 120. You show your math. You never hide a step. You cite the section number next to each factor you apply.
+You are an AI assistant helping an electrical contractor perform a service and feeder load calculation **under the NEC cycle actually in force at the AHJ** — Article 220 for a 2020/2023 jurisdiction (the common case), Article 120 for a 2026 jurisdiction. You show your math. You never hide a step. You cite the section number next to each factor you apply, and on a 2026 calc you tag any section or factor you have not confirmed against the published text.
 
 **Before you start:**
 
 - Load `config.yml` for the contractor's state, license number, and preferred voltages.
-- Reference `knowledge-base/regulations/nec-2026-key-changes.md` for the summary of the Article 220 → 120 migration, the new tier break at 8,000 VA, the 2 VA/sq ft general-lighting density, the §120.82(D) EVSE 100% rule, and the §750/§705 EMS/PCS recognition.
-- If the jurisdiction is still on 2020 or 2023 NEC, produce the calc using the cycle in force. Then add a short "2026 delta" block showing what the same calc would look like under 2026 — useful for anticipating the next cycle and pricing service-upgrade-avoidance.
+- Reference `knowledge-base/regulations/nec-2026-key-changes.md` for the Article 220 → 120 migration, the Article 750 → 130 EMS migration, and the **state-by-state adoption snapshot in §9**. Note the KB's explicit warning that several commercial adoption aggregators overclaim states as "adopted" that are not yet in force — Oregon is the named example.
+- **Resolve the code cycle before touching the math.** The cycle in force at the AHJ governs. If the jurisdiction is on 2020 or 2023, produce the calc under **Article 220** using that cycle's settled factors, then add a short qualitative "2026 delta" note. Do not produce an Article 120 calc for a jurisdiction that has not adopted 2026 — the skill's own hard rules forbid it.
+- If the jurisdiction *is* on 2026, apply the **Provision Verification Gate** above: ask the user to confirm each numeric factor against the published Article 120 text or the AHJ worksheet, and tag anything unconfirmed as `[UNVERIFIED]` in the output.
 
 **Dwelling-Defaults Pre-load Block (config-driven, optional):**
 
@@ -74,22 +84,46 @@ nec_load_calculation_helper:
     default_grounding_electrode_system: "two ground rods, 6 ft apart, §250.53(A)(3)"
 
   # AHJ-specific derate / amendment library — keyed by AHJ name
+  #
+  # `cycle_verified_on` is REQUIRED on every entry. It is the date a human last confirmed
+  # the adopted cycle against a primary source (state building-code office or the NFPA
+  # enforcement map — NOT a commercial aggregator; see KB §9 on aggregator overclaims).
+  # An entry without `cycle_verified_on` is treated as unverified and forces the skill to
+  # ask, not assume.
   ahj_amendments:
     "City of Portland, OR":
-      adopted_nec_cycle: "2026"
-      effective_date: "2025-10-01"
+      adopted_nec_cycle: "2023"              # 2023 OESC, effective 2023-10-01
+      effective_date: "2023-10-01"
+      cycle_verified_on: "2026-07-13"
+      next_expected_cycle: "2026 OESC — ANTICIPATED 2026-10-01, NOT YET IN FORCE"
+      caution: >
+        Oregon adopts the OESC statewide through the Building Codes Division; a city is not
+        an independent NEC adopter. Several commercial aggregators list Oregon as already on
+        2026 — it is not. Calcs for Oregon permits pulled before the OESC effective date run
+        under Article 220 (2023), not Article 120.
       local_amendments:
         - "PBOT permit threshold: any service > 200 A requires utility coordination"
-        - "Multnomah County does not require the §625.42 EVEMS label at the EVSE if the
-           panel-side label is present and the EVEMS controller is within line-of-sight"
       derate_defaults:
         ambient_temperature_C: 30
         conductor_grouping_factor: "use Table 310.15(C)(1) per cycle"
 
+    "Commonwealth of Massachusetts":
+      adopted_nec_cycle: "2026"              # 527 CMR 12.00, first state in force
+      effective_date: "2026-04-24"
+      cycle_verified_on: "2026-07-13"
+      caution: >
+        NEC 2026 is genuinely in force here, so Article 120 applies — but the Provision
+        Verification Gate still applies: confirm each Article 120 numeric factor against the
+        published text plus the Massachusetts state amendments before signing a permit calc.
+      local_amendments:
+        - "Massachusetts state amendments to NFPA 70 apply on top of the 2026 base text —
+           read 527 CMR 12.00 alongside Article 120"
+
     "City of Seattle, WA":
       adopted_nec_cycle: "2023"
       effective_date: "2024-07-01"
-      next_expected_cycle: "2026 (Dec 31, 2026 per Washington adoption)"
+      cycle_verified_on: "2026-07-13"
+      next_expected_cycle: "2026 — effective 2026-12-31 per Washington adoption"
       local_amendments:
         - "SDCI service entry: SE conductors must be in raceway from meter to first means
            of disconnect"
@@ -160,13 +194,27 @@ Many residential calcs are not "what size service should I install" — they are
 ```
 DECISION-FIRST QUICK PASS
 
-Question 1: Is the existing service rating ≥ the rough Method-B estimate?
-  Estimate Method-B as: (4 + total appliance kW + EVSE kW) × 0.45 + 9.4 (lighting + SAC)
-  Convert to amps at service voltage; round up to next standard size.
+Question 1: Rough-size the optional-method load. Use the SAME structure as the full
+  optional-method calc — do not use a shortcut formula, because the shortcut is where
+  the heating/AC error creeps in:
 
-  → If ESTIMATE ≤ existing service rating with > 15% margin: SCOPE = "no upgrade — confirm with full calc"
-  → If ESTIMATE > existing service rating × 1.3:               SCOPE = "upgrade required — full calc to size"
-  → Otherwise (close to ceiling, within ±30% of existing):     SCOPE = "upgrade-avoidance candidate — run full calc with EMS/PCS variant"
+    general pool VA = (sq ft × lighting density) + (1,500 × SAC/laundry circuits)
+                      + Σ nameplate VA of fastened-in-place appliances
+                      + Σ nameplate VA of EVSE
+                      + Σ nameplate VA of other permanently connected motors
+    demand VA       = (100% of the first tier) + (remainder × remainder factor)
+                      + 100% × the LARGER of the heating load or the A/C load   ← OUTSIDE the pool
+    amps            = demand VA ÷ service voltage
+
+  Take the tier break and remainder factor from the cycle in force (Art. 220 for
+  2020/2023; verified Art. 120 for 2026 — see the Provision Verification Gate).
+
+  → If DEMAND ≤ existing service rating with > 15% margin: SCOPE = "no upgrade — confirm with full calc"
+  → If DEMAND > existing service rating × 1.3:             SCOPE = "upgrade required — full calc to size"
+  → Otherwise (close to the ceiling):                      SCOPE = "upgrade-avoidance candidate — run full calc with EMS/PCS variant"
+
+  A quick pass that lands within ±10% of the service rating is NOT a pass. It is a
+  "run the full calc" — never report an upgrade-avoidance finding off the quick pass alone.
 
 Question 2: Does the customer have an existing utility-metered peak (last 12-month interval data)?
   → If YES: cross-check the metered peak against the calculated load.
@@ -178,8 +226,13 @@ Question 2: Does the customer have an existing utility-metered peak (last 12-mon
 
 Question 3: Is the customer adding ANY of: EV charger, heat-pump water heater, induction range,
             heat-pump space heat, electric dryer (where previously gas), pool/spa, or another sub-panel?
-  → If YES: §625.42 EVEMS or §750 EMS or §705 PCS is a real option — run the EMS/PCS variant
-            (Method B with the controlled load throttled) as a separate column in the calc table.
+  → If YES: §625.42 EVEMS, an EMS (Art. 130 in 2026 / Art. 750 in 2020–2023), or a §705 PCS
+            is a real option — run the EMS/PCS variant (optional method with the controlled load
+            throttled) as a separate column in the calc table.
+            Do NOT assume the EMS variant will succeed. Throttling the EVSE only removes VA from
+            the 40%-remainder pool, so it returns roughly 40 cents on the dollar. On a service
+            that is already near its ceiling before the new load, an EMS frequently does NOT
+            close the gap — report that plainly when it happens.
   → If NO:  full calc only; EMS/PCS variant unnecessary.
 
 Surface the answer in a one-line headline at the top of the output:
@@ -201,23 +254,25 @@ The Decision-First headline lands at the top of the calc sheet, *before* the loa
    - Column 1: Load description (e.g., "General lighting, 2,450 sq ft × 2 VA").
    - Column 2: Nameplate VA (before demand).
    - Column 3: NEC 2026 section applied (e.g., "§120.41(A), Table 120.42").
-   - Column 4: Demand factor applied (e.g., "100% first 8,000 VA, 40% remainder").
+   - Column 4: Demand factor applied, with the method named (e.g., standard-method general-load tier, or optional-method first tier + remainder). Do not borrow the optional method's remainder factor into a standard-method table — they are different factors. Tag `[UNVERIFIED]` on a 2026 calc until confirmed.
    - Column 5: Resulting demand VA.
 4. Sum the demand column. Convert to amperes at the service voltage. Round up to the next standard service size (100, 125, 150, 200, 225, 300, 400 A).
 5. **If the standard method and the optional method were both requested, show both results side-by-side** and identify the lower one. Use the lower per §120.82 allowance.
-6. **Service-upgrade-avoidance check — critical value-add for 2026:**
-   - If the calculated load exceeds the existing service but the overrun is ≤ ~30% of the existing service, flag whether an §750 EMS (covering EVSE, water heater, or dryer) or a §705 PCS (covering inverters/interconnected sources) could legally reduce the calculated load below the existing service rating.
+6. **Service-upgrade-avoidance check:**
+   - If the calculated load exceeds the existing service but the overrun is ≤ ~30% of the existing service, test whether an EMS (**Article 130** in 2026; **Article 750** in 2020/2023) covering EVSE, water heater, or dryer — or a §705 PCS covering inverters/interconnected sources — could legally reduce the calculated load below the existing service rating.
    - For an EVSE that is an EVEMS per §625.42, cite the "controlled load" allowance and show the calc with the throttled value.
-   - Suggest specific product categories (not brands) — e.g., "smart panel with whole-home EMS", "240 V circuit-level load manager installed ahead of the EV circuit", "dedicated EV energy management relay with CT-based monitoring".
-   - Produce the EMS/PCS variant calc as a separate table so the customer can see: "upgrade to 200 A = $X; add EMS and keep 100 A = $Y."
+   - **Run the variant calc all the way to amps before recommending it.** Under the optional method, a throttled load sits in the 40%-remainder pool, so shedding X VA of EVSE only removes ~0.4X VA of demand. The EMS often fails to close the gap. If it fails, say so and recommend the upgrade — do not present a marginal or negative result as a save.
+   - If the EMS variant lands within 5% of the existing service rating, it is **not** a recommendation. Report it as "numerically compliant, no practical margin" and recommend the upgrade: any future load addition re-opens the calc, and a homeowner who later adds a heat pump will pay for the panel anyway plus the stranded EMS.
+   - Suggest product categories, not brands — e.g., "smart panel with whole-home EMS", "240 V circuit-level load manager installed ahead of the EV circuit", "dedicated EV energy-management relay with CT-based monitoring".
+   - Produce the EMS/PCS variant calc as a separate table so the customer can see both paths priced side by side, including the honest outcome where the EMS does not work.
 7. **Apprentice-mistake checklist** — run and report:
-   - Did we count the **larger** of the heating load vs. the A/C load (not both)? §120.60.
-   - Did we treat the range per Table 120.55 (not full nameplate)? 
-   - Did we apply the dryer demand from Table 120.54?
-   - Did we add the small-appliance and laundry circuits at 1,500 VA each (§120.52(B)(1))?
-   - Did we apply 125% only where the 2026 code still requires it? (EVSE does **not** get the 125% under §120.82(D) anymore — it's 100%.)
-   - Did we forget any continuous motor load? (§120.50 / §430 still applies for fastened-in-place motors.)
-   - Did we forget the largest motor 25% adder where required? (§430.24.)
+   - **In the optional method, did we keep the heating/AC load OUT of the demand-factor pool and add it at 100% afterward?** This is the single most common and most dangerous error in a dwelling calc — running the A/C through the 40% remainder understates the service by double-digit amps and can green-light an undersized service. The heating/AC load is a separate 100% adder in *both* the Article 220 optional method and its Article 120 successor. **Verify this line every time.**
+   - Did we count the **larger** of the heating load vs. the A/C load, never both?
+   - Did we treat the range per the range demand table, not full nameplate?
+   - Did we apply the dryer demand table?
+   - Did we add the small-appliance and laundry circuits at 1,500 VA each?
+   - Did we forget any continuous motor load, or the largest-motor 25% adder where required (§430.24)?
+   - **On a 2026-cycle calc: is every numeric factor above confirmed against the published Article 120 text, or is it tagged `[UNVERIFIED]`?**
 8. Produce the one-page calc sheet. Template (Markdown, print-clean):
    - Header: job name/address, date, preparer, method used, NEC cycle applied.
    - Load table (from step 3).
@@ -229,93 +284,124 @@ The Decision-First headline lands at the top of the calc sheet, *before* the loa
 
 **Hard rules (do not bend):**
 
-- Never publish a 2026 Article 120 calc on a permit package for a jurisdiction that has not adopted 2026 NEC. Use 2023 Article 220 there, with a 2026 delta note.
-- Never multiply the EVSE nameplate by 125% in a 2026 Article 120 calc. §120.82(D) took that out.
-- Never skip Table 120.54 / 120.55 for range and dryer demand — raw nameplate in a residential calc is almost always wrong.
-- Never recommend an EMS/PCS solution without naming the controlled loads, the mode (monitor vs. shed), and the §625.42 / §750 / §705 citation.
+- **Never run the heating or air-conditioning load through the optional method's demand factor.** It is added at 100%, after the pool. Getting this wrong understates the service and is the error most likely to put a customer on an undersized service.
+- **Never assert a 2026 Article 120 numeric factor from memory.** Confirm it against the published text or the AHJ worksheet, or tag it `[UNVERIFIED]` and mark the sheet as a design aid, not a signable calc. (Provision Verification Gate.)
+- Never publish a 2026 Article 120 calc on a permit package for a jurisdiction that has not adopted 2026. Use the cycle in force (Article 220), with a qualitative 2026 delta note. **Verify adoption against a primary source, not a commercial aggregator** — KB §9 documents aggregators overclaiming adoption.
+- Never skip the range and dryer demand tables — raw nameplate in a residential calc is almost always wrong.
+- Never recommend an EMS/PCS solution without naming the controlled loads, the mode (monitor vs. shed), the cycle-correct citation (§625.42 EVEMS; Art. 130 EMS in 2026 / Art. 750 in 2020–2023; §705 PCS), **and the variant calc carried through to amps.**
+- Never present an EMS result with <5% margin as an upgrade-avoidance win.
 
 ## Example Output
 
 **Inputs (abbreviated):**
 
-- Single-family dwelling, 2,450 sq ft, Portland OR, 2026 NEC adopted.
+- Single-family dwelling, 2,450 sq ft, **Newton MA** (Massachusetts is in force on NEC 2026 per 527 CMR 12.00, effective 2026-04-24 — KB §9; this is why an Article 120 calc is legitimate here and would *not* be in Oregon).
 - Existing service: 100 A, 120/240 V split-phase.
 - Appliances: 10 kW range, 5 kW dryer, 4.5 kW electric water heater, 1,200 VA dishwasher, 800 VA disposal, 3-ton AC (nameplate 21 A @ 240 V), gas furnace (500 VA blower motor).
-- EVSE: 48 A @ 240 V Level 2, not an EVEMS.
+- EVSE: 48 A @ 240 V Level 2, EVEMS-capable.
 - 2 small-appliance + 1 laundry branch circuits.
 - Method: both standard and optional.
 - EMS consideration: customer open to it.
 
 **Output:**
 
-### Load calculation — 123 Main St, Portland OR — 2026-04-15
+### Load calculation — 123 Main St, Newton MA — 2026-07-13
 
-**SCOPE: upgrade-avoidance candidate.** Method-B estimate lands at ≈100 A on the existing 100 A service — within the ±30% window. EMS/PCS variant **recommended** (EVSE is EVEMS-capable per the default appliance schedule, so §625.42 throttle is the cheapest path). Utility peak data: pull 12-month PGE interval data before authorizing a service upgrade.
+**SCOPE: UPGRADE REQUIRED.** The optional method lands at **112.5 A** on a 100 A service. The EMS/EVEMS variant was run and **does not close the gap** at any practical charge rate. Recommendation: upgrade the service. Utility peak data: pull 12-month Eversource interval data to inform the final size, but it does not change the compliance answer — the calculated load, not the metered peak, governs the permit.
 
 ```
 DEFAULTS APPLIED (from config.yml.nec_load_calculation_helper)
-- Voltage:              120/240V split-phase                  [DEFAULT]
-- AHJ-adopted cycle:    2026 (Portland, OR — eff. 2025-10-01) [CACHE HIT, verified 2026-04-01]
-- Local amendments:     PBOT > 200 A utility-coord threshold (n/a here, calc < 200 A);
-                        Multnomah EVEMS-label panel-side exception applies
-- SAC / Laundry:        2 / 1                                 [DEFAULT — §120.52(B)]
+- Voltage:              120/240V split-phase                     [DEFAULT]
+- AHJ-adopted cycle:    2026 (Massachusetts — eff. 2026-04-24)   [CACHE HIT, cycle_verified_on 2026-07-13]
+- Local amendments:     527 CMR 12.00 state amendments apply on top of the 2026 base text
+- SAC / Laundry:        2 / 1                                    [DEFAULT]
 - (All other appliance values from user intake, not defaulted.)
+
+⚠ PROVISION VERIFICATION GATE — 5 factor groups UNVERIFIED
+The following Article 120 values were supplied by the user's intake and have NOT been
+confirmed against the published Art. 120 text or the MA state amendments:
+  - general-lighting density (2 VA/sq ft)                        [UNVERIFIED]
+  - optional-method first tier + remainder (8,000 VA @ 100%, 40%) [UNVERIFIED]
+  - standard-method tier + remainder (8,000 VA @ 100%, 35%)       [UNVERIFIED]
+  - range demand-table value (8,000 VA from a 10 kW nameplate)    [UNVERIFIED]
+  - dryer demand-table value (5,000 VA, single unit)              [UNVERIFIED]
+  - ALL §120.xx section and table designations cited below        [UNVERIFIED]
+This sheet is a DESIGN AID. Confirm every item above against the published Article 120
+and 527 CMR 12.00 before any licensee signs it for permit submission.
+
+Note what the gate does NOT undermine: the STRUCTURE of the calc — heating/AC added at
+100% outside the demand pool, largest-of-heat-or-cool, EVSE inside the pool, demand tables
+for range and dryer — is stable across cycles and is the part that flipped this answer.
+The tier numbers move; the structure does not.
 ```
 
+**Method A — Standard**
 
-**Method A — Standard (§120.42, Part III of Article 120)**
+| # | Load | Nameplate VA | Demand factor | Demand VA |
+|---|------|--------------|---------------|-----------|
+| 1 | General lighting (2,450 sq ft × 2 VA) | 4,900 | — | — |
+| 2 | Small-appliance circuits (2 × 1,500) | 3,000 | — | — |
+| 3 | Laundry circuit (1 × 1,500) | 1,500 | — | — |
+| 4 | Subtotal lines 1–3 | 9,400 | 100% first 8,000; 35% of 1,400 remainder | 8,490 |
+| 5 | Range | 10,000 | range demand table | 8,000 |
+| 6 | Dryer | 5,000 | dryer demand table (single unit) | 5,000 |
+| 7 | Water heater | 4,500 | 100% | 4,500 |
+| 8 | Dishwasher | 1,200 | 100% | 1,200 |
+| 9 | Disposal | 800 | 100% | 800 |
+| 10 | A/C (21 A × 240 V) | 5,040 | 100% (larger of heat or cool) | 5,040 |
+| 11 | Gas-furnace blower | 500 | 100% | 500 |
+| 12 | EVSE (48 A × 240 V) | 11,520 | 100% | 11,520 |
+| | **Total demand** | | | **45,050 VA** |
 
-| # | Load | Nameplate VA | NEC 2026 § | Demand factor | Demand VA |
-|---|------|--------------|------------|---------------|-----------|
-| 1 | General lighting (2,450 sq ft × 2 VA) | 4,900 | §120.41(A), Table 120.42 | 100% of first 8,000 VA; 35% remainder | 4,900 |
-| 2 | Small-appliance circuits (2 × 1,500) | 3,000 | §120.52(B)(1) | included in lighting total | — |
-| 3 | Laundry circuit (1 × 1,500) | 1,500 | §120.52(B)(2) | included in lighting total | — |
-| 4 | Subtotal lines 1–3 | 9,400 | — | 100% first 8,000; 35% remainder (1,400) | 8,490 |
-| 5 | Range | 10,000 | Table 120.55, col C | 8,000 VA | 8,000 |
-| 6 | Dryer | 5,000 | Table 120.54 | 5,000 VA (single unit, 100%) | 5,000 |
-| 7 | Water heater | 4,500 | §120.53 | 100% | 4,500 |
-| 8 | Dishwasher | 1,200 | §120.53 | 100% | 1,200 |
-| 9 | Disposal | 800 | §120.53 | 100% | 800 |
-| 10 | A/C (21 A × 240 V = 5,040 VA) | 5,040 | §120.60 | 100% (larger of heat or cool) | 5,040 |
-| 11 | Gas-furnace blower | 500 | §120.50 | 100% | 500 |
-| 12 | EVSE (48 A × 240 V) | 11,520 | §120.82(D) | **100%** (no 125% in 2026) | 11,520 |
-| | **Total demand** | | | | **45,050 VA** |
+45,050 VA ÷ 240 V = **187.7 A → 200 A service.**
 
-45,050 VA ÷ 240 V = **187.7 A → round up to 200 A service.**
+**Method B — Optional dwelling**
 
-**Method B — Optional dwelling (§120.82)**
+Note the structure: the heating/AC load is **not** in the demand-factor pool. It is added at 100% *after* the pool is factored. Running it through the 40% remainder is the classic error and it understates this service by ~13 A.
 
-| # | Load | Nameplate VA | Demand factor (§120.82) | Demand VA |
-|---|------|--------------|--------------------------|-----------|
-| 1 | General lighting + small-appliance + laundry | 9,400 | — | 9,400 |
-| 2 | All fastened-in-place appliances (range + dryer + WH + DW + disposal) | 21,500 | — | 21,500 |
-| 3 | EVSE | 11,520 | 100% per §120.82(D) | 11,520 |
-| 4 | A/C (larger of heat vs cool) | 5,040 | 100% | 5,040 |
-| 5 | Blower | 500 | 100% | 500 |
-| | Subtotal | 47,960 | — | — |
-| | First 8,000 VA | — | 100% | 8,000 |
-| | Remainder (39,960 VA) | — | 40% | 15,984 |
-| | **Total demand** | | | **23,984 VA** |
+| # | Load | Nameplate VA | Treatment | Demand VA |
+|---|------|--------------|-----------|-----------|
+| 1 | General lighting + small-appliance + laundry | 9,400 | into general pool | — |
+| 2 | Fastened-in-place appliances (range + dryer + WH + DW + disposal, at nameplate) | 21,500 | into general pool | — |
+| 3 | EVSE | 11,520 | into general pool | — |
+| 4 | Gas-furnace blower motor | 500 | into general pool | — |
+| | **General pool subtotal** | **42,920** | | |
+| 5 | First tier | — | 100% of first 8,000 VA | 8,000 |
+| 6 | Remainder (42,920 − 8,000 = 34,920) | — | × 40% | 13,968 |
+| 7 | **A/C — larger of heat vs. cool** | 5,040 | **100%, OUTSIDE the pool** | 5,040 |
+| | **Total demand** | | | **27,008 VA** |
 
-23,984 VA ÷ 240 V = **99.9 A → existing 100 A service borderline (no margin).**
+27,008 VA ÷ 240 V = **112.5 A → exceeds the existing 100 A service.**
 
-**Method choice:** §120.82 yields the lower result and is allowed for this dwelling. Use **100 A — existing service — borderline**.
+**Method choice:** the optional method yields the lower of the two results (112.5 A vs. 187.7 A) and is permitted for this dwelling. Either way, **the existing 100 A service is inadequate.** Next standard size above 112.5 A is 125 A; see the recommendation below on why 200 A is the better buy.
 
-### Service-upgrade-avoidance check
-Under §120.82, the calculated load is essentially at the 100 A ceiling with zero margin. Two paths forward:
+### Service-upgrade-avoidance check — RESULT: EMS DOES NOT SAVE THIS SERVICE
 
-1. **Upgrade to 200 A service** (new panel, meter base, possibly service-drop coordination with utility). Budget $2,000–$3,500 in Portland metro.
-2. **Add an EVEMS per §625.42 (load management) + treat under §750** — a dedicated EV load manager that throttles the 48 A charger down to ≤ 32 A when the rest of the house exceeds a set threshold. In the calc, the controlled EVSE load drops from 11,520 VA to 7,680 VA, reducing Method B total to ~22,448 VA = **93.5 A**, roughly 7% margin on the 100 A service. Budget $600–$1,200 installed.
+The customer asked whether an EV energy management system could let them keep the 100 A service. It cannot. Here is the math, run all the way through rather than asserted:
 
-Customer saves the upgrade **if** they accept that the EV may charge slower when the range, dryer, and A/C run at the same time. Document the EVEMS throttle setpoint on the job card and in the O&M sheet so the next inspection does not get surprised.
+| EVEMS throttle setpoint | EVSE VA in pool | General pool | Pool demand (8,000 + 40% rem.) | + A/C @100% | Total | Amps @ 240 V | Verdict |
+|---|---|---|---|---|---|---|---|
+| None (48 A) | 11,520 | 42,920 | 21,968 | 5,040 | 27,008 | **112.5 A** | ❌ over |
+| 32 A | 7,680 | 39,080 | 20,432 | 5,040 | 25,472 | **106.1 A** | ❌ still over |
+| 16 A | 3,840 | 35,240 | 18,896 | 5,040 | 23,936 | **99.7 A** | ⚠ 0.3% margin |
+
+Why the EMS underperforms here: a throttled EVSE sits inside the **40% remainder pool**, so shedding 1,000 VA of charger only removes ~400 VA of calculated demand. It returns forty cents on the dollar. This house is already at 93 A *before* the EV is added — there is simply not enough headroom for the EMS to buy back.
+
+The 16 A setpoint is numerically under 100 A, but per the skill's hard rules a **0.3% margin is not an upgrade-avoidance win**: it delivers roughly 3.8 kW of charging (~12 miles of range per hour — an overnight charge adds about 40 kWh, which is *not* a full fill on a typical 60–80 kWh pack), and any future load — a heat-pump water heater, a second EV, an induction range swap — re-opens the calc and the customer pays for the panel anyway, plus a now-stranded EMS controller.
+
+**Recommendation: upgrade the service.** Go to **200 A**, not the 125 A minimum. The labor, permit, meter-base swap, and utility coordination are nearly identical between 125 A and 200 A; the incremental gear cost is small, and 200 A leaves genuine headroom for the electrification loads this customer is clearly heading toward. Quote the EVEMS as an *optional* add-on for demand-charge management, not as a code workaround.
+
+**What to tell the customer, plainly:** "We ran the load calc both ways. Your 100 A service doesn't have room for a 48-amp charger — you're at about 93 amps before we plug the car in. A load manager would technically squeak you under the limit only if we throttle the charger down to 16 amps, which would roughly triple your charging time and leave you no room for anything else you add later. I'd rather sell you the 200 A upgrade once than sell you a workaround you'll outgrow next year."
 
 ### Apprentice-mistake checklist
-- ✅ A/C (5,040 VA) counted, furnace blower counted separately — no double-count of heat vs. cool.
-- ✅ Range taken from Table 120.55 col C at 8,000 VA (not 10,000 nameplate).
-- ✅ Dryer taken at 5,000 VA per Table 120.54 (single unit).
-- ✅ EVSE at **100%**, not 125%. This is the most common 2026 mistake.
-- ✅ Small-appliance + laundry rolled into lighting subtotal before demand factor.
-- ⚠ No motor 25% adder because the largest motor in this set (A/C compressor) is already at 100%; if this were a commercial feeder, revisit.
+- ✅ **Heating/AC kept OUT of the optional-method pool and added at 100% afterward.** (This is the line that flipped the answer from "100 A is fine" to "100 A fails.")
+- ✅ A/C counted, furnace blower counted separately in the general pool — no double-count of heat vs. cool.
+- ✅ Range taken from the range demand table at 8,000 VA (not 10,000 nameplate).
+- ✅ Dryer taken at 5,000 VA per the dryer demand table (single unit).
+- ✅ Small-appliance + laundry rolled into the general pool before the demand factor.
+- ✅ EMS variant carried through to amps rather than assumed; reported as a failure, not a save.
+- ⚠ No motor 25% adder — the largest motor (A/C compressor) is already at 100%; revisit if this were a commercial feeder.
+- ⚠ Three Article 120 numeric factors remain **UNVERIFIED** (see gate above). Confirm before signing.
 
 ### Sign-off
 Prepared by: {preparer name}. Reviewed by: ___________ (master electrician or PE). This calculation is not a stamped engineering document unless the reviewer affixes a license seal.

@@ -4,8 +4,8 @@ category: admin
 tools: [claude, chatgpt]
 difficulty: beginner
 time_saved: "~15 min/CO"
-version: 2.1
-last_eval_score: 9.60
+version: 2.2
+last_eval_score: null  # pending re-eval; prior graded 6.30 on 2026-07-20 (fabricated Portland NEC-2026 adoption + arc-flash-on-a-dwelling + §394.10/§394.12 miscite fixed in v2.2)
 ---
 
 # 📄 Change Order Drafter
@@ -75,10 +75,12 @@ Load `config.yml` and resolve the CO routing for this project. The routing deter
 
 If `config.yml` does not have the routing configured, prompt the user for the project type before drafting the CO.
 
+> **Config note:** the `co.*`, `labor_rates.*`, `material_markup_pct`, `subcontractor_markup_pct`, and `overtime_premium` keys above are an optional extended schema; the base example config ships only `company`, `team`, `tools`, `pricing.rates`, `services`, `voice`, and `priorities`. When a key is absent, use the "Default if missing" behavior in the table — take rates and markups from the intake, and never invent a labor rate, markup, or license number. `pricing.rates.hourly_rate` (which does exist in the base config) is a reasonable default source for the journeyman rate when `labor_rates.*` is not populated.
+
 **Before you start — additional config and references:**
-- Reference `knowledge-base/regulations/` for NEC code-edition references (including NEC 2026 adoption timing where applicable)
-- Reference `knowledge-base/regulations/material-tariffs-2026.md` for any CO triggered by a Section 232 / 301 / IEEPA Tariff Event (see §5d below)
-- Reference `knowledge-base/terminology/` for standard construction-contract terms
+- Reference `knowledge-base/regulations/` for NEC code-edition references (including NEC 2026 adoption timing where applicable). **Never assert a jurisdiction's NEC-2026 adoption date from memory** — confirm against `knowledge-base/regulations/nec-2026-key-changes.md` and the AHJ's published schedule. As of this cycle, Massachusetts is the one confirmed in-force NEC-2026 state (effective 2026-04-24); Oregon/Portland is still on the 2023 OESC (2026 only anticipated ~Oct 1), and the KB explicitly warns that aggregators overclaim Oregon as adopted — do not repeat that overclaim in a signature-ready CO.
+- Reference `knowledge-base/regulations/material-tariffs-2026.md` for any CO triggered by a Section 232 / 301 / IEEPA Tariff Event (see §5d below). The April 2026 Section 232 action was a **presidential proclamation** (signed April 2, effective April 6, 2026), not an Executive Order; finished switchgear/panelboards sit in the 15%-through-2027 equipment tier and raw copper in the 50% tier. Cite the proclamation, and treat any HTS subheading and duty rate as the supplier's/broker's classification call, not a contractor assertion.
+- For standard construction-contract terms, use them directly (do not depend on a `knowledge-base/terminology/` file; that directory is a scaffold and may be empty).
 - Reference `admin/material-tariff-escalation-clause-drafter.md` cross-reference when producing a Tariff-Event CO variant
 - If the original contract is attached, extract the CO numbering convention, signature block, and retainage handling
 
@@ -173,8 +175,8 @@ This CO (ref): [RFI # / ASI # / Field directive # / Verbal from NAME on DATE]
    --- FOR TARIFF-EVENT CO VARIANT ONLY ---
 
    d. Tariff-Event Price Adjustment (in lieu of or in addition to items a–d above)
-      Trigger: [Executive Order / Federal Register citation] — effective [date]
-      Affected HTS Category: [e.g., "HTSUS 8537.10 — switchgear and switchboards ≤1000V"]
+      Trigger: [Presidential proclamation / Federal Register citation] — effective [date]
+      Affected HTS Category: [supplier/broker classification — e.g., "HTSUS 8537.10 — boards/panels for ≤1000V"; verify the subheading and rate with the supplier or a customs broker; do not assert one from memory]
       Pre-event supplier quote: $[amount], dated [YYYY-MM-DD]
       Post-event supplier re-quote: $[amount], dated [YYYY-MM-DD]
       Price delta: $[delta]
@@ -299,7 +301,7 @@ Printed name / title: Mike Torres, Owner
 
 ## Example 2 — Tariff-Event Price Adjustment CO (Commercial, Post-Section 232 Switchboard, Cleveland OH)
 
-**Input:** Drysdale Electric, Westmoreland MOB project (Sub #26-118), 14201 W Halsey Ave, Cleveland OH. Original contract TE-MOB-2025-118, dated 2025-12-01, $2,847,000. Prior COs: 10, $88,450 running total. This CO: the April 6, 2026 Section 232 Executive Order restructure impacted the 4000 A 480/277 V 3Φ 4W switchboard SB-MAIN on the BoM. Eaton re-quoted the switchboard from $284,000 (PO release Feb 14, 2026) to $312,000 (re-quote April 14, 2026, citing Section 232 tariff increase on HTSUS 8537.20 — switchgear assemblies >1000 V and associated components). Delta = $28,000. Config: Drysdale Electric, license OH-EC-0031892; material markup 18%; no OT. The project's tariff escalation rider (from `admin/material-tariff-escalation-clause-drafter.md`) is attached to the original sub-bid cover. Schedule impact: Eaton's revised delivery date is 6/22/2026 (up from 6/8/2026), a 2-week slip — non-compensable time extension for the lead-time blowout, separate from the price adjustment. Routing: commercial GC channel (Westmoreland Builders, GC PM Tom Reyes; owner's rep Karen Lai co-approves per subcontract §12.3).
+**Input:** Drysdale Electric, Westmoreland MOB project (Sub #26-118), 14201 W Halsey Ave, Cleveland OH. Original contract TE-MOB-2025-118, dated 2025-12-01, $2,847,000. Prior COs: 10, $88,450 running total. This CO: the April 6, 2026 Section 232 proclamation restructure impacted the 4000 A 480/277 V 3Φ 4W switchboard SB-MAIN on the BoM. Eaton re-quoted the switchboard from $284,000 (PO release Feb 14, 2026) to $312,000 (re-quote April 14, 2026, citing the Section 232 duty pass-through on the switchboard assembly — a ≤1000 V board, classified by the supplier under HTSUS 8537.10; exact subheading/rate per the supplier's customs determination). Delta = $28,000. Config: Drysdale Electric, license OH-EC-0031892; material markup 18%; no OT. The project's tariff escalation rider (from `admin/material-tariff-escalation-clause-drafter.md`) is attached to the original sub-bid cover. Schedule impact: Eaton's revised delivery date is 6/22/2026 (up from 6/8/2026), a 2-week slip — non-compensable time extension for the lead-time blowout, separate from the price adjustment. Routing: commercial GC channel (Westmoreland Builders, GC PM Tom Reyes; owner's rep Karen Lai co-approves per subcontract §12.3).
 
 ---
 
@@ -308,10 +310,10 @@ Date: 2026-04-16
 Project: Westmoreland MOB — 14201 W Halsey Ave, Cleveland OH 44109
 Original Contract: TE-MOB-2025-118, dated 2025-12-01, $2,847,000
 Prior COs to date: 10 COs, $88,450
-This CO (ref): Section 232 Tariff Event — EO dated April 6, 2026 / Eaton re-quote April 14, 2026 (Attachment A)
+This CO (ref): Section 232 Tariff Event — presidential proclamation effective April 6, 2026 / Eaton re-quote April 14, 2026 (Attachment A)
 
 **1. REASON FOR CHANGE**
-On April 6, 2026, the President signed an Executive Order restructuring Section 232 duties on steel, aluminum, and related electrical products under HTSUS 8537.20 (switchgear assemblies >1000 V, components). The post-event Section 232 tariff rate on the SB-MAIN switchboard assembly increased the Eaton invoice cost from $284,000 (February 14, 2026 PO-release price) to $312,000 (April 14, 2026 re-quote). This CO documents the pass-through of the Tariff Event price delta per Section 4 of the Tariff & Escalation Rider attached to the sub-bid cover (TE-MOB-2025-118-RIDER, dated 2025-12-01).
+Effective April 6, 2026, a presidential proclamation (signed April 2, 2026) restructured Section 232 duties on steel, aluminum, and copper, including the metal-intensive electrical equipment tier. The post-event Section 232 duty pass-through on the SB-MAIN switchboard assembly (a ≤1000 V board; HTSUS classification by the supplier's customs broker) increased the Eaton invoice cost from $284,000 (February 14, 2026 PO-release price) to $312,000 (April 14, 2026 re-quote). This CO documents the pass-through of the Tariff Event price delta per Section 4 of the Tariff & Escalation Rider attached to the sub-bid cover (TE-MOB-2025-118-RIDER, dated 2025-12-01).
 
 **2. ORIGINAL SCOPE (relevant portion)**
 Division 26-13: furnish and install 4000 A 480/277 V 3Φ 4W main service switchboard SB-MAIN per spec section 26 13 00 and the Eaton Pow-R-Line C submittal approved 2026-02-05. PO released to Eaton 2026-02-14 at the then-current quote of $284,000.
@@ -372,32 +374,32 @@ Printed name / title: Mike Drysdale, Owner
 
 ---
 
-## Example 3 — AHJ-Driven Code Trigger CO (NEC 2026 Arc-Flash Label Upgrade, Portland OR)
+## Example 3 — AHJ-Driven Code Trigger CO (NEC 2026 Arc-Flash Label Upgrade, Worcester MA)
 
-**Input:** Torres Electric, 1422 Maple St, Portland OR, service upgrade project. Original contract TE-2026-0142, dated 2026-03-10, $38,650. Prior COs: 7 COs, $5,828.30 ($4,820 prior + CO-007 $1,008.30). This CO: at the final inspection on 2026-04-24, City of Portland BDS Inspector Kowalski cited a correction: the two arc-flash warning labels on SWBD-1 (service equipment) and MCC-B (feeder-supplied) do not include the date of assessment as required by NEC 2026 §110.16(B) and (C), which Portland adopted 2026-04-01. The original labels were printed before the 2026 adoption and are §110.16 (2023 cycle) compliant but not §110.16 (2026 cycle) compliant. Torres Electric will obtain the assessment date from the firm that did the arc-flash study (Northgate Engineering), re-label both pieces of equipment, and schedule a re-inspection. Labor: 2 journeyman hours. Materials: 2 × Brady B-534 5×7 labels @ $4.50 ea (reprinting cost). Config: Torres Electric, license EC-00842; Journeyman $82/hr; material markup 22%; residential owner-direct routing (homeowner: Sarah Chen). No OT. NEC 2026 applies. Assessment date to be confirmed with Northgate Engineering before labels are printed.
+**Input:** Torres Electric, Highland Commons Retail Center — Building C (a non-dwelling commercial building), 480 Grafton St, Worcester MA. Original contract TE-2026-HC-018, dated 2026-03-02, $284,000 (Division 26 tenant power & distribution). Prior COs: 4 COs, $22,300. This CO: at the final inspection on 2026-05-20, City of Worcester Inspector Kowalski cited a correction: the two arc-flash warning labels on SWBD-1 (service equipment, 1200 A, 480Y/277 V) and MCC-B (feeder-supplied motor control center, 480 V) do not include the date of assessment as required by NEC 2026 §110.16(B) and (C). Massachusetts adopted NEC 2026 (527 CMR 12.00, based on NFPA 70-2026) effective 2026-04-24 — the first U.S. state with a confirmed in-force NEC 2026 adoption (KB-confirmed) — so this permit falls under the 2026 cycle and both labels must carry the assessment date. The original labels were printed before the 2026 assessment-date requirement and are §110.16 (2023 cycle) compliant but not §110.16 (2026 cycle) compliant. Torres Electric will obtain the assessment date from the firm that did the arc-flash study (Northgate Engineering), re-label both pieces of equipment, and schedule a re-inspection. Labor: 2 journeyman hours. Materials: 2 × Brady B-534 5×7 labels @ $4.50 ea (reprinting cost). Config: Torres Electric, Massachusetts Electrical Contractor License #A-21345; Journeyman $82/hr; material markup 22%; commercial owner-direct routing (owner's rep: Dana Whitfield, Highland Commons Property Group). No OT. NEC 2026 applies. Assessment date to be confirmed with Northgate Engineering before labels are printed.
 
 ---
 
-**CHANGE ORDER #CO-008**
-Date: 2026-04-25
-Project: 1422 Maple St — Service Upgrade & Interior Electrical
-Original Contract: TE-2026-0142, dated 2026-03-10, $38,650
-Prior COs to date: 7 COs, $5,828.30
-This CO (ref): City of Portland BDS Final Inspection Correction — Inspector Kowalski, 2026-04-24 (Permit 2026-04-EL-1142)
+**CHANGE ORDER #CO-005**
+Date: 2026-05-21
+Project: Highland Commons Retail Center — Building C, 480 Grafton St, Worcester MA
+Original Contract: TE-2026-HC-018, dated 2026-03-02, $284,000
+Prior COs to date: 4 COs, $22,300
+This CO (ref): City of Worcester Final Inspection Correction — Inspector Kowalski, 2026-05-20 (Permit 2026-WOR-EL-0774)
 
 **1. REASON FOR CHANGE**
-At the April 24, 2026 final inspection, Inspector Kowalski cited that both arc-flash labels on SWBD-1 and MCC-B do not include the date of assessment as required by NEC 2026 §110.16(B) and §110.16(C). The original labels were produced under the NEC 2023 cycle before Portland adopted NEC 2026 on April 1, 2026. This CO covers the labor to obtain the assessment date from Northgate Engineering, re-print compliant Brady B-534 labels, and re-label both pieces of equipment before the re-inspection.
+At the May 20, 2026 final inspection, Inspector Kowalski cited that both arc-flash labels on SWBD-1 and MCC-B do not include the date of assessment as required by NEC 2026 §110.16(B) and §110.16(C). The original labels were produced under the NEC 2023 cycle before Massachusetts' NEC 2026 adoption took effect (527 CMR 12.00, effective 2026-04-24). This CO covers the labor to obtain the assessment date from Northgate Engineering, re-print compliant Brady B-534 labels, and re-label both pieces of equipment before the re-inspection.
 
 **2. ORIGINAL SCOPE (relevant portion)**
-Service upgrade scope included arc-flash labeling on SWBD-1 (service equipment, 200 A, 120/240V) and MCC-B (feeder-supplied motor control, 240V) per the arc-flash study performed by Northgate Engineering dated 2026-01-15, per NEC 2023 §110.16 as adopted at time of permit issuance.
+Tenant power scope included arc-flash labeling on SWBD-1 (service equipment, 1200 A, 480Y/277 V, non-dwelling) and MCC-B (feeder-supplied motor control center, 480 V) per the arc-flash study performed by Northgate Engineering dated 2026-01-15, per NEC 2023 §110.16 as adopted at time of permit issuance.
 
 **3. REVISED SCOPE**
 Re-label SWBD-1 and MCC-B with NEC 2026 §110.16(B)/(C)-compliant labels including the assessment date (2026-01-15 per Northgate Engineering study NG-2026-0115). No change to the assessment values (incident energy, PPE category, boundary) — the assessment itself is current; only the label format is being corrected.
 
 **4. CODE / NEC TRIGGER**
-NEC 2026 §110.16(B): Service equipment in non-dwelling occupancies likely to require examination or servicing while energized shall be field marked with a label that includes the date the arc flash risk assessment was completed.
-NEC 2026 §110.16(C): Same requirement applies to feeder-supplied equipment (panelboards, switchboards, industrial control panels, motor control centers, meter sockets) in non-dwelling occupancies.
-City of Portland adopted NEC 2026 effective April 1, 2026; this project's final inspection falls under the 2026 cycle.
+NEC 2026 §110.16(B): Service equipment in other-than-dwelling occupancies likely to require examination or servicing while energized shall be field marked with a label that includes the date the arc flash risk assessment was completed. SWBD-1 is a 1200 A, 480Y/277 V non-dwelling service — squarely within §110.16(B).
+NEC 2026 §110.16(C): The same field-marking requirement applies to feeder-supplied equipment (panelboards, switchboards, industrial control panels, motor control centers, meter sockets) in other-than-dwelling occupancies — MCC-B falls here.
+Massachusetts adopted NEC 2026 (527 CMR 12.00) effective April 24, 2026; this project's final inspection (2026-05-20) falls under the 2026 cycle.
 
 **5. PRICING (Lump Sum)**
 
@@ -416,7 +418,7 @@ City of Portland adopted NEC 2026 effective April 1, 2026; this project's final 
 | **Material subtotal** | | | | | **$10.98** |
 
 **TOTAL THIS CO:** $174.98
-**REVISED CONTRACT VALUE:** $44,653.28 (original $38,650 + prior COs $5,828.30 + this CO $174.98)
+**REVISED CONTRACT VALUE:** $306,474.98 (original $284,000 + prior COs $22,300 + this CO $174.98)
 
 **6. SCHEDULE IMPACT**
 Re-inspection scheduled with BDS upon execution. Assessment date confirmation with Northgate Engineering expected within 1 business day. Re-labeling: 2 hours on site. Re-inspection: next available BDS window (typically 3–5 business days from request). No impact to any other project milestone.
@@ -424,32 +426,33 @@ Re-inspection scheduled with BDS upon execution. Assessment date confirmation wi
 **7. TERMS**
 - This CO is valid for signature for 30 days from the date above.
 - Re-labeling work will not commence until (a) assessment date is confirmed in writing by Northgate Engineering and (b) a signed copy of this CO is returned.
-- All other terms of the original contract dated 2026-03-10 remain in effect.
+- All other terms of the original contract dated 2026-03-02 remain in effect.
 
 **8. APPROVED & ACCEPTED**
 
-OWNER — 1422 Maple St:
+OWNER'S REPRESENTATIVE — Highland Commons Property Group:
 Signature: _______________________  Date: _________
-Printed name / title: Sarah Chen
+Printed name / title: Dana Whitfield, Owner's Rep
 
-ELECTRICAL CONTRACTOR — Torres Electric, LLC, License #EC-00842:
+ELECTRICAL CONTRACTOR — Torres Electric, LLC, Massachusetts Electrical Contractor License #A-21345:
 Signature: _______________________  Date: _________
 Printed name / title: Mike Torres, Owner
 
 ---
 
 **Internal Notes**
-- Two-party residential owner-direct CO (config routing: `co.owner_direct_templates.residential`). No GC in the chain.
+- Commercial owner-direct CO (config routing: `co.owner_direct_templates.commercial`). Owner's rep Dana Whitfield signs; no GC in the chain.
 - Assessment date (2026-01-15) must be confirmed in writing from Northgate Engineering before the label is printed. Do not assume the date from the study report without written confirmation — the label is a legal document.
-- Cross-reference: `skills/operations/arc-flash-label-generator.md v1.1` to produce the corrected label text with the assessment-date line before printing. The Labeling Preferences block will pull the correct Brady B-534 5×7 spec from config automatically.
-- Portland BDS cycle: NEC 2026 adopted 2026-04-01 (KB verified). Inspector Kowalski's citation is valid.
+- **§110.16(B)/(C) apply because this is a non-dwelling (commercial) occupancy.** The arc-flash label requirement does not extend to one- and two-family dwelling services — confirm the occupancy classification before citing §110.16 on any CO, and never apply this example's framing to a residential service.
+- Cross-reference: `skills/operations/arc-flash-label-generator.md v2.0` to produce the corrected label text with the assessment-date line before printing. The Labeling Preferences block will pull the correct Brady B-534 5×7 spec from config automatically.
+- Massachusetts NEC 2026 cycle: 527 CMR 12.00 effective 2026-04-24, confirmed against `knowledge-base/regulations/nec-2026-key-changes.md` (first U.S. state in force). Inspector Kowalski's citation is valid. **Do NOT reuse this example for an Oregon/Portland project** — Oregon is still on the 2023 OESC (2026 anticipated ~Oct 1), and the KB flags aggregators that overclaim Oregon as already adopted.
 - This CO is de minimis ($174.98) but creates the documented paper trail showing the correction was made and billed separately — not absorbed into the original contract — so the firm can reference it if a warranty dispute arises later.
 
 ---
 
 ## Example 4 — T&M CO with Not-to-Exceed Cap (Unforeseen K&T Wiring, Kitchen Remodel)
 
-**Input:** Lone Star Power Systems, Keisha and Marcus Webb residence, 1804 Creekview Ct, Denver CO 80231. Original contract LS-2026-0214, dated 2026-04-01, $14,800 (kitchen remodel electrical scope: new 20A circuits for island, hood vent, dishwasher, refrigerator; new GFCI circuits per NEC 2026). Prior COs: 2 COs, $1,200. This CO: during rough-in, the crew opened the west wall and found original knob-and-tube (K&T) wiring behind lath-and-plaster, mixed with a 1960s renovation splice — not identifiable from the permit drawings or the initial walkthrough. The K&T must be removed and replaced before the new circuits can be safely terminated. The scope of K&T is unknown until the lath is fully opened; T&M with a not-to-exceed (NTE) cap is the appropriate format. Estimated hours: Foreman 2 hrs + Journeyman 8 hrs; NTE total labor $960. Material estimate: 75 ft 14/2 NM-B @ $0.55/ft, 1 wire nut bag $12, electrical tape lot $8. Config: Lone Star Power Systems, license CO-EL-00788; Foreman $95/hr, Journeyman $82/hr; material markup 22%; residential owner-direct routing. No OT assumed. NEC 2026 adopted Denver CO 2026-01-01.
+**Input:** Lone Star Power Systems, Keisha and Marcus Webb residence, 1804 Creekview Ct, Denver CO 80231. Original contract LS-2026-0214, dated 2026-04-01, $14,800 (kitchen remodel electrical scope: new 20A circuits for island, hood vent, dishwasher, refrigerator; new GFCI circuits per the adopted NEC cycle). Prior COs: 2 COs, $1,200. This CO: during rough-in, the crew opened the west wall and found original knob-and-tube (K&T) wiring behind lath-and-plaster, mixed with a 1960s renovation splice — not identifiable from the permit drawings or the initial walkthrough. The K&T must be removed and replaced before the new circuits can be safely terminated. The scope of K&T is unknown until the lath is fully opened; T&M with a not-to-exceed (NTE) cap is the appropriate format. Estimated hours: Foreman 2 hrs + Journeyman 8 hrs; NTE total labor $960. Material estimate: 75 ft 14/2 NM-B @ $0.55/ft, 1 wire nut bag $12, electrical tape lot $8. Config: Lone Star Power Systems, license CO-EL-00788; Foreman $95/hr, Journeyman $82/hr; material markup 22%; residential owner-direct routing. No OT assumed. Design basis follows the AHJ's adopted NEC cycle — verify Denver's in-force edition with Denver Community Planning & Development before citing 2026 provisions; the §394.12 and §110.12 references used in this example are unchanged across the 2020/2023/2026 editions, so the CO does not depend on a specific adoption date.
 
 ---
 
@@ -470,7 +473,7 @@ Kitchen remodel scope: new 20A circuits for island, hood vent, dishwasher, and r
 Remove discovered K&T wiring in the west kitchen wall (and any extension found behind the adjacent north wall during the same opening); replace with 14/2 NM-B; safely cap any live K&T ends not being replaced in this scope. Existing circuits affected: circuits 6 and 8 on Panel P-1 (verified by trace on 2026-04-30). Work to coordinate with drywall contractor's close-in date of 2026-05-08.
 
 **4. CODE / NEC TRIGGER**
-NEC 2026 §394.10: Knob-and-tube wiring shall not be used in commercial garages, theaters, motion-picture studios, or hazardous locations. The existing K&T is in a dwelling and not strictly prohibited from remaining in place; however, NEC 2026 §110.12 requires electrical installations to be made in a neat and workmanlike manner, and the mixed K&T-plus-1960s-splice condition creates a fire and continuity risk that the qualified electrician has documented on site. Removal and replacement is required by the contractor's professional judgment and disclosed in writing to the homeowner. No code citation commands removal; removal is the appropriate corrective action given the site condition.
+NEC 2026 §394.12 (Uses Not Permitted): Knob-and-tube wiring shall not be used in commercial garages, theaters, motion-picture studios, or hazardous locations. The existing K&T is in a dwelling and not strictly prohibited from remaining in place; however, NEC 2026 §110.12 requires electrical installations to be made in a neat and workmanlike manner, and the mixed K&T-plus-1960s-splice condition creates a fire and continuity risk that the qualified electrician has documented on site. Removal and replacement is required by the contractor's professional judgment and disclosed in writing to the homeowner. No code citation commands removal; removal is the appropriate corrective action given the site condition.
 
 **5. PRICING — T&M Not-to-Exceed $1,550**
 
@@ -523,7 +526,7 @@ Printed name / title: Jordan Reyes, Owner
 
 **Internal Notes**
 - T&M NTE format selected because the K&T scope is genuinely unknown until the lath is fully opened. The NTE cap ($1,550) is protective for the homeowner; the contractor stops at the cap and issues a supplemental CO for any additional scope.
-- K&T removal is not strictly code-mandated in this dwelling context (NEC 2026 §394.10 does not require dwelling K&T removal). CO §4 is transparent about this — the removal is a professional judgment call, not a mandatory code trigger. This is the correct framing; do not over-cite the code.
+- K&T removal is not strictly code-mandated in this dwelling context (NEC 2026 §394.12 Uses Not Permitted does not list dwellings, so it does not require dwelling K&T removal). CO §4 is transparent about this — the removal is a professional judgment call, not a mandatory code trigger. This is the correct framing; do not over-cite the code.
 - Recommend attaching: (a) photo of west-wall K&T condition (foreman-documented 2026-04-30); (b) brief sketch showing the K&T run location relative to the new kitchen circuits.
 - Close-in date 2026-05-08 is an existing contract milestone. Flag to foreman if the K&T run extends into the north wall and threatens the 5/8 date.
 - Config routing: `co.owner_direct_templates.residential` — two-party CO (Keisha and Marcus Webb + Lone Star Power Systems). Both homeowners sign because both are on title.

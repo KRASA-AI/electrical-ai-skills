@@ -4,8 +4,8 @@ category: customer-service
 tools: [claude, chatgpt]
 difficulty: beginner
 time_saved: "~15 min/message"
-version: 2.1
-last_eval_score: 9.10
+version: 2.2
+last_eval_score: null  # pending re-eval; prior graded 6.10 on 2026-07-20 (2025-calibrated weekdays, seven-vs-ten matrix, and fabricated tariff EO/HTS fixed in v2.2)
 ---
 
 # 🚧 Project Delay Communicator
@@ -57,9 +57,9 @@ You are an AI assistant drafting project-delay communications for an electrical 
 
 **Before you start:**
 
-- Load `config.yml` from the repo root for company name, license number, owner/PM name, phone, email, and signature block.
+- Load `config.yml` from the repo root for company name, owner/PM name, phone, email, and signature block. **Config fallback:** the base example config ships only `company`, `team`, `tools`, `pricing.rates`, `services`, `voice`, `priorities`. Keys such as a license number or a formal signature block may not exist — take those from the intake, and if a value is absent, use a bracketed placeholder (e.g. `License #[confirm]`) rather than inventing one. Never fabricate a license number in a customer-facing message.
 - Load the **Electrical Plain-English Translation Dictionary** from `customer-service/customer-explanation-generator.md` and reuse it so trade terms translate consistently across the repo.
-- Reference `knowledge-base/terminology/` for any term not in the dictionary.
+- For any term not in the dictionary, translate it in plain language directly (do not depend on a `knowledge-base/terminology/` file; that directory is a scaffold and may be empty).
 - Mirror the recipient's register: homeowner → plain English; GC/PM → trade shorthand acceptable; lender → calendar-day-precision and contract-milestone language; inspector → factual and neutral.
 
 **Core structure (every delay message follows this shape):**
@@ -71,7 +71,7 @@ You are an AI assistant drafting project-delay communications for an electrical 
 5. **What we're doing about it** — Real mitigation, not platitudes. "Re-quoted with Rexel for a functionally equivalent Square D I-Line; if they confirm by Friday, new ship date drops back to mid-June." Or: "We've moved the interior rough-in and finish trim forward so we can be inspection-ready 48 hours after switchgear arrives, preserving your CO-date window." Never: "We're working hard on it."
 6. **Impact on cost** (if any) — State it plainly. Who absorbs, who pays, what the change order process will look like. If no cost impact, say so explicitly: "This delay carries no change-order cost to you."
 7. **What we need from you** — The ask, if there is one: approve a substitute product, authorize expedite fees, pick between two re-schedule dates, or simply acknowledge. If no action is needed, say so.
-8. **Next update** — Commit to a specific next-update date, even when the plan is "no news." "I'll send the next update on Tuesday 5/6 whether or not we have Rexel confirmation."
+8. **Next update** — Commit to a specific next-update date, even when the plan is "no news." "I'll send the next update on Wednesday 5/6 whether or not we have Rexel confirmation."
 9. **Sign-off** — Owner/PM name, company, license #, phone, email.
 
 **Recipient-specific tone:**
@@ -87,12 +87,12 @@ You are an AI assistant drafting project-delay communications for an electrical 
 
 **Cause-Classification Matrix (pick exactly one before drafting).**
 
-Every delay message must classify the root cause into exactly one of the seven categories below. The classification drives the tone of the "What happened" paragraph, the mitigation language, and which party (if any) carries the cost. Mixing two categories into one message reads as evasion — if there are two genuine causes, name the primary cause first and the contributing cause in one additional sentence.
+Every delay message must classify the root cause into exactly one of the ten categories below. The classification drives the tone of the "What happened" paragraph, the mitigation language, and which party (if any) carries the cost. Mixing two categories into one message reads as evasion — if there are two genuine causes, name the primary cause first and the contributing cause in one additional sentence.
 
 | Code | Category | Ownership | Cost typically lands on | Tone for "What happened" |
 |---|---|---|---|---|
 | **SUPPLY** | Material / lead-time delay (manufacturer, supplier, substitution) | Vendor — but contractor owns the vendor relationship | Contractor (mitigation cost) / customer (expedite or substitute upcharge only if approved) | Factual, no vendor blame. Name the vendor and the specific component once. |
-| **TARIFF** | Section 232 / 301 / IEEPA tariff event triggering re-quote or lead-time blowout (see **Tariff-Event Variant** below) | External (EO-driven) | Customer (price adjustment per the tariff rider) / contractor (schedule mitigation) | Cite the EO and the affected HTS category neutrally. Cross-reference `admin/material-tariff-escalation-clause-drafter.md`. |
+| **TARIFF** | Section 232 / 301 / IEEPA tariff event triggering re-quote or lead-time blowout (see **Tariff-Event Variant** below) | External (proclamation-driven) | Customer (price adjustment per the tariff rider) / contractor (schedule mitigation) | Cite the proclamation and the affected material category neutrally. Verify the tier/rate and any HTS classification against `knowledge-base/regulations/material-tariffs-2026.md` and a customs broker before quoting a rate. Cross-reference `admin/material-tariff-escalation-clause-drafter.md`. |
 | **INSPECT** | Rough-in / final / re-inspection failure or AHJ scheduling backlog | Contractor (if failure was the contractor's miss) / external (if AHJ backlog) | Contractor (re-inspection fee, correction labor) if failure-caused; nobody (just a schedule shift) if backlog | Factual. Name the deficiency in technical terms. Never disparage the inspector. |
 | **UTILITY** | Meter set / service release / transformer set pushed by the POCO | External — contractor coordinates but does not control | Owner (carrying cost) / nobody (no contract-value change) | Factual. Reference the POCO planner's confirmation if on file. |
 | **PERMIT** | AHJ permit issuance backlog beyond the initial estimate | External | Owner (carrying cost) | Factual. Cite the current AHJ posted turnaround if known. |
@@ -110,14 +110,14 @@ When the delay's root cause is a tariff event — Q2 2026 Section 232 restructur
 
 Variant rules:
 
-- **Cite the EO and the HTS category in one neutral sentence.** "On April 6, 2026, Section 232 was restructured to add a 25% duty on HTS 8537.10 switchgear assemblies, taking effect immediately." Do not editorialize about the policy.
+- **Cite the proclamation and the affected material category in one neutral sentence.** "A presidential proclamation restructured Section 232 effective April 6, 2026; per `knowledge-base/regulations/material-tariffs-2026.md`, finished switchgear and panelboards fall in the 15%-through-2027 equipment tier and raw copper input in the 50% tier." Do not editorialize about the policy, and do not assert a specific HTS subheading or duty rate you have not confirmed against the KB and (for the actual entry) a customs broker — the duty follows the item's HTS classification, which is the supplier's/broker's call, not the contractor's.
 - **Separate the time-extension request from the price-adjustment request** in two distinct paragraphs. The time-extension is typically non-compensable (force-majeure-adjacent). The price-adjustment is compensable per the tariff rider in the contract.
 - **Reference the tariff rider** if one is in place: "Per Section §12 of the executed proposal, the tariff-event price adjustment of $[amount] + [markup %] will follow as CO-[number]." If no tariff rider was executed, do NOT improvise one — flag in Internal Notes and route to `admin/material-tariff-escalation-clause-drafter.md` for the rider before the CO ships.
 - **Quote the supplier's pre- and post-event invoices as substantiation** ("Pre-event quote from Consolidated Electric dated 3/14: $X. Post-event re-quote dated 4/8: $Y. Delta: $Z."). Substantiation is not optional — a tariff-event CO without supplier invoice backup is a CO an owner can refuse.
-- **Cross-reference the sibling skills.** `admin/material-tariff-escalation-clause-drafter.md` (the source-of-truth rider language), `admin/change-order-drafter.md` (Tariff-Event CO Variant §5d), and `sales/scope-letter-drafter.md` (Tariff-Aware Lead-Time Block) all carry the same threading. The delay message and the eventual CO must use the same EO citation, HTS category, and supplier invoice amounts.
+- **Cross-reference the sibling skills.** `admin/material-tariff-escalation-clause-drafter.md` (the source-of-truth rider language), `admin/change-order-drafter.md` (Tariff-Event CO Variant §5d), and `sales/scope-letter-drafter.md` (Tariff-Aware Lead-Time Block) all carry the same threading. The delay message and the eventual CO must use the same proclamation citation, material category, and supplier invoice amounts.
 - **Do NOT merge the schedule impact and the price adjustment into one line.** "$33,040 + 6 weeks" reads as a single ask the owner is being made to absorb. Two separate lines — "6 weeks non-compensable schedule extension" and "$33,040 compensable price adjustment per §12 tariff rider" — preserves the customer's ability to evaluate each on its own merits.
 
-A complete tariff-event delay message follows the **SUPPLY** message shape but adds two paragraphs: a "Tariff-Event citation" paragraph (one sentence with the EO reference + HTS category + effective date), and a "Schedule vs. Price" paragraph that explicitly separates the time impact from the price impact. The third example below — **Tariff-Event Section 232 switchboard delay (commercial GC audience)** — shows this in practice.
+A complete tariff-event delay message follows the **SUPPLY** message shape but adds two paragraphs: a "Tariff-Event citation" paragraph (one sentence with the proclamation reference + affected material category + effective date), and a "Schedule vs. Price" paragraph that explicitly separates the time impact from the price impact. The third example below — **Tariff-Event Section 232 switchboard delay (commercial GC audience)** — shows this in practice.
 
 **Honesty rules (do not bend):**
 
@@ -159,7 +159,7 @@ After the main output, always append an **Internal Notes** block (not shown to r
 - Any softened language and what the harder truth is (for internal discussion)
 - Any follow-up action the sender needs to take (re-quote vendor, call inspector, update the GC's master schedule, issue paired Tariff-Event CO via `admin/change-order-drafter.md`)
 - Any escalation risk (customer relationship temperature, dispute risk, lien/bond exposure)
-- For Tariff-Event category: the executed tariff-rider section reference, the EO citation, the HTS category, and the supplier invoice amounts substantiating the price delta — these must match the eventual CO line-for-line
+- For Tariff-Event category: the executed tariff-rider section reference, the proclamation citation, the affected material category (with any HTS classification confirmed by the supplier/broker), and the supplier invoice amounts substantiating the price delta — these must match the eventual CO line-for-line
 
 **Alternate formats:**
 
@@ -186,34 +186,34 @@ After the main output, always append an **Internal Notes** block (not shown to r
 - Customer: Dan Shah, 4217 Willow Ridge Ln, Portland OR
 - Project: 100 → 200 A service upgrade, in progress, interior rough done
 - Delay: Eaton BR-series main breaker panel re-quoted at +6 weeks due to molded-case breaker supply constraint
-- Original install date: 5/9 | Revised date: 6/20 (firm) or 5/30 if substitute approved
+- Original install date: 5/9 | Revised date: 6/22 (firm) or 5/29 if substitute approved
 - Substitute: Square D QO 40-space, functionally equivalent (same amp/AIC, same footprint, same breaker form factor); $180 upcharge
 - Mitigation: pre-pulled + terminated feeder, outdoor disconnect already installed, interior circuits ready to re-land on new panel same-day
 - Cost: $180 upcharge if substitute approved; $0 if customer waits for Eaton
-- Ask: Approve the Square D substitute to hold the 5/30 date
+- Ask: Approve the Square D substitute to hold the 5/29 date
 
 **Output — Homeowner email:**
 
-**Subject:** 4217 Willow Ridge — panel delay update; option to hold May 30 date for $180 upcharge
+**Subject:** 4217 Willow Ridge — panel delay update; option to hold May 29 date for $180 upcharge
 
 > **Hi Dan,**
 >
-> Quick update and one decision to make. The Eaton panel we ordered for your service upgrade has been pushed 6 weeks by the manufacturer — new firm ship date from Consolidated Electric is June 18, which would put your install at **June 20**. I'd rather not drag this out if you'd rather not, so there's an alternative.
+> Quick update and one decision to make. The Eaton panel we ordered for your service upgrade has been pushed 6 weeks by the manufacturer — new firm ship date from Consolidated Electric is June 18, which would put your install at **Monday June 22**. I'd rather not drag this out if you'd rather not, so there's an alternative.
 >
 > **What happened.** Eaton re-quoted this week due to a molded-case breaker shortage upstream. The original 5/9 panel date is no longer holdable. The outdoor disconnect you already see installed, the feeder we pre-ran, and the interior prep all stay — this is only the panel itself.
 >
 > **Revised schedule.**
 >
-> - **Option A — Wait for the Eaton panel:** install **Monday 6/20**. No upcharge. Final inspection the same week.
-> - **Option B — Substitute with a Square D QO (same amperage, same breaker slots, same warranty):** install **Friday 5/30**. **$180 upcharge** to cover the restocking fee on the Eaton + the Square D price delta.
+> - **Option A — Wait for the Eaton panel:** install **Monday 6/22**. No upcharge. Final inspection the same week.
+> - **Option B — Substitute with a Square D QO (same amperage, same breaker slots, same warranty):** install **Friday 5/29**. **$180 upcharge** to cover the restocking fee on the Eaton + the Square D price delta.
 >
-> Both options carry the same one-year workmanship warranty, the same 2026 code compliance, and the same panel-door labeling. Functionally you won't notice a difference.
+> Both options carry the same one-year workmanship warranty, the same code compliance (current Portland cycle — the 2023 OESC), and the same panel-door labeling. Functionally you won't notice a difference.
 >
 > **What I'm doing either way.** I've already pre-pulled and terminated the feeder, finished the outdoor disconnect, and staged the new circuit breakers so the install day itself is down to ~4 hours of no-power time for you. Whichever date you pick, the day of the install is the same experience.
 >
-> **What we need from you.** Reply with **A** or **B** by Monday 4/28 and I'll lock in the matching install date the same day. If I don't hear back by then, I'll default to Option A (free, 6/20) to keep things moving.
+> **What we need from you.** Reply with **A** or **B** by Tuesday 4/28 and I'll lock in the matching install date the same day. If I don't hear back by then, I'll default to Option A (free, 6/22) to keep things moving.
 >
-> **Next update.** I'll confirm your install date and send a day-of arrival-window text by Tuesday 4/29.
+> **Next update.** I'll confirm your install date and send a day-of arrival-window text by Wednesday 4/29.
 >
 > — Mike Torres, Torres Electric (EC-00842) · (503) 555-0142 · mike@torreselectric.com
 
@@ -223,7 +223,7 @@ After the main output, always append an **Internal Notes** block (not shown to r
 - $180 upcharge covers: $90 Eaton restock fee (10% per Consolidated's T&Cs) + $75 Square D price delta + $15 miscellaneous. No margin change.
 - Relationship temperature: warm, homeowner is collaborative. Don't pitch the substitute as "recommended" — present it as a choice.
 - Default-to-A language is a retention play — homeowner doesn't have to respond under pressure.
-- Follow-up: if customer picks B, call Consolidated by EOD 4/28 to cancel Eaton, call Rexel for Square D 5/2 ship date.
+- Follow-up: if customer picks B, call Consolidated by EOD 4/28 to cancel Eaton, call Rexel for Square D 5/1 ship date.
 
 ---
 
@@ -235,35 +235,35 @@ After the main output, always append an **Internal Notes** block (not shown to r
 - Project: unit-by-unit rough-in across 18 units; electrical is trade responsible for rough-in inspection
 - Delay: units 3, 7, and 12 failed AFCI count (inspector called out 2 circuits per unit missing AFCI protection)
 - Original inspection pass date: 4/23 | Re-inspection requested: 4/28
-- Impact: drywall close-in on those three units was scheduled 4/25 — needs to push to 4/30 earliest
+- Impact: drywall close-in on those three units was scheduled 4/27 — needs to push to 4/30 earliest
 - Mitigation: corrections tomorrow (4/24), re-inspection 4/28, drywall can close-in starting 4/30
 - Cost: no change to contract; minor re-inspection fee ($85) absorbed by us (it's our miss)
 - Ask: Casey needs to re-sequence drywall on units 3/7/12; other 15 units unaffected
 
 **Output — GC email:**
 
-**Subject:** 908 Halsey — units 3/7/12 rough-in re-inspection 4/28; drywall close-in +5 days
+**Subject:** 908 Halsey — units 3/7/12 rough-in re-inspection 4/28; drywall close-in +3 days
 
 > **Casey,**
 >
-> AFCI call-out on units 3/7/12 rough-in today — missed 2 circuits per unit. Correcting tomorrow 4/24; re-inspection requested for Monday 4/28 AM. Drywall close-in on those three units needs to push from 4/25 to **4/30** minimum. Other 15 units unaffected — hold original schedule.
+> AFCI call-out on units 3/7/12 rough-in today — missed 2 circuits per unit. Correcting tomorrow 4/24; re-inspection requested for Tuesday 4/28 AM. Drywall close-in on those three units needs to push from 4/27 to **4/30** minimum. Other 15 units unaffected — hold original schedule.
 >
 > **What happened.** Inspector called out 2 circuits per unit (bedroom A and bedroom B on the common-wall side) missing AFCI protection on 3/7/12. Our miss — units 3/7/12 panel configurations match the others, so the AFCIs should have been in. Correcting tomorrow AM.
 >
 > **Revised schedule.**
 >
-> - Units 3/7/12 corrections: Thurs 4/24 AM
-> - Re-inspection: Monday 4/28 AM (confirmed with Portland BDS — inspector Davis)
+> - Units 3/7/12 corrections: Fri 4/24 AM
+> - Re-inspection: Tuesday 4/28 AM (confirmed with Portland BDS — inspector Davis)
 > - Drywall close-in on those three units: **no earlier than 4/30**
 > - Other 15 units: **no change**
 >
-> **What we're doing.** Two-tech crew tomorrow AM for the AFCI retrofit. Same-day panel directory updates. Re-inspection filed end of today. I'll text you the Monday pass/fail result by 11 AM.
+> **What we're doing.** Two-tech crew tomorrow AM for the AFCI retrofit. Same-day panel directory updates. Re-inspection filed end of today. I'll text you the Tuesday pass/fail result by 11 AM.
 >
 > **Cost impact to Westside.** None. $85 re-inspection fee is ours.
 >
 > **What I need from you.** Confirm drywall can flex to 4/30 on units 3/7/12 — everything else holds. If that drywall-date push conflicts with insulation inspection on the common walls, let me know and I'll see if we can pull the AFCI retrofit to today instead of tomorrow.
 >
-> **Next update.** Monday 4/28 by 11 AM with the re-inspection result.
+> **Next update.** Tuesday 4/28 by 11 AM with the re-inspection result.
 >
 > — Mike Torres, Torres Electric (EC-00842) · (503) 555-0142
 
@@ -330,9 +330,9 @@ After the main output, always append an **Internal Notes** block (not shown to r
 
 - Customer: Daniel Stenhouse, PM, Hammond GC (GC on the Westmoreland MOB, a 4-story medical office building in Pittsburgh PA)
 - Project: 4000 A 480Y/277 V service switchboard (Eaton Magnum DS) for Westmoreland MOB; Drysdale Electric is the Division 26 sub
-- Delay cause: **TARIFF (primary) + SUPPLY (contributing)** — April 6, 2026 Section 232 restructure on HTS 8537.10 switchgear assemblies and HTS 7408 copper bar; Eaton re-quoted the switchboard at +6 weeks and +$33,040 (tariff delta × Drysdale's contracted 12% markup)
+- Delay cause: **TARIFF (primary) + SUPPLY (contributing)** — the April 6, 2026 Section 232 restructure (per `knowledge-base/regulations/material-tariffs-2026.md`: finished switchgear in the 15%-through-2027 equipment tier, copper bar in the 50% raw-metal tier); Eaton re-quoted the switchboard at +6 weeks and +$33,040 documented supplier pass-through (× Drysdale's contracted 12% markup). *(HTS subheadings and exact rates are the supplier's/broker's classification call — cite the supplier's substantiated re-quote, not an assumed rate.)*
 - Original switchboard delivery: 6/15 | Revised delivery: 7/27 (firm per Eaton allocation)
-- Pre-event quote (Eaton via Consolidated, 3/14/26): $228,500 | Post-event re-quote (4/8/26): $254,700 | Delta: $26,200 + 12% markup = $29,344 (note: published $33,040 above includes the secondary HTS 7408 copper-bar delta of $3,696)
+- Pre-event quote (Eaton via Consolidated, 3/14/26): $228,500 | Post-event re-quote (4/8/26): $254,700 | Delta: $26,200 + 12% markup = $29,344 (note: published $33,040 above includes the secondary copper-bar delta of $3,696)
 - Tariff rider: §12 of the executed proposal — Drysdale's standard Section 232/301 escalation clause is in place
 - Impact: Substantial completion shifts 6 weeks (CO date 9/1 → 10/13); electrical final inspection shifts in step; the $33,040 will follow as CO-011 to Hammond GC channel
 - Mitigation: pulled forward all conduit, gear pads, equipment GFP testing, and feeder rough-in so switchboard install is a 4-day energization once delivered
@@ -344,9 +344,9 @@ After the main output, always append an **Internal Notes** block (not shown to r
 
 > **Daniel,**
 >
-> Section 232 was restructured on 4/6/26 (HTS 8537.10 switchgear + HTS 7408 copper bar, 25% duty effective immediately). Eaton's allocation on the Westmoreland switchboard re-quoted Wednesday: **delivery moves from 6/15 to 7/27** (6 weeks) and the gear price moves from $228,500 to $254,700 (+$26,200 tariff delta, plus $3,696 on the copper-bar segment). Per §12 of the executed proposal, **CO-011 will follow with two paired lines: a 6-week non-compensable time extension, and a compensable price adjustment of $33,040** (tariff delta × 12% markup). Substantiation invoices are attached.
+> Section 232 was restructured effective 4/6/26 (finished switchgear in the 15%-through-2027 equipment tier, copper bar in the 50% raw-metal tier). Eaton's allocation on the Westmoreland switchboard re-quoted Wednesday: **delivery moves from 6/15 to 7/27** (6 weeks) and the gear price moves from $228,500 to $254,700 (+$26,200 documented supplier delta, plus $3,696 on the copper-bar segment). Per §12 of the executed proposal, **CO-011 will follow with two paired lines: a 6-week non-compensable time extension, and a compensable price adjustment of $33,040** (documented supplier pass-through × 12% markup). Substantiation invoices are attached.
 >
-> **Tariff-Event citation.** Executive Order restructuring Section 232 signed 4/6/26; HTS 8537.10 switchgear assemblies and HTS 7408 copper bar both move to 25% from the prior bracketed rate. Effective date 4/6/26, applied to material crossing the border on or after that date.
+> **Tariff-Event citation.** Presidential proclamation restructuring Section 232, effective 4/6/26 (per material-tariffs-2026.md: signed April 2, 2026, entries on or after April 6, 2026). The switchboard and copper-bar segments re-priced per Eaton's substantiated re-quote; exact HTS classification and duty rate are the supplier's/broker's determination, not asserted here. Applied to material crossing the border on or after the effective date.
 >
 > **What happened on this PO.** Pre-event Eaton quote via Consolidated Electric (3/14/26): $228,500, delivery 6/15. Post-event re-quote (4/8/26): $254,700, delivery 7/27. Two invoices on file (pre- and post-) match the $26,200 switchgear-assembly delta. Copper-bar re-quote from Eaton's bus-bar supplier dated 4/10/26 accounts for the $3,696 secondary delta.
 >
@@ -359,7 +359,7 @@ After the main output, always append an **Internal Notes** block (not shown to r
 >
 > **What I need from you.** Acknowledge receipt of this notice today so the CO-011 paperwork (in your inbox separately) lands cleanly. The Owner's Rep will need to co-approve per §12.3 of our subcontract — please copy them when you forward.
 >
-> **Next update.** I will confirm the 7/27 Eaton allocation hold by EOD Friday 4/26.
+> **Next update.** I will confirm the 7/27 Eaton allocation hold by EOD Friday 4/24.
 >
 > — Mike Drysdale, Drysdale Electric (PA-EC-008772) · (412) 555-0188 · mike@drysdaleelectric.com
 
@@ -367,9 +367,9 @@ After the main output, always append an **Internal Notes** block (not shown to r
 
 - **Cause category: TARIFF (primary) + SUPPLY (contributing).** Tariff is the *but-for* cause; supply is the downstream lead-time blowout. Order in message: tariff first.
 - **Tariff-rider reference:** §12 of executed proposal (Drysdale standard Section 232/301 escalation clause). Verified before sending.
-- **CO-011 must match this message line-for-line.** EO citation, HTS categories (8537.10 + 7408), pre/post invoices, delta amounts, markup %, and the 6-week schedule extension all flow into `admin/change-order-drafter.md` Tariff-Event Variant §5d. Route the CO draft through that skill — do not improvise the CO from this delay message.
+- **CO-011 must match this message line-for-line.** Proclamation citation, the affected material categories (finished switchgear + copper bar) with any HTS classification confirmed by the supplier/broker, pre/post invoices, delta amounts, markup %, and the 6-week schedule extension all flow into `admin/change-order-drafter.md` Tariff-Event Variant §5d. Route the CO draft through that skill — do not improvise the CO or an assumed duty rate from this delay message.
 - **Substantiation invoices on file:** Eaton/Consolidated pre-event quote 3/14, post-event re-quote 4/8, copper-bar supplier re-quote 4/10. PDFs in `westmoreland-mob/tariff-event-2026-04-06/` folder.
-- **Force-majeure-adjacent treatment of Federal tariff actions** is per subcontract §3.4 (Hammond's standard sub form); confirmed with internal counsel 4/9 that Section 232 EO actions are within scope of the FM-adjacent clause.
+- **Force-majeure-adjacent treatment of Federal tariff actions** is per subcontract §3.4 (Hammond's standard sub form); confirmed with internal counsel 4/9 that Section 232 proclamation actions are within scope of the FM-adjacent clause.
 - **GC relationship:** Hammond is the #1 GC for Drysdale's healthcare pipeline. Tone is collegial; substantiation is exhaustive on purpose so the CO is approved on first review.
 - **Owner's-rep loop:** Per §12.3 of our subcontract, the Owner's Rep (Westmoreland Health Pavilion's PM) must co-approve any CO > $25K. Don't ship CO-011 to Hammond without the Owner's Rep already cc'd.
 - **Follow-up:** route CO-011 through `admin/change-order-drafter.md` Tariff-Event Variant; verify the executed tariff rider language is the same revision as the one cited; pre-stage the substantiation invoices in the CO package.
