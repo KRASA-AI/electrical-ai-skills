@@ -4,8 +4,8 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~45 min/list"
-version: 1.1
-last_eval_score: 8.90
+version: 1.2
+last_eval_score: 6.40  # graded 2026-07-20/re-confirmed 2026-07-28 (v1.1): the "8.90" prior figure predated the rubric.yml re-baseline. Three worked-example defects fixed in v1.2: kitchen GFCI miscited as §210.8(A)(7) (correct (A)(6)) in Worked Example 1; a §110.24 available-fault-current label wrongly placed on a 200 A dwelling service (§110.24 excludes dwellings) in Worked Example 1; a 480 V transformer-primary feeder in Worked Example 2 that named a 125 A OCPD over a #4 Cu conductor (85 A ampacity) with a contradictory "100 A" also stated in the same line, now upsized to #1 Cu (130 A); and a GEC in Worked Example 2 miscited to the wrong NEC Table 250.66 bracket (#4 Cu instead of #2 Cu for a 4/0 Cu largest conductor). See changelogs/electrical.md 2026-07-28.
 ---
 
 # 📋 Material List / BOM Generator
@@ -152,12 +152,13 @@ The output must NOT do any of the following. If asked to do any of these, refuse
 3. **No quantities below the package size for items that come in fixed packages.** Wire nuts come in 100s, not 17s; 1/2" EMT couplings come in boxes of 100, not 8s. Round up to the package size.
 4. **No "best brand" or "premium" quality language.** Specify the brand by name from `config.yml.suppliers.preferred_brands` or by the spec's BoD listing — never with a marketing adjective.
 5. **No silent substitution of a banned supplier or a banned brand.** The Notes block surfaces the situation; the user decides.
-6. **No omission of grounding-electrode conductor or equipment-grounding conductor sizing.** GEC and EGC are NEC Article 250 line items that are commonly forgotten and become first-cycle inspection failures. Compute per NEC Table 250.66 (GEC) and 250.122 (EGC) for the service rating and the upstream OCPD.
-7. **No omission of arc-flash labeling, panel directory, or the field-marked available-fault-current label per NEC 110.24** for any service ≥ 1200 A or any unit substation.
-8. **No omission of fire-stop / fire-caulk on any rated-assembly penetration the BOM implies** (e.g., a feeder run from a panel to a remote disconnect that crosses a 2-hour rated wall — fire-caulk goes on the BOM).
-9. **No reliance on the manufacturer's "general purpose" lug rating when the spec calls for AL9CU.** Aluminum-feeder applications require AL9CU lugs; specify them by listing.
-10. **No customer-facing or marketing-style prose anywhere on the BOM.** A BOM is a procurement document.
-11. **No phrase listed in `config.yml.voice.banned_phrases`.**
+6. **No omission of grounding-electrode conductor or equipment-grounding conductor sizing.** GEC and EGC are NEC Article 250 line items that are commonly forgotten and become first-cycle inspection failures. Compute per NEC Table 250.66 (GEC — sized off the largest ungrounded service/feeder conductor) and 250.122 (EGC — sized off the upstream OCPD rating). Re-derive the bracket from the table each time rather than pattern-matching to a prior example's number; a GEC/EGC sized off the wrong bracket is an undersized grounding conductor, not a rounding error.
+7. **No feeder conductor sized below its own OCPD.** Before finalizing any feeder line, confirm the conductor's Table 310.16 ampacity (at the correct temperature column) is at or above the OCPD rating protecting it — per 240.4(B), the "next standard size up" allowance applies only when the conductor's exact ampacity falls between two standard OCPD sizes, not as a license to jump multiple standard sizes. If the math doesn't close, upsize the conductor rather than the OCPD.
+8. **No omission of arc-flash labeling, panel directory, or the field-marked available-fault-current label per NEC 110.24** for any service ≥ 1200 A or any unit substation. §110.24 explicitly excludes dwelling units — never add the AFC label line to a dwelling-unit service BOM regardless of amperage.
+9. **No omission of fire-stop / fire-caulk on any rated-assembly penetration the BOM implies** (e.g., a feeder run from a panel to a remote disconnect that crosses a 2-hour rated wall — fire-caulk goes on the BOM).
+10. **No reliance on the manufacturer's "general purpose" lug rating when the spec calls for AL9CU.** Aluminum-feeder applications require AL9CU lugs; specify them by listing.
+11. **No customer-facing or marketing-style prose anywhere on the BOM.** A BOM is a procurement document.
+12. **No phrase listed in `config.yml.voice.banned_phrases`.**
 
 ### 7. Cross-references
 
@@ -203,7 +204,7 @@ stock:
 | Meter base | Milbank U2980-XL-200, 200 A 4-jaw RL meter base, NEMA 3R | 1 | ea | Main Equipment | Cleveland Wholesale | In stock | — |
 | SER cable, 4/0-4/0-2/0 AL | Service-entrance cable, 20 ft + 5% waste = 21 ft → 25 ft cut | 25 | ft | Conductors (Feeder) | Cleveland Wholesale | In stock | 25% derivative tier (AL) |
 | 12/2 NM-B w/ ground | Branch-circuit, kitchen circuits 30 ft × 2 = 60 ft + 12% waste = 67 ft → 100 ft (cut to bundle pull) | 100 | ft | Conductors (Branch) | Cleveland Wholesale | In stock | 50% raw tier on Cu basis |
-| 20 A 1P CAFCI/GFCI dual-function breaker | Square D QO120CAFI-DF, dual-function for kitchen circuits per NEC 210.8 + 210.12 | 2 | ea | Overcurrent | Cleveland Wholesale | In stock | 15% finished-equipment tier |
+| 20 A 1P CAFCI/GFCI dual-function breaker | Square D QO120CAFI-DF, dual-function for kitchen circuits per NEC 210.8(A)(6) (GFCI) + 210.12 (AFCI) | 2 | ea | Overcurrent | Cleveland Wholesale | In stock | 15% finished-equipment tier |
 | 15 A 1P CAFCI breaker | Square D QO115CAFI, re-land existing branch-circuit re-terminations | 12 | ea | Overcurrent | Cleveland Wholesale | In stock | 15% finished-equipment tier |
 | 20 A 1P GFCI breaker | Square D QO120GFI, re-land existing GFCI-required branch circuits (bath, garage, outdoor, laundry) | 4 | ea | Overcurrent | Cleveland Wholesale | In stock | 15% finished-equipment tier |
 | Type-2 whole-house SPD | Square D HEPD80, 80 kA, lugs to panel busbar | 1 | ea | Specialty | Cleveland Wholesale | In stock | — |
@@ -215,14 +216,13 @@ stock:
 | Anti-oxidant compound | For AL feeder lug terminations | 1 | tube | Consumables | Truck Stock | — | — |
 | Panel directory label set | Pre-printed, adhesive, NEC 408.4(A) compliant | 1 | set | Consumables | Cleveland Wholesale | In stock | — |
 | Arc-flash warning label | NEC 110.16(A), residential service entrance | 1 | ea | Consumables | Cleveland Wholesale | In stock | — |
-| Available-fault-current field-marked label | NEC 110.24, calculation date and value | 1 | ea | Consumables | Truck Stock | — | — |
 
 **Notes & Reminders:**
 
 - NEC 2026 Cleveland adopted 2026-01-01 — outdoor service disconnect (NEC 230.85) is required, not optional. Outdoor disconnect added as a separate Main Equipment line.
-- Dual-function breakers (CAFCI + GFCI) used on the new kitchen circuits — NEC 210.12 (AFCI) and 210.8(A)(7) (GFCI for kitchen) both apply, dual-function is the lower-cost compliance path.
+- Dual-function breakers (CAFCI + GFCI) used on the new kitchen circuits — NEC 210.12 (AFCI) and 210.8(A)(6) (GFCI for kitchen) both apply, dual-function is the lower-cost compliance path.
 - GEC sized per NEC Table 250.66: 200 A service with #4/0 AL feeder → #4 Cu GEC. EGC per NEC Table 250.122 for 200 A OCPD → #6 Cu (this is the panel-to-disconnect bond).
-- Available-fault-current label per NEC 110.24 — required field marking; the label-and-Sharpie pen is on truck stock, but the BOM lists it as a discrete line so the foreman doesn't forget.
+- NEC 110.24 (available-fault-current field marking) does NOT apply here: §110.24 explicitly excludes dwelling units regardless of service size, and this is a 200 A dwelling service well under the ≥1200 A / unit-substation trigger in Hard Rule 7 above anyway. No AFC label line is included on this BOM for that reason — do not add one to a dwelling-unit service BOM.
 - FPE Stab-Lok panel removal — handled per the firm's standard demo and disposal procedure; haul-away on the work order, not on the BOM.
 
 ## Worked Example 2 — Commercial TI Feeder Run (480 V to 208 V step-down)
@@ -261,14 +261,14 @@ bom:
 |---|---|---|---|---|---|---|---|
 | 75 kVA dry-type transformer | Square D EE75T3H, 480 Δ – 208Y/120 V, 3Φ, K-13 rated, NEMA 1, indoor | 1 | ea | Main Equipment | Consolidated Electrical Distributors Portland | **6 weeks** (quote 2026-04-26) | 15% finished-equipment tier — verify quote validity at PO |
 | LP-2A panelboard | Square D NQ442L1C, 225 A 42-ckt, 208Y/120 V 3Φ 4W, MLO with 225 A main lug, copper bus, 22 kAIC | 1 | ea | Main Equipment | Consolidated | **8 weeks** (quote 2026-04-26) | 15% finished-equipment tier |
-| 480 V primary feeder | (3) #4 Cu THHN-2 + (1) #8 Cu EGC; 60 ft × 1.05 waste = 63 ft → 75 ft pull (cut to bundle); per NEC 310.16 75 °C column #4 Cu = 85 A; primary OCPD 100 A; transformer primary FLA 90 A; protected per NEC 450.3(B) at 125% = 113 A → 125 A OCPD | 75 | ft | Conductors (Feeder) | Consolidated | In stock | 50% raw tier on Cu basis |
+| 480 V primary feeder | (3) #1 Cu THHN-2 + (1) #6 Cu EGC; 60 ft × 1.05 waste = 63 ft → 75 ft pull (cut to bundle); transformer primary FLA 90 A × 125% = 112.5 A → 125 A primary OCPD per NEC 450.3(B); per NEC 310.16 75 °C column #1 Cu = 130 A, which meets/exceeds the 125 A OCPD directly under 240.4(B) — sized to the OCPD, not relying on a transformer-only conductor exception; EGC per Table 250.122 for a 125 A OCPD = #6 Cu | 75 | ft | Conductors (Feeder) | Consolidated | In stock | 50% raw tier on Cu basis |
 | 208 V secondary feeder | (4) 4/0 Cu THHN-2 + (1) #4 Cu EGC; 60 ft × 1.05 waste = 63 ft → 75 ft pull; per NEC 310.16 75 °C column 4/0 Cu = 230 A; transformer secondary FLA 208 A; OCPD on LP-2A is the panel main; conductor protected per NEC 240.4(B) | 75 | ft | Conductors (Feeder) | Consolidated | In stock | 50% raw tier on Cu basis |
 | 1 1/4" EMT (primary) | 60 ft × 1.08 waste = 65 ft → 75 ft (cut to length, in 10 ft sticks) | 75 | ft | Raceway | Consolidated | In stock | 25% derivative tier on imported steel — verify mill on quote |
 | 2 1/2" EMT (secondary) | 60 ft × 1.08 waste = 65 ft → 75 ft | 75 | ft | Raceway | Consolidated | In stock | 25% derivative tier |
 | 1 1/4" EMT couplings | 1 ea per 10 ft = 8 ea + 20% spare = 10 → box of 25 | 1 | bx | Raceway Fittings | Consolidated | In stock | — |
 | 2 1/2" EMT couplings | 1 ea per 10 ft = 8 ea + 20% spare = 10 → box of 25 | 1 | bx | Raceway Fittings | Consolidated | In stock | — |
 | Transformer floor pad / housekeeping | 4" concrete pad, 36" × 36" (typically by GC; flag for confirmation) | 1 | ea | Specialty (GC scope) | n/a | — | — |
-| #4 Cu GEC | Per NEC Table 250.66 for 75 kVA transformer with 4/0 Cu secondary | 25 | ft | Grounding | Consolidated | In stock | 50% raw tier on Cu basis |
+| #2 Cu GEC | Per NEC Table 250.66: largest ungrounded conductor is the 4/0 Cu secondary, which falls in the "over 3/0 through 350 kcmil" bracket → #2 Cu GEC (not #4 — #4 is the bracket for a 2/0–3/0 Cu largest conductor) | 25 | ft | Grounding | Consolidated | In stock | 50% raw tier on Cu basis |
 | AL9CU lug kit (panel main) | Square D listed lug for 4/0 Cu — verify panel as-shipped vs added kit | 1 | kit | Specialty | Consolidated | In stock | — |
 | Available-fault-current label, NEC 110.24 | Field-marked; secondary calc 11.4 kAIC at LP-2A per upstream short-circuit study (Kessler & Daoud rev 2026-04-08) | 1 | ea | Consumables | Truck Stock | — | — |
 
@@ -326,3 +326,5 @@ bom:
 ---
 
 *v1.1 — 2026-04-28 — added config-driven supplier preference matrix, three takeoff worked examples (residential service upgrade, commercial TI feeder run, industrial MCC retrofit), Tariff-Aware Material-Sourcing block, hard rules, and cross-references to the new submittal-package-compiler.md skill.*
+
+*v1.2 — 2026-07-28 — Skill Evaluator fix: corrected §210.8(A)(7)→(A)(6) kitchen GFCI miscite; removed the §110.24 AFC label wrongly applied to a dwelling service (Ex. 1); fixed the transformer-primary feeder conductor/OCPD mismatch by upsizing #4 Cu→#1 Cu against the 125 A OCPD (Ex. 2); corrected the GEC Table 250.66 bracket from #4 Cu to #2 Cu for a 4/0 Cu largest conductor (Ex. 2); added Hard Rules 6-7 guardrails against re-deriving GEC/EGC brackets and feeder/OCPD ampacity matching from scratch each time rather than pattern-matching a prior example.*

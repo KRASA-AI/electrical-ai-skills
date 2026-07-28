@@ -4,8 +4,8 @@ category: admin
 tools: [claude, chatgpt]
 difficulty: beginner
 time_saved: "~15 min/CO"
-version: 2.2
-last_eval_score: null  # pending re-eval; prior graded 6.30 on 2026-07-20 (fabricated Portland NEC-2026 adoption + arc-flash-on-a-dwelling + §394.10/§394.12 miscite fixed in v2.2)
+version: 2.3
+last_eval_score: 6.90  # graded 2026-07-28 (v2.2, pre-fix): re-verification of the 2026-07-20 v2.2 fix found the fabricated-adoption/arc-flash/§394 defects held fixed, but surfaced a NEW arithmetic defect in Example 4 (Labor NTE stated $960 vs. computed subtotal $846, propagating to the CO and revised-contract totals) that kept the skill just below the 7.0 passing score. Fixed in v2.3 — see changelogs/electrical.md 2026-07-28.
 ---
 
 # 📄 Change Order Drafter
@@ -107,6 +107,7 @@ If `config.yml` does not have the routing configured, prompt the user for the pr
 - **Tariff-Event CO** — Use when a Section 232 / 301 / IEEPA Tariff Event (as defined in the project's tariff escalation rider from `admin/material-tariff-escalation-clause-drafter.md`) triggers a material price adjustment after the proposal or PO date. The Tariff-Event CO has a distinct structure (see §5d in the Output Format template below).
 
 **Calculation conventions:**
+- **NTE-vs-subtotal consistency:** on a T&M not-to-exceed CO, the stated NTE figure must equal the sum of the itemized hours × rate (or cost × markup) rows directly above it, unless a contingency margin is explicitly named and shown as its own line (e.g., "$X computed + $Y contingency for possible additional scope = $Z NTE"). Never state a round NTE number that silently differs from its own backup table — recompute the table first, then set the NTE equal to it, and add an explicit contingency line only if one is intended.
 - Use config-defined rates. Do not invent rates. If config lacks a rate, prompt the user for it before finalizing.
 - Apply material markup on cost, not on list price unless the user says otherwise.
 - Overtime premium: time-and-a-half after 8 hrs/day or 40 hrs/week per config setting.
@@ -452,7 +453,7 @@ Printed name / title: Mike Torres, Owner
 
 ## Example 4 — T&M CO with Not-to-Exceed Cap (Unforeseen K&T Wiring, Kitchen Remodel)
 
-**Input:** Lone Star Power Systems, Keisha and Marcus Webb residence, 1804 Creekview Ct, Denver CO 80231. Original contract LS-2026-0214, dated 2026-04-01, $14,800 (kitchen remodel electrical scope: new 20A circuits for island, hood vent, dishwasher, refrigerator; new GFCI circuits per the adopted NEC cycle). Prior COs: 2 COs, $1,200. This CO: during rough-in, the crew opened the west wall and found original knob-and-tube (K&T) wiring behind lath-and-plaster, mixed with a 1960s renovation splice — not identifiable from the permit drawings or the initial walkthrough. The K&T must be removed and replaced before the new circuits can be safely terminated. The scope of K&T is unknown until the lath is fully opened; T&M with a not-to-exceed (NTE) cap is the appropriate format. Estimated hours: Foreman 2 hrs + Journeyman 8 hrs; NTE total labor $960. Material estimate: 75 ft 14/2 NM-B @ $0.55/ft, 1 wire nut bag $12, electrical tape lot $8. Config: Lone Star Power Systems, license CO-EL-00788; Foreman $95/hr, Journeyman $82/hr; material markup 22%; residential owner-direct routing. No OT assumed. Design basis follows the AHJ's adopted NEC cycle — verify Denver's in-force edition with Denver Community Planning & Development before citing 2026 provisions; the §394.12 and §110.12 references used in this example are unchanged across the 2020/2023/2026 editions, so the CO does not depend on a specific adoption date.
+**Input:** Lone Star Power Systems, Keisha and Marcus Webb residence, 1804 Creekview Ct, Denver CO 80231. Original contract LS-2026-0214, dated 2026-04-01, $14,800 (kitchen remodel electrical scope: new 20A circuits for island, hood vent, dishwasher, refrigerator; new GFCI circuits per the adopted NEC cycle). Prior COs: 2 COs, $1,200. This CO: during rough-in, the crew opened the west wall and found original knob-and-tube (K&T) wiring behind lath-and-plaster, mixed with a 1960s renovation splice — not identifiable from the permit drawings or the initial walkthrough. The K&T must be removed and replaced before the new circuits can be safely terminated. The scope of K&T is unknown until the lath is fully opened; T&M with a not-to-exceed (NTE) cap is the appropriate format. Estimated hours: Foreman 2 hrs + Journeyman 8 hrs; NTE total labor $846 (= 2 × $95 + 8 × $82, the computed point estimate; no separate contingency margin is named for labor, so the NTE equals the subtotal per the NTE-vs-subtotal consistency rule above). Material estimate: 75 ft 14/2 NM-B @ $0.55/ft, 1 wire nut bag $12, electrical tape lot $8. Config: Lone Star Power Systems, license CO-EL-00788; Foreman $95/hr, Journeyman $82/hr; material markup 22%; residential owner-direct routing. No OT assumed. Design basis follows the AHJ's adopted NEC cycle — verify Denver's in-force edition with Denver Community Planning & Development before citing 2026 provisions; the §394.12 and §110.12 references used in this example are unchanged across the 2020/2023/2026 editions, so the CO does not depend on a specific adoption date.
 
 ---
 
@@ -475,15 +476,15 @@ Remove discovered K&T wiring in the west kitchen wall (and any extension found b
 **4. CODE / NEC TRIGGER**
 NEC 2026 §394.12 (Uses Not Permitted): Knob-and-tube wiring shall not be used in commercial garages, theaters, motion-picture studios, or hazardous locations. The existing K&T is in a dwelling and not strictly prohibited from remaining in place; however, NEC 2026 §110.12 requires electrical installations to be made in a neat and workmanlike manner, and the mixed K&T-plus-1960s-splice condition creates a fire and continuity risk that the qualified electrician has documented on site. Removal and replacement is required by the contractor's professional judgment and disclosed in writing to the homeowner. No code citation commands removal; removal is the appropriate corrective action given the site condition.
 
-**5. PRICING — T&M Not-to-Exceed $1,550**
+**5. PRICING — T&M Not-to-Exceed $1,436**
 
-**a. Labor (T&M actual hours × rate — NTE $960)**
+**a. Labor (T&M actual hours × rate — NTE $846)**
 
 | Classification | Est. Hours | Rate    | Est. Subtotal |
 |---|---|---|---|
 | Foreman        | 2          | $95.00  | $190.00       |
 | Journeyman     | 8          | $82.00  | $656.00       |
-| **Labor NTE**  |            |         | **$960.00**   |
+| **Labor NTE**  |            |         | **$846.00**   |
 
 Final billing reflects actual hours × rate. Hours will not exceed the NTE above without a further signed CO.
 
@@ -498,8 +499,8 @@ Final billing reflects actual hours × rate. Hours will not exceed the NTE above
 
 Actual material cost billed at cost + 22% markup; NTE on materials is $590 for the K&T scope (estimate includes contingency for additional wire if the K&T run extends into the north wall).
 
-**TOTAL THIS CO (NTE): $1,550.00**
-**REVISED CONTRACT VALUE:** $17,550.00 (original $14,800 + prior COs $1,200 + this CO NTE $1,550)
+**TOTAL THIS CO (NTE): $1,436.00**
+**REVISED CONTRACT VALUE:** $17,436.00 (original $14,800 + prior COs $1,200 + this CO NTE $1,436)
 
 Actual CO value may be less than the NTE if the K&T scope is smaller than estimated.
 
@@ -525,7 +526,7 @@ Printed name / title: Jordan Reyes, Owner
 ---
 
 **Internal Notes**
-- T&M NTE format selected because the K&T scope is genuinely unknown until the lath is fully opened. The NTE cap ($1,550) is protective for the homeowner; the contractor stops at the cap and issues a supplemental CO for any additional scope.
+- T&M NTE format selected because the K&T scope is genuinely unknown until the lath is fully opened. The NTE cap ($1,436) is protective for the homeowner; the contractor stops at the cap and issues a supplemental CO for any additional scope.
 - K&T removal is not strictly code-mandated in this dwelling context (NEC 2026 §394.12 Uses Not Permitted does not list dwellings, so it does not require dwelling K&T removal). CO §4 is transparent about this — the removal is a professional judgment call, not a mandatory code trigger. This is the correct framing; do not over-cite the code.
 - Recommend attaching: (a) photo of west-wall K&T condition (foreman-documented 2026-04-30); (b) brief sketch showing the K&T run location relative to the new kitchen circuits.
 - Close-in date 2026-05-08 is an existing contract milestone. Flag to foreman if the K&T run extends into the north wall and threatens the 5/8 date.

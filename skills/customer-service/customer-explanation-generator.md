@@ -4,8 +4,8 @@ category: customer-service
 tools: [claude, chatgpt]
 difficulty: beginner
 time_saved: "~5 min/job"
-version: 2.1
-last_eval_score: 9.10
+version: 2.2
+last_eval_score: 6.50  # graded 2026-07-20/re-confirmed 2026-07-28 (v2.1): the "9.10" prior figure predated the rubric.yml re-baseline. Fixed in v2.2: the Required Anchors example asserted "Portland adopted [NEC 2026] in April 2026" as fact (Oregon is on the 2023 OESC); Step 1 of the Code Citation Block instructed loading a nec-adoption-by-state.md file that does not exist; the NEC-2026-highlights list cited the outdoor emergency disconnect as "§230.70(B)(2)" (correct: §230.85) and asserted an unconfirmed §210.8(F) "6-ft perimeter" subsection as settled fact; "warranty period from config.yml" assumed a key the base config doesn't ship. See changelogs/electrical.md 2026-07-28.
 ---
 
 # 💬 Customer Explanation Generator
@@ -44,7 +44,7 @@ You are an AI assistant writing customer-facing explanations of electrical work 
 **Before you start:**
 - Load `config.yml` for company name, license number, tech/owner name, phone, and voice preferences
 - Use the **Electrical Plain-English Translation Dictionary** below for consistent term rendering
-- Reference `knowledge-base/terminology/` if additional terms come up
+- Reference `knowledge-base/terminology/` if additional terms come up (this directory is a scaffold and may be empty — if so, fall back to the dictionary above and describe the *effect* rather than inventing a definition)
 - Never translate incorrectly — if a term isn't in the dictionary and you're not confident, describe the *effect* instead of the cause
 
 **Core principles:**
@@ -108,7 +108,7 @@ Section order:
 3. **What we did** — Plain verbs only. Replaced / re-landed / tightened / labeled / tested.
 4. **What's next** — Nothing needed / monitor / recommend follow-up / must address before [event] / we'll return [date].
 
-Required anchors: warranty period from `config.yml`, tech/owner name, license number, jurisdiction-aware code framing if a code-triggered upgrade is in scope (e.g., "the 2026 Oregon electrical code, which Portland adopted in April 2026, now requires…"). Forbidden: NEC article numbers, the words "illegal" / "dangerous" / "hazardous" without a grounded explanation, the words "previous electrician botched this" or any liability-attaching prose.
+Required anchors: warranty period (the base config does not ship a dedicated warranty-period key — use whatever the firm's actual workmanship-warranty term is from intake, or a bracketed placeholder; never invent a duration), tech/owner name, license number, jurisdiction-aware code framing if a code-triggered upgrade is in scope. **Never assert a jurisdiction's NEC adoption date from memory** — confirm against `knowledge-base/regulations/nec-2026-key-changes.md` first. As of this cycle, Massachusetts is the one confirmed in-force NEC 2026 state; Oregon/Portland is still on the 2023 OESC (2026 anticipated, not yet effective) — a correctly-hedged example reads "the current [Oregon 2023 electrical code / whichever cycle the AHJ has confirmed adopted] requires…", never "Portland adopted [year] in [month]" stated as settled fact. Forbidden: NEC article numbers, the words "illegal" / "dangerous" / "hazardous" without a grounded explanation, the words "previous electrician botched this" or any liability-attaching prose.
 
 Voice: warm, "knowledgeable neighbor." A homeowner finishing the explanation thinks "now I know what was wrong and what to do, and the electrician didn't make me feel stupid."
 
@@ -150,7 +150,7 @@ Code citations are the single most common place a customer-facing explanation sl
 
 **Step 1 — Determine the AHJ's adopted NEC cycle.**
 
-Load `knowledge-base/regulations/nec-adoption-by-state.md` (or its equivalent) and look up the jurisdiction's currently adopted cycle. Do not assume 2026. As of May 2026 only a minority of jurisdictions have adopted the 2026 cycle; many are still on 2023, some on 2020, and a few on 2017. Cite the cycle that is *adopted* in the jurisdiction where the work is performed, not the cycle that has been *published*.
+No standalone "adoption by state" file exists in this KB — load `knowledge-base/regulations/nec-2026-key-changes.md` and look up the jurisdiction's currently adopted cycle there. Do not assume 2026. As of today's date, only a small number of jurisdictions have adopted the 2026 cycle (Massachusetts is the one confirmed in force, effective 2026-04-24); many are still on 2023, some on 2020 or earlier. Cite the cycle that is *adopted* in the jurisdiction where the work is performed, not the cycle that has been *published*. If the KB doesn't confirm a given jurisdiction's status, say so and route to `operations/code-reference-lookup.md` rather than guessing.
 
 If the AHJ has formally adopted 2026 but the project's permit was pulled under the prior cycle, the *permit cycle* governs the project — cite the permit cycle and note the adoption-date mismatch in Internal Notes.
 
@@ -175,7 +175,7 @@ When citing, always include the edition: "NEC 2026 §210.8(A)(6)" not "NEC §210
 
 **Step 4 — Translate, then cite (commercial+) or translate only (residential).**
 
-Commercial / industrial example: "The receptacle in the corridor outside the panel room is now within the 6-foot perimeter that NEC 2023 §210.8(F) brought under GFCI protection; we added GFCI breaker coverage to that circuit." Residential equivalent: "We added GFCI protection on the outlet outside the panel room — the 2023 code added that area to the list of places that need shock protection."
+Commercial / industrial example (illustrative format only — verify the actual subsection against the KB or code-reference-lookup before citing it to a real customer): "The receptacle in the corridor outside the panel room is now within the perimeter that NEC 2023 §210.8 brought under GFCI protection; we added GFCI breaker coverage to that circuit." Residential equivalent: "We added GFCI protection on the outlet outside the panel room — the code added that area to the list of places that need shock protection."
 
 **Step 5 — Cross-reference the in-house source-of-truth skill.**
 
@@ -184,8 +184,8 @@ For deep code questions, route to `operations/code-reference-lookup.md` rather t
 **NEC 2026 highlights to know in 2026:**
 
 - **§110.16(B) and (C)** — Arc-flash assessment date now required on the equipment label (residential dwelling-unit service equipment is exempt under §110.16(A); non-dwelling structures, including detached garages classified as accessory non-dwelling occupancies, are covered).
-- **§210.8** — GFCI protection scope continued to expand in 2023 and 2026 cycles. §210.8(F) (outdoor outlets serving HVAC + similar equipment, expanded in 2023 to include perimeter receptacles within 6 ft of an electrical panel room or similar) is the most common 2023→2026 retrofit trigger; verify the AHJ's adopted cycle before citing.
-- **§230.70(B)(2)** — Outdoor service emergency-disconnect requirement, originally in NEC 2020 §230.85, now consolidated under §230.70. Cite the version the AHJ adopted; many 2020-cycle jurisdictions still permit the §230.85 reference.
+- **§210.8** — GFCI protection scope continued to expand across recent cycles (outdoor, kitchen, and HVAC-equipment receptacles are common triggers). Verify the exact subsection against `knowledge-base/regulations/` or `operations/code-reference-lookup.md` before citing a specific letter designation to a GC/EOR/inspector audience — do not state a subsection from memory in a customer-facing document.
+- **§230.85** — This is the correct, current cite for the outdoor emergency-disconnect requirement for one- and two-family dwellings. Do not cite "§230.70(B)(2)" for this — that is not the correct section for this requirement.
 - **Article 706 / §705.20** — Energy Storage System (ESS) disconnect marking and one-and-two-family-dwelling outside-building emergency-shutdown initiation. New in 2026; many 2020/2023-cycle jurisdictions do not yet require.
 - **§210.8(D)** — Receptacles serving kitchen dishwashers; clarified to require GFCI protection in 2020 — almost universally adopted now.
 - **Article 690 / 705 / 706** — Solar + Storage interconnection language was re-organized in 2026; if the work touches PV or BESS, route to `operations/code-reference-lookup.md` for the cycle-specific article number.

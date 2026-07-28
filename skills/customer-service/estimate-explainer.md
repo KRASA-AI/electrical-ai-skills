@@ -4,8 +4,8 @@ category: customer-service
 tools: [claude, chatgpt]
 difficulty: beginner
 time_saved: "~15 min/estimate"
-version: 2.1
-last_eval_score: 9.10
+version: 2.2
+last_eval_score: 6.30  # graded 2026-07-20/re-confirmed 2026-07-28 (v2.1): the "9.10" prior figure in this frontmatter predated the rubric.yml re-baseline and did not reflect the flagship worked example's fabricated "Oregon state sales tax does not apply to labor" (Oregon has no state sales tax at all) and its "2026-required outdoor emergency disconnect" claim in a Portland (2023 OESC) example, plus the phantom `estimate_explainer.standard_phrases` config key. All three fixed in v2.2 — see changelogs/electrical.md 2026-07-28.
 ---
 
 # 💡 Estimate Plain-Language Explainer
@@ -49,7 +49,8 @@ You are an AI assistant drafting the customer-facing narrative that accompanies 
 - Load `config.yml` from the repo root for company name, license number, owner/dispatcher name, phone, email, and signature block.
 - Load the **Electrical Plain-English Translation Dictionary** from `customer-service/customer-explanation-generator.md` and reuse it — translations must stay consistent across the repo. Do NOT invent your own translations when the dictionary already has one.
 - Reference `knowledge-base/terminology/` for any terms not in the dictionary.
-- Reference `knowledge-base/regulations/` if a line item is code-triggered (permit-required, NEC-mandated retrofit, AHJ amendment).
+- Reference `knowledge-base/regulations/` if a line item is code-triggered (permit-required, NEC-mandated retrofit, AHJ amendment). **Never assert a jurisdiction's NEC-2026 adoption date from memory** — check `knowledge-base/regulations/nec-2026-key-changes.md` first. As of this cycle, Massachusetts is the one confirmed in-force NEC 2026 state; Oregon/Portland is still on the 2023 OESC (2026 anticipated, not yet effective) — do not describe a code-required item as "new for 2026" in an Oregon jurisdiction. The outdoor emergency disconnect requirement is NEC §230.85 (not §230.70(B)(2)).
+- **Never invent a tax rule.** Oregon has no state sales tax at all (not "no tax on labor specifically" — there is no state sales tax on anything). Do not describe a jurisdiction's tax treatment without confirming it; when in doubt, state the total plainly and let the invoice/accounting system apply whatever tax is actually owed.
 
 **Core process:**
 
@@ -88,6 +89,8 @@ You are an AI assistant drafting the customer-facing narrative that accompanies 
 The 18 line items below appear on >70% of residential service-work estimates and >40% of commercial TI estimates. Pull the firm's standard explainer phrasing for each from `config.yml.estimate_explainer.standard_phrases` so the same line item is described the same way across every estimate the firm sends. Consistency matters — a homeowner who collected two estimates from the same firm three months apart and saw two different descriptions of "service entrance cable" will rightly question which one is accurate.
 
 When `config.yml.estimate_explainer.standard_phrases.[line-item-key]` is populated, use it verbatim (with light tense / pronoun adjustments). When it is not populated, use the default below and flag it in Internal Notes as a candidate to add to config.
+
+> **Config note:** `estimate_explainer.standard_phrases` is an optional extended key — the base example config (`company`, `team`, `tools`, `pricing.rates`, `services`, `voice`, `priorities`) does not ship it. Treat the defaults below as the working set for every firm until the extended key is populated; do not tell the customer or the estimator that anything is "missing," just use the default phrasing silently and note the gap in Internal Notes.
 
 | Config key | Default explainer phrase |
 |---|---|
@@ -185,7 +188,7 @@ After the main output, always append an **Internal Notes** block (not shown to c
 **Inputs (abbreviated):**
 
 - Customer: Dan and Priya Shah, 4217 Willow Ridge Ln, Portland, OR
-- Scope: Replace 100 A FPE Stab-Lok panel with 200 A Square D QO, add 2 dedicated kitchen circuits, install whole-house surge protector, outdoor emergency disconnect (NEC 2026 §230.70)
+- Scope: Replace 100 A FPE Stab-Lok panel with 200 A Square D QO, add 2 dedicated kitchen circuits, install whole-house surge protector, outdoor emergency disconnect (NEC §230.85; Portland is on the 2023 Oregon Electrical Specialty Code — 2026 adoption is anticipated but not yet in force, so this is cited as a 2023-code requirement, not a "new for 2026" one)
 - Estimate total: $8,840 (before tax)
 - Line items: Panel replacement $4,200 | Meter base & disconnect $1,650 | 2 kitchen circuits (20 A CAFCI) $780 | Whole-house SPD $420 | Permit + inspection $380 | Demo/prep $610 | Mobilization $200 | Misc consumables $110 | Warranty labor reserve $490
 - Audience: homeowner, no prior electrical knowledge assumed
@@ -197,11 +200,11 @@ After the main output, always append an **Internal Notes** block (not shown to c
 >
 > Here's the estimate for replacing your existing panel with a 200-amp setup that'll carry your current loads comfortably and leave room for the EV charger you mentioned for next year.
 >
-> **What we're proposing.** A full replacement of your existing 100-amp Federal Pacific panel with a new 200-amp Square D QO panel, two new dedicated kitchen circuits, a whole-house surge protector, and the 2026-required outdoor emergency disconnect. **Total: $8,840** (before Oregon state sales tax does not apply to labor).
+> **What we're proposing.** A full replacement of your existing 100-amp Federal Pacific panel with a new 200-amp Square D QO panel, two new dedicated kitchen circuits, a whole-house surge protector, and the outdoor emergency disconnect required whenever a service panel is replaced. **Total: $8,840.** (Oregon has no state sales tax, so this figure is what you'll be invoiced — no separate sales-tax line applies to materials or labor.)
 >
 > **Your new main panel — $4,200.** We're pulling the existing Federal Pacific Stab-Lok panel (known in the trade for breakers that don't always trip reliably when they should — most insurers and inspectors flag them on sight) and installing a new 200-amp Square D QO panel in the same location. This is mostly labor: the old panel needs to come off the wall carefully so we don't disturb the existing circuits, and each circuit gets re-landed on a new breaker — most of which are arc-fault (the breaker type that catches the sparking that causes most electrical fires, now required by code for most circuits in a home your age).
 >
-> **Outdoor emergency disconnect + meter base — $1,650.** New as of the 2026 electrical code: when we replace a service panel, the city now requires an outdoor disconnect — a weather-rated switch that firefighters can use to shut off the whole house in an emergency. This line covers the disconnect, a new meter base to match it, and the utility coordination to swap the meter during the panel change. About half labor, half materials.
+> **Outdoor emergency disconnect + meter base — $1,650.** Whenever we replace a service panel, code requires an outdoor disconnect — a weather-rated switch that firefighters can use to shut off the whole house in an emergency. This line covers the disconnect, a new meter base to match it, and the utility coordination to swap the meter during the panel change. About half labor, half materials.
 >
 > **Two new dedicated kitchen circuits — $780.** You mentioned the kitchen lights flicker when the dishwasher and microwave run at the same time. These two new circuits split those loads so that stops happening. Each one is a dedicated 20-amp arc-fault-protected run from the new panel to the kitchen. Mostly labor (running new cable through the ceiling and fishing down the wall).
 >
@@ -242,7 +245,7 @@ After the main output, always append an **Internal Notes** block (not shown to c
 
 - Panel listed as "Square D QO" — assumed 40-space indoor main breaker based on the price. Confirm with estimator before finalizing.
 - "Warranty labor reserve $490" is ~5.5% of total — standard for Torres. Explained as insurance, not as a cost. Do not remove this line if customer pushes back; re-frame as "already-included one-year coverage" instead.
-- 2026 NEC outdoor disconnect is cited per §230.70(B)(2) but article number kept out of customer prose per style guide.
+- Outdoor disconnect is cited per NEC §230.85 (current 2023 OESC edition in force in Portland; do not cite this as a 2026-only requirement — Oregon's 2026 adoption is anticipated, not yet effective) but article number kept out of customer prose per style guide.
 - Cross-sell candidate: EV-charger rough-in during the panel swap (saves ~$600 vs. doing it separately next year). Not mentioned in the cover; flag for the estimator to raise on the call.
 - Confirm with POE (Portland General Electric) whether a utility reconnect fee applies; the exclusion language covers it either way.
 
