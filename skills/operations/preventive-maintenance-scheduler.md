@@ -4,7 +4,7 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~45 min/schedule"
-version: 1.2
+version: 1.3
 last_eval_score: 9.70
 ---
 
@@ -47,6 +47,7 @@ You are an AI assistant helping electrical contractors build professional preven
 
 - Load `config.yml` from the repo root for company name, license number, owner / lead-tech names, default jurisdiction, default NEC cycle, NETA membership status (if any), `voice` preferences, and the **Equipment-Class PM Template Library** (`config.yml.preventive_maintenance_scheduler.equipment_class_library` — see the dedicated section below).
 - Reference `knowledge-base/regulations/nec-2026-key-changes.md` for NEC 2026 §110.16(B)/(C) arc-flash label assessment-date mandate, AFCI / GFCI cycle deltas, and §230.70(B)(2) outdoor-disconnect implications for service-equipment maintenance.
+- Reference `knowledge-base/regulations/nfpa-70e-2027-outlook.md` for the 70E edition anchor. The 5-year arc-flash re-assessment interval is unchanged in the incoming 2027 edition, so **no PM schedule dates shift because of it** — do not rebuild a re-assessment clock on the news that a new edition is coming. Cite the 70E edition the customer's (or the contractor's) safety program has adopted; 70E 2027 is not yet issued and is not citable on a PM contract deliverable.
 - Reference `knowledge-base/regulations/lighting-incentives-2026.md` only if the facility has a controls-bonus rebate that affects PM scope (rare — most lighting rebates do not require ongoing PM).
 - Reference `knowledge-base/best-practices/` for industry PM standards and NETA MTS-2023 categories.
 

@@ -18,7 +18,9 @@
 
 **Federal solar safe-harbor cross-reference:** Commercial solar projects racing the July 4, 2026 §48E "begin construction" deadline have NEC-cycle implications layered onto the federal-tax safe-harbor timeline. See `solar-itc-safe-harbor-2026.md` for the OBBBA / IRS Notice 2025-42 framework and contractor-side documentation checklist.
 
-**Last updated in this repo:** 2026-06-08 (landscape monitor — Oregon 2026 OESC anticipated effective Oct 1, 2026 per Oregon BCD; aggregator "adopted" overclaim flagged. Massachusetts in effect April 24, 2026; Texas Sept 1, 2026; Washington Dec 31, 2026 carried forward).
+**Mid-cycle amendment caution:** the adopted *edition* is only half the question. A published NEC can be amended between editions by a Tentative Interim Amendment (TIA), which carries the same force as the text it amends the moment it is issued. See **§10** before citing a specific section on anything an inspector will read.
+
+**Last updated in this repo:** 2026-07-13 (landscape monitor — added §10 on Tentative Interim Amendments, covering live TIA activity against the 2026 edition: TIA 1903 (§700.6(C) transfer-equipment bypass/isolation exception), TIA 1912 (§624.44(A) portable EVSE/ESVSE connection), TIA 1915 (Table 270.122(B) UL heading alignment). Prior §10 renumbered to §11). Prior update 2026-06-08 (Oregon 2026 OESC anticipated effective Oct 1, 2026 per Oregon BCD; aggregator "adopted" overclaim flagged. Massachusetts in effect April 24, 2026; Texas Sept 1, 2026; Washington Dec 31, 2026 carried forward).
 
 This document is a practical summary for contractors. It is not a substitute for reading the Code. Always confirm text against the published NEC and any state/local amendments.
 
@@ -134,11 +136,53 @@ NEC adoption is a state-by-state process. The code is published by NFPA; enforce
 
 ---
 
-## 10. How AI Assistants Should Handle NEC 2026 References
+## 10. Tentative Interim Amendments (TIAs) — How the 2026 NEC Changes *Between* Editions
+
+Everything above treats "NEC 2026" as a fixed document. It isn't. A published NFPA code can be amended mid-cycle by a **Tentative Interim Amendment (TIA)** — and a TIA, once issued by the Standards Council, **has the same force as the text it amends**, effective immediately, without waiting for the 2029 edition.
+
+This is a real and commonly-missed gap. A contractor who verifies "my AHJ enforces NEC 2026," pulls the 2026 book, and stops there can still be working from superseded text. **The adoption question ("which edition?") and the amendment question ("which TIAs are in force against that edition?") are two different questions.** The repo's adoption-tracker guidance in §9 answers only the first.
+
+### The TIA lifecycle, briefly
+
+A TIA is proposed (often by a manufacturer, an association, or an individual who has found an error or an unworkable omission) → posted for public comment with a stated closing date → balloted by the responsible technical committee → issued or rejected by the Standards Council. Most proposed TIAs do not survive. The ones that do become enforceable text.
+
+**Practical consequence: a proposed TIA is not a code change and must never be cited as one.** But it is an early-warning signal about a provision that practitioners are finding broken in the field — which is often exactly the provision that will generate an inspection dispute.
+
+### Live TIA activity against the 2026 NEC (as of this update)
+
+Three TIAs against the 2026 edition were in the public-comment window in mid-2026, and one against the next cycle had ballot results posted. **All are proposals under review — none of the below is enforceable text, and none should be cited on a submittal, permit drawing, or inspection report.**
+
+| TIA Log No. | Targets | What it seeks to do | Comment closed |
+|---|---|---|---|
+| **1903** | §700.6(C) + new Exception | Add an exception to the **bypass-and-isolation requirement for emergency-system transfer equipment**, so it would not apply where the emergency-dependent processes can be safely disabled during service, the structure is unoccupied with fire protection fully functional, temporary means are substituted, and a written emergency plan is filed with the AHJ. Submitted by NEMA. | July 27, 2026 |
+| **1912** | §624.44(A) | Revise **connection requirements for portable EVSE / ESVSE** — permitting certain listed 30 A / 50 A / 60 A receptacles, adding 277 V single-phase and 277/480 V three-phase locking pin-and-sleeve provisions, and clarifying attachment-plug sizing. Argues Article 624 was created from Article 625 in a way that left the two articles in conflict. Submitted by Beta Technologies. | July 8, 2026 |
+| **1915** | Tables 270.122(B)(1)–(3) | Correct **table headings** so they align with the referenced UL standards. An editorial-alignment fix, not a substantive requirement change. | July 7, 2026 |
+
+A separate TIA (**No. 1896**, disconnecting means) went to final ballot against the *next* NEC cycle — a reminder that TIA traffic runs against multiple editions at once, and that the edition a TIA targets is as important as the TIA itself.
+
+### Why the §700.6(C) item (TIA 1903) is the one to actually watch
+
+It is the only one of the three with a direct commercial-scope consequence. If a contractor is bidding emergency-system work in a large occupancy — hospital, high-rise, assembly — the bypass-and-isolation requirement for transfer equipment drives real equipment cost and real service-access design. The proposal's own argument is that the as-published 2026 language leaves large occupancies without a practical way to service failed transfer equipment. Whichever way it resolves:
+
+- **If the TIA is issued**, some projects gain a documented path to omit bypass/isolation hardware — but only against a four-condition test, one of which is a **written emergency plan made available to the AHJ**. That is contractor scope, and it is the kind of condition that gets promised in a bid and forgotten before inspection.
+- **If it is rejected**, the as-published requirement stands and should be priced in.
+
+**Either way, the bid-time move is the same: do not assume the exception. Price the requirement, and flag the TIA as a potential deduct.**
+
+### The rule for this repo
+
+> Verifying an AHJ's adopted **edition** is necessary but not sufficient. Before citing a specific 2026 NEC section on a document that an inspector will read, check whether a TIA has been **issued** against that section. Check the NFPA document information page for NFPA 70 — TIAs and errata are posted there under the current-edition tab.
+
+Proposed TIAs are useful to a contractor as **risk signal** (this provision is contested; expect field variance and inspector disagreement) and as **bid-strategy input** (price the published requirement; carry the potential relief as a deduct). They are never a citation.
+
+---
+
+## 11. How AI Assistants Should Handle NEC 2026 References
 
 When using AI skills in this repo to draft inspection reports, permit narratives, or code-reference lookups:
 
 - **Default to the user's AHJ code cycle** loaded from `config.yml`. Do not assume 2026 unless explicitly confirmed.
+- **Never present a proposed TIA as a code change.** If a user's question touches a section with live TIA activity (see §10 — currently §700.6(C), §624.44(A), Tables 270.122(B)(1)–(3)), state the published requirement as the governing text, then flag the TIA separately as a pending proposal and a bid-risk signal. A proposed TIA is never a citation.
 - If the user cites an article that moved in 2026 (e.g., Article 220), the AI should note the reorganization and provide both the old and new citations in a transition period.
 - For arc flash label content, the AI should always prompt for the assessment date — it is now a required field on the label.
 - AI-generated load calculations should ask whether an energy management system is used; if so, flag Article 130 provisions.

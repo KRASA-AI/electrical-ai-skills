@@ -4,7 +4,7 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: advanced
 time_saved: "~45 min/JHA"
-version: 1.0
+version: 1.1
 last_eval_score: null
 ---
 
@@ -63,6 +63,8 @@ You are an AI assistant compiling a Job Hazard Analysis / Pre-Task Plan for an e
 
 - Load `config.yml` for company legal name, license number, foreman / competent-person roster, in-house qualified-electrical-worker (QEW) list per NFPA 70E §110.6, standard PPE inventory, standard LOTO devices, emergency-contact list, and `voice.banned_phrases`.
 - Load `knowledge-base/regulations/nec-2026-key-changes.md` for the cycle-aware NEC references (Article 220 → 120 migration; Article 750 → 130 EMS migration; §110.16 / §110.24 labeling cycle).
+- Load `knowledge-base/regulations/nfpa-70e-2027-outlook.md` before emitting any 70E citation. **Every 70E section number in this skill is anchored to the edition the user's written electrical safety program has adopted — today, for nearly everyone, 70E 2024.** 70E 2027 cleared the June 2026 Technical Meeting as a Consent Standard (no amending motions) and is expected to issue in fall 2026, but an unissued standard is not citable. A JHA or EEWP is read by an OSHA compliance officer and, after a recordable incident, by a plaintiff's attorney: a section number from an edition that did not exist on the date the document was signed is an evidentiary problem, not a sign of diligence. The citation anchor changes only when the *user's own program* adopts the new edition.
+- **Low-voltage/high-current caution (practice, not citation).** If the task involves a battery energy storage system, a DC-coupled PV array, an EV charging installation, or any other high-current low-voltage source, do **not** let a sub-50 V nominal reading terminate the hazard analysis. Arc-flash and thermal energy can be present well below the voltage thresholds that trigger the familiar shock-protection boundaries. Analyze the *available energy*, not just the nameplate voltage — the 70E 2027 draft is reported to be tightening exactly this reasoning. Tightening the analysis early is sound practice; citing 2027 for it is not.
 - Load `knowledge-base/regulations/material-tariffs-2026.md` only if the JHA's source equipment is a long-lead item flagged on the project's material-tariff schedule (rare — typically not relevant to the JHA).
 - Read the equipment's arc-flash label (or the project arc-flash study) before composing the EEWP: the incident energy, the arc-flash boundary, and the assessment date drive the PPE category and the EEWP's "approach boundary" section. If the label's assessment date is more than 5 years old or the system has changed materially since the assessment, flag the JHA for "re-assessment required per NFPA 70E §130.5(B) before energized work."
 
@@ -177,6 +179,8 @@ The output must NOT do any of the following. If asked to do any of these, refuse
 8. **No JHA that does not name the competent person.** OSHA 29 CFR 1926.32(f) and NFPA 70E §110.5 require a named competent person / qualified person — anonymous JHAs do not meet OSHA documentation.
 9. **No NFPA 70E approach-boundary value pulled from a generic table when the actual gear has a labeled boundary.** The label governs.
 10. **No PPE category derived from incident-energy method *and* the table method on the same equipment.** Pick one method per gear (per NFPA 70E §130.5(G)); cite the chosen method explicitly.
+11. **No citation to an unpublished NFPA 70E edition.** Cite only the edition the user's electrical safety program has adopted. NFPA 70E 2027 is not issued (expected fall 2026) and must not appear in a section reference, a PPE-category basis, or an EEWP — regardless of how imminent publication is.
+12. **No JHA that clears a low-voltage source on nominal voltage alone.** If the source is a battery bank, DC bus, PV array, or EVSE with high available fault current, the JHA must address available incident energy even where the nominal voltage sits below the usual shock-boundary thresholds. "It's only 48 V" is not a hazard analysis.
 11. **No backfeed step omitted.** Even on a "nothing on this site is solar" job — the JHA verifies it's not solar / BESS / generator-fed, rather than assuming.
 12. **No sign-off block without space for every crew member.** A JHA the crew has not signed is not a JHA.
 13. **No NEC citation without the article and section number.** "Per the NEC" is not a citation; "Per NEC 110.24" is.
@@ -193,6 +197,7 @@ The output must NOT do any of the following. If asked to do any of these, refuse
 - `skills/operations/submittal-package-compiler.md` — Submittal package; the JHA reads the equipment ratings on the cut sheet (kAIC, SCCR, AFC) but does not generate the submittal.
 - `skills/admin/contract-risk-reviewer.md` — Used when an owner-specific safety program (ABC STEP / OSHA VPP / hyperscaler / utility / federal-prime) imposes contract-specific JHA requirements that differ from the company's standard.
 - `knowledge-base/regulations/nec-2026-key-changes.md` — Cycle-aware citation reference.
+- `knowledge-base/regulations/nfpa-70e-2027-outlook.md` — 70E edition anchor, Consent-Standard status, and the pre-issuance citation rule.
 
 ## Example Output
 
