@@ -4,8 +4,8 @@ category: _shared
 tools: [claude, chatgpt]
 difficulty: beginner
 time_saved: "~10 min/use"
-version: 2.1
-last_eval_score: 9.70
+version: 2.2
+last_eval_score: 6.50  # graded 2026-07-20 / re-confirmed 2026-10-13 (v2.1); the 9.70 figure predated the rubric re-baseline. Fixed in v2.2: §230.70(B)(2) → §230.85 and "2026-only" framing removed; Seattle-on-NEC-2026 claim corrected; §210.12(B) → §210.12(A); dubious §250.70 correction replaced; weekday/date errors; voice table mapped to real config keys. See changelogs/electrical.md 2026-10-13.
 ---
 
 # Email Drafter
@@ -51,15 +51,17 @@ Load `config.yml` from the repo root and resolve these voice keys IN ORDER. If a
 | `company.name` | Signature line | "[Company Name]" placeholder + flag |
 | `company.license_no` | Signature line, inspector emails | "[License #]" placeholder + flag |
 | `company.phone`, `.email`, `.address` | Signature block | "[Phone] / [Email] / [Address]" + flag |
-| `voice.formality` | first/last name use, contractions | `professional-warm` (contractions OK; first names with homeowners; last names with inspectors) |
+| `voice.tone` *(base-config key)* | Overall register — read it, then map to the formality default below | `professional-warm` (contractions OK; first names with homeowners; last names with inspectors) |
 | `voice.contractions` | "we'll" vs "we will" | `enabled` |
 | `voice.greeting_style` | "Hi Sarah," vs "Sarah —" vs "Dear Ms. Chen," | `first-name-comma` for homeowner / GC / PM / supplier / tenant; `last-name-formal` for inspector / utility |
 | `voice.signoff_style` | "Thanks," vs "Best," vs "Sincerely," | `Thanks,` for homeowner / GC / PM / supplier / tenant; `Sincerely,` for inspector / utility / collections |
 | `voice.emoji_policy` | Whether emojis are allowed | `mirror-recipient` (only if recipient used one first; never on inspector / utility / collections / formal) |
-| `voice.banned_phrases` | Marketing fluff to avoid | Default banned: "world-class", "trusted partner", "your satisfaction is our top priority", "innovative solutions", "industry-leading", "premier", "best-in-class" |
-| `default_jurisdiction.state` | NEC adoption check | "[State]" + flag |
-| `default_jurisdiction.nec_cycle` | Inspector NEC citation cycle | 2023 (most-adopted as of Q1 2026) + flag |
+| `voice.never_use` *(base-config key)* + `voice.always_use` | Phrases to avoid / phrases the owner always uses | Default banned: "world-class", "trusted partner", "your satisfaction is our top priority", "innovative solutions", "industry-leading", "premier", "best-in-class" |
+| `default_jurisdiction.state` | NEC adoption check | `company.location` (base-config key) for the state; flag it |
+| `default_jurisdiction.nec_cycle` | Inspector NEC citation cycle | **No default for inspector emails — ask.** For non-inspector drafts, check the adoption snapshot in `nec-2026-key-changes.md` |
 | `default_jurisdiction.citation_format` | Full vs. abbreviated NEC §§ | `full-with-cycle` ("NEC 2023 §240.21(B)(1)") |
+
+**Base-config reality check:** the shipped `config.example.yml` only carries `company.*` (name, location, service_area, website), `voice.tone`, `voice.always_use`, `voice.never_use`, `pricing.*` and `tools.*`. Every other key in this table (license number, phone, email, greeting/sign-off style, jurisdiction block) is an *optional extension*. If a key is absent, use the fallback and list it once in Internal Notes. Do not list it on every draft, and never invent a license number.
 
 Apply the resolved voice to every draft. Do not hand-write a tone; pull it.
 
@@ -71,7 +73,9 @@ When the recipient is `inspector` or `AHJ`:
 
 1. **Use the AHJ's adopted NEC cycle, NOT the firm's default.** If the user did not provide jurisdiction, ask before drafting. Do not guess.
 2. **Cite per the AHJ's preferred format.** If `default_jurisdiction.citation_format` = `full-with-cycle`, render as `NEC 2023 §250.122(B)`. If `abbreviated`, render as `§250.122(B)` only. If unknown, default to `full-with-cycle`.
-3. **State / AHJ Adoption Snapshot:** Before citing any 2026-only provision (Article 120 load calc, §110.16(B)/(C) arc-flash assessment-date mandate, §230.70(B)(2) outdoor disconnect, §705 PCS / UL 3141), confirm the AHJ is on the 2026 cycle. If the AHJ is on 2020 or 2023, do NOT cite the 2026-only provision in an inspector email; cite the in-force cycle's equivalent and reserve the 2026 reference for an internal note.
+3. **State / AHJ Adoption Snapshot:** Before citing any 2026-only provision (Article 120 section numbers for load calcs, the 2026 arc-flash label assessment-date field, other renumbered 2026 sections), confirm the AHJ is on the 2026 cycle **for this permit's application date**. If the AHJ is on 2020 or 2023, do NOT cite the 2026-only provision in an inspector email; cite the in-force cycle's equivalent (e.g., Article 220 instead of Article 120) and put the 2026 reference in an internal note. The outdoor emergency disconnect for one- and two-family dwellings is **§230.85** and has applied **since the 2020 cycle** — it is not a 2026-only provision, and "§230.70(B)(2)" is the wrong cite for it.
+   - **Adoption status as of 2026-10-13** (re-check the KB before relying on it): MA (Apr 24, 2026), TX (Sept 1, 2026) and OR (2026 OESC, Oct 1, 2026) enforce NEC 2026. Washington's 2026 adoption is not effective until Dec 31, 2026.
+   - **TIAs:** if the cited section has an issued TIA (see the §10 register in `nec-2026-key-changes.md`), confirm the AHJ adopted it before citing the amended text.
 4. **Never cite an NEC section you cannot verify in `knowledge-base/regulations/`.** If the cited section is not in the KB, surface an Internal Note asking the user to verify.
 
 ### Before you start — Knowledge-Base Pulls
@@ -85,7 +89,7 @@ When the recipient is `inspector` or `AHJ`:
 1. Identify the email type from the categories above — if it doesn't fit one, pick the closest match and note it in the Internal Notes block.
 2. Resolve voice from config (above).
 3. Draft a subject line that is specific and scannable:
-   - GOOD: "Permit pulled — 1422 Maple St service upgrade — inspection Thursday 4/17"
+   - GOOD: "Permit pulled — 1422 Maple St service upgrade — inspection Thursday 4/16"
    - BAD: "Update" / "Following up" / "Your electrical project"
 4. Open with the bottom line in the first sentence. Electrical customers and GCs don't want a "hope this finds you well" windup — they want to know immediately whether action is required.
 5. Use short paragraphs (2–3 sentences max). Use bullets for lists of items (materials, circuits, corrections).
@@ -108,7 +112,7 @@ When the recipient is `inspector` or `AHJ`:
 
 The skill must NOT auto-send any draft that violates these rules. Surface the violation in the Internal Notes block and let the user decide.
 
-1. **Never send an inspector a draft containing a 2026-only NEC provision in a 2020/2023-cycle AHJ.** (Example: never cite §230.70(B)(2) outdoor disconnect to a Houston inspector unless the City of Houston has adopted 2026.)
+1. **Never send an inspector a draft containing a 2026-only NEC provision in a 2020/2023-cycle AHJ.** (Example: never cite an Article 120 load-calculation section to an inspector whose permit is under the 2023 cycle — cite the Article 220 equivalent. Texas moved to NEC 2026 on Sept 1, 2026, so a Houston permit applied for before that date is still a 2023 permit.)
 2. **Never send a homeowner a draft containing more than two NEC section numbers without plain-English translation.** Homeowners do not read code. Use customer-explanation-generator's translation dictionary.
 3. **Never send a GC a draft naming a specific delay-cause attribution** (e.g., "the delay is the plumber's fault") without an Internal Notes flag asking the user to confirm the attribution before sending. Wrong attribution generates an enemy.
 4. **Never send a draft containing a banned-voice phrase** from `voice.banned_phrases`. Replace with the trade-equivalent or remove.
@@ -142,15 +146,15 @@ After the draft, add a short **Internal Notes** section flagging:
 
 ### Example 1 — Homeowner: permit pulled + inspection scheduled
 
-**Input:** Email to homeowner Sarah Chen — permit pulled for her service upgrade at 1422 Maple St, rough-in inspection scheduled Thursday 4/17 between 10 AM and noon, need her or someone 18+ on-site, power will be off roughly 2 hours during the swap (already scheduled for next Monday 4/21 starting at 8 AM). Voice: `professional-warm`, contractions enabled, greeting `first-name-comma`, signoff `Thanks,`. Company: Torres Electric, License #EC-00842.
+**Input:** Email to homeowner Sarah Chen — permit pulled for her service upgrade at 1422 Maple St, rough-in inspection scheduled Thursday 4/16 between 10 AM and noon, need her or someone 18+ on-site, power will be off roughly 2 hours during the swap (already scheduled for next Monday 4/20 starting at 8 AM). Voice: `professional-warm`, contractions enabled, greeting `first-name-comma`, signoff `Thanks,`. Company: Torres Electric, License #EC-00842.
 
-**Subject:** Permit pulled — 1422 Maple St — inspection Thu 4/17, power-off Mon 4/21
+**Subject:** Permit pulled — 1422 Maple St — inspection Thu 4/16, power-off Mon 4/20
 
 Hi Sarah,
 
-Good news on the service upgrade — we pulled the permit this morning and the inspection is scheduled for **Thursday, April 17 between 10 AM and noon**. You (or another adult) will need to be home so the inspector can access the panel area.
+Good news on the service upgrade — we pulled the permit this morning and the inspection is scheduled for **Thursday, April 16 between 10 AM and noon**. You (or another adult) will need to be home so the inspector can access the panel area.
 
-For the actual panel swap on **Monday, April 21**, we'll start at 8 AM. Power to the house will be off for roughly **2 hours** while we change out the panel and tie in the new service. If you have anything that can't lose power — medical equipment, a home office on a deadline, freezer contents — let me know by Friday and we'll work around it.
+For the actual panel swap on **Monday, April 20**, we'll start at 8 AM. Power to the house will be off for roughly **2 hours** while we change out the panel and tie in the new service. If you have anything that can't lose power — medical equipment, a home office on a deadline, freezer contents — let me know by Friday and we'll work around it.
 
 Please reply to confirm you've got both dates on your calendar.
 
@@ -167,17 +171,17 @@ Torres Electric — License #EC-00842
 
 ### Example 2 — General Contractor: rough-in complete + schedule update
 
-**Input:** Email to Dan Verheij at Bracken Construction (GC) — Bracken Boulder commercial TI job, our electrical rough-in complete on the second floor as of today, third-floor rough-in starts Monday and finishes Wednesday, mechanical contractor's HVAC drops on the third floor are conflicting with two of our home runs and we need a coordination call before Monday. Voice: `professional-warm`, contractions enabled, greeting `first-name-comma`, signoff `Thanks,`.
+**Input:** Email to Dan Verheij at Bracken Construction (GC) — Bracken Boulder commercial TI job, our electrical rough-in complete on the second floor as of today, third-floor rough-in starts Monday 4/27 and finishes Wednesday 4/29, mechanical contractor's HVAC drops on the third floor are conflicting with two of our home runs and we need a coordination call before Monday. Voice: `professional-warm`, contractions enabled, greeting `first-name-comma`, signoff `Thanks,`.
 
-**Subject:** Bracken Boulder TI — 2F rough-in complete; need 30-min HVAC coord call before Mon 4/28
+**Subject:** Bracken Boulder TI — 2F rough-in complete; need 30-min HVAC coord call before Mon 4/27
 
 Dan,
 
 Second-floor electrical rough-in is complete as of today; ready for your inspection coordination whenever the framing punch is closed.
 
-Third-floor rough-in starts **Monday 4/28** and we're sized to finish by **Wednesday 4/30**. Two of our home runs (panel 3LP, circuits 14 and 22) are running into the new HVAC drops Apex put in the field last week. Need a 30-minute coordination call with you and Apex's foreman before Monday morning so we don't reroute and then have to reroute again.
+Third-floor rough-in starts **Monday 4/27** and we're sized to finish by **Wednesday 4/29**. Two of our home runs (panel 3LP, circuits 14 and 22) are running into the new HVAC drops Apex put in the field last week. Need a 30-minute coordination call with you and Apex's foreman before Monday morning so we don't reroute and then have to reroute again.
 
-Can we lock in **Friday 4/25 at 2 PM** on a Teams call? Reply with a thumbs up or pick a different window.
+Can we lock in **Friday 4/24 at 2 PM** on a Teams call? Reply with a thumbs up or pick a different window.
 
 Thanks,
 Mike Torres
@@ -217,16 +221,16 @@ Torres Electric — License #EC-00842
 
 ### Example 4 — Inspector / AHJ: corrections-complete re-inspection request
 
-**Input:** Email to Inspector Kowalski, City of Portland BDS — service upgrade at 1422 Maple St, original rough-in inspection on 4/17 had two corrections (1) GEC connection at the water main needed an irreversible compression connector per §250.70 and (2) AFCI breakers needed for two added kitchen receptacle circuits per §210.12(B). Both corrected this week; need re-inspection. AHJ on 2023 NEC. Voice: `professional-formal` for inspector, `last-name-formal` greeting, `Sincerely,` signoff. Company: Torres Electric, License #EC-00842, Portland OR.
+**Input:** Email to Inspector Kowalski, City of Portland BDS — service upgrade at 1422 Maple St, original rough-in inspection on 4/16 had two corrections: (1) the GEC connection to the interior metal water pipe was more than 5 ft from where the pipe enters the building, contrary to §250.68(C)(1); (2) AFCI protection was missing on two added kitchen receptacle circuits, per §210.12(A). Both corrected this week; need re-inspection. Permit applied for April 2026 → Portland on the 2023 OESC (NEC 2023 + Oregon amendments); Oregon's 2026 OESC did not take effect until Oct 1, 2026. Voice: `professional-formal` for inspector, `last-name-formal` greeting, `Sincerely,` signoff. Company: Torres Electric, License #EC-00842, Portland OR.
 
 **Subject:** Re-inspection request — 1422 Maple St — Permit 2026-04-EL-1142 — corrections complete
 
 Inspector Kowalski,
 
-Re-inspection requested on permit 2026-04-EL-1142 (1422 Maple St, service upgrade). Both corrections from the 4/17 rough-in inspection are complete:
+Re-inspection requested on permit 2026-04-EL-1142 (1422 Maple St, service upgrade). Both corrections from the 4/16 rough-in inspection are complete:
 
-1. GEC connection at the water main — replaced the bonded clamp with an irreversible compression connector per NEC 2023 §250.70.
-2. Two added kitchen receptacle circuits — installed combination AFCI breakers per NEC 2023 §210.12(B).
+1. GEC connection to the metal water pipe — relocated to within 5 ft of the point of entrance per NEC 2023 §250.68(C)(1), using a listed clamp, accessible.
+2. Two added kitchen receptacle circuits — installed combination AFCI/GFCI (dual-function) breakers per NEC 2023 §210.12(A) and §210.8(A)(6).
 
 Available for re-inspection any time during the BDS Tuesday or Thursday morning windows next week. Photos of both corrections attached.
 
@@ -238,7 +242,9 @@ Torres Electric — License #EC-00842
 (555) 123-4567 · mike@torres-electric.com
 
 **Internal Notes:**
-- Citation format: `full-with-cycle` — Portland BDS is on NEC 2023 (verified in config and KB). Did NOT cite §230.70(B)(2) outdoor disconnect because Portland has not adopted NEC 2026 as of Q1 2026 (NEVER-SEND #1 hold).
+- Citation format: `full-with-cycle`. The permit was applied for in April 2026, so it is under the 2023 OESC (checked against the KB adoption snapshot). A Portland permit applied for on or after Oct 1, 2026 would be cited as the 2026 OESC instead.
+- The outdoor emergency disconnect (§230.85) was not cited because it was not one of the corrections, not because of the code cycle; §230.85 applies under 2020, 2023 and 2026 alike.
+- §210.12(A) is the dwelling-unit AFCI rule (§210.12(B) is dormitory units, so it would be the wrong cite). Kitchen receptacles also need GFCI under §210.8(A)(6), which is why a dual-function breaker is named.
 - No dollar figures or invoice references included (NEVER-SEND #5).
 - Recommend attaching: (a) close-up photo of GEC compression at water main; (b) panel photo with the two new AFCI breakers labeled.
 - If the inspector responds with a different preferred citation format (some BDS inspectors prefer abbreviated §-only), update `default_jurisdiction.citation_format` in config to `abbreviated` for future drafts.
@@ -259,7 +265,7 @@ Releasing PO K-2026-0188 for the Bracken Boulder TI:
 - Target jobsite delivery: **8/15/2026**
 - Bond and grounding lugs sized for 500 kcmil
 
-Need LT confirmation by **Friday 5/2**. If the GE / Eaton / Siemens lines are all past 8/15, send the next two soonest options with prices so I can decide before the close-out call with the GC on Tuesday.
+Need LT confirmation by **Friday 5/1**. If the GE / Eaton / Siemens lines are all past 8/15, send the next two soonest options with prices so I can decide before the close-out call with the GC on Tuesday.
 
 Thanks,
 Mike Torres
@@ -299,7 +305,7 @@ Torres Electric — License #EC-00842
 
 ### Example 7 — Utility Coordinator: service reconnect scheduling
 
-**Input:** Email to Reese Acharya, Service Coordinator at PSE — need reconnect on a 200 A → 400 A residential service upgrade at 882 Westmoreland Ave, account #PSE-552-0188, service-order #SO-2026-04188, target reconnect window 5/26 morning, panel and outdoor disconnect ready as of 5/22, all permits closed. Voice: `professional-formal` for utility, `last-name-formal` greeting, `Sincerely,` signoff.
+**Input:** Email to Reese Acharya, Service Coordinator at PSE — need reconnect on a 200 A → 400 A residential service upgrade at 882 Westmoreland Ave, account #PSE-552-0188, service-order #SO-2026-04188, target reconnect window 5/26 morning, panel and outdoor emergency disconnect ready as of 5/22, all permits closed. Bellevue WA (PSE territory); permit under the 2023 NEC as adopted by Washington (WA's 2026 adoption is effective Dec 31, 2026). Voice: `professional-formal` for utility, `last-name-formal` greeting, `Sincerely,` signoff.
 
 **Subject:** Reconnect request — Account PSE-552-0188 — SO-2026-04188 — 882 Westmoreland Ave — target 5/26 AM
 
@@ -307,11 +313,11 @@ Ms. Acharya,
 
 Reconnect request on a 200 A → 400 A residential service upgrade.
 
-- Service address: 882 Westmoreland Ave, Seattle WA
+- Service address: 882 Westmoreland Ave, Bellevue WA
 - PSE account: PSE-552-0188
 - PSE service order: SO-2026-04188
-- New panel: 400 A, outdoor-mounted with §230.70(B)(2)-compliant emergency disconnect
-- Permit status: BDS final inspection passed 5/20; permit 2026-05-EL-0188 closed 5/21
+- New service: 400 A, with outdoor emergency disconnect per §230.85
+- Permit status: City of Bellevue final inspection passed 5/20; permit 2026-05-EL-0188 closed 5/21
 - Target reconnect window: morning of **Tuesday, May 26**
 
 If 5/26 AM is unavailable, the next acceptable window is the morning of 5/28. Please confirm dispatch and any pre-arrival meter-base photo requirements.
@@ -322,11 +328,14 @@ Torres Electric — License #EC-00842
 (555) 123-4567 · mike@torres-electric.com
 
 **Internal Notes:**
-- Cited §230.70(B)(2) only because Seattle is on NEC 2026 — verify against KB before sending if config doesn't reflect the latest adoption status.
+- Cited §230.85 (outdoor emergency disconnect), which applies in Washington under the 2023 NEC. No 2026-only provision was cited. Washington's NEC 2026 adoption does not take effect until Dec 31, 2026.
+- Utility check: the address is in Bellevue, which PSE serves. A Seattle address would be Seattle City Light, not PSE, so always match the utility to the service address before sending.
 - No dollar amounts (NEVER-SEND #5).
 - Customer name and tenant detail intentionally omitted from this utility-side email.
 - Recommend attaching the inspection-passed sticker photo and the new meter-base photo.
 
 ## Anti-Plagiarism Notes
 
-Subject-line conventions, signature block format, and "bottom line up front" structure are uncopyrightable craft conventions. NEC section references (§210.12(B), §230.70(B)(2), §240.21(B)(1), §250.70, §250.122(B)) are uncopyrightable code citations. Worked-example names ("Sarah Chen," "Dan Verheij," "Lia Patel," "Inspector Kowalski," "Karen," "Aaron Diallo," "Reese Acharya"), addresses ("1422 Maple St," "882 Westmoreland Ave"), permit numbers, and PO numbers are fictional. Real utility name (PSE) and real distributor name (Crescent Electric Supply) are uncopyrightable trade names referenced in their actual business sense.
+Subject-line conventions, signature block format, and "bottom line up front" structure are uncopyrightable craft conventions. NEC section references (§210.8(A)(6), §210.12(A), §230.85, §240.21(B)(1), §250.68(C)(1), §250.122(B)) are uncopyrightable code citations. Worked-example names ("Sarah Chen," "Dan Verheij," "Lia Patel," "Inspector Kowalski," "Karen," "Aaron Diallo," "Reese Acharya"), addresses ("1422 Maple St," "882 Westmoreland Ave"), permit numbers, and PO numbers are fictional. Real utility name (PSE) and real distributor name (Crescent Electric Supply) are uncopyrightable trade names referenced in their actual business sense.
+
+*v2.2 — 2026-10-13 — Skill Evaluator fix: outdoor emergency disconnect re-cited §230.70(B)(2) → §230.85 everywhere, no longer framed as 2026-only; NEVER-SEND #1 example now uses a real 2026-only item (Article 120); Example 7 moved from Seattle (wrong utility, wrong "NEC 2026" claim) to Bellevue/PSE on the 2023 NEC; Example 4 corrections replaced with verifiable cites (§250.68(C)(1), §210.12(A) + §210.8(A)(6)); five weekday/date mismatches fixed against the 2026 calendar; voice table mapped to the real base-config keys; adoption snapshot and TIA check added.*

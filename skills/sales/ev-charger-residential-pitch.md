@@ -4,15 +4,15 @@ category: sales
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~25 min/pitch"
-version: 1.2
-last_eval_score: null
+version: 1.3
+last_eval_score: 6.60  # graded 2026-07-28 / re-confirmed 2026-10-13 (v1.2). Fixed in v1.3: EVSE-vs-breaker sizing rule, §230.85 outdoor-disconnect cite and its 2020-cycle origin, Article 130 EMS cite, Portland adoption date (Oregon 2026 OESC in force Oct 1, 2026, not Oct 2025), TIA 1892 GFCI guardrail, config fallbacks. See changelogs/electrical.md 2026-10-13.
 ---
 
 # ⚡ EV Charger Residential Pitch
 
 ## Purpose
 
-Produce a one-page homeowner-facing pitch for a residential Level-2 EV charger installation that (1) opens with the right conversation for the homeowner's situation rather than a generic "we install EV chargers" brochure, (2) accurately sizes the job under the **2026 NEC** rules — Article 120 load calc, §120.82(D) 100%-of-nameplate for EVSE, §625.42 EVEMS recognition, the new §230.70 outdoor service-disconnect requirement, and the §120.82-"qualified persons only" mandate — and (3) always runs the **service-upgrade-avoidance check** before pitching an upgrade, because an EV Energy Management System (EVEMS) can often add a Level-2 charger to an existing 100 A or 200 A service without touching the panel.
+Produce a one-page homeowner-facing pitch for a residential Level-2 EV charger installation that (1) opens with the right conversation for the homeowner's situation rather than a generic "we install EV chargers" brochure, (2) accurately sizes the job under the code cycle the AHJ actually enforces — for a 2026-cycle AHJ that means the Article 120 load calc with the EVSE at its full nameplate rating, §625.42 EVEMS recognition, the outdoor emergency disconnect on any one- or two-family service replacement (§230.85, in force since the 2020 cycle), and the 2026 Article 625 "qualified person" installation language — and (3) always runs the **service-upgrade-avoidance check** before pitching an upgrade, because an EV Energy Management System (EVEMS) can often add a Level-2 charger to an existing 100 A or 200 A service without touching the panel.
 
 The output is a clean one-pager (or short email) that a homeowner reads and says *"I understand what I'm paying for, I understand why the number is what it is, and I don't feel like I'm being upsold."*
 
@@ -33,16 +33,18 @@ Do NOT use this skill to produce a firm contract or a stamped load calculation. 
 Provide the following:
 
 1. **Homeowner name and address** — For the greeting and to let the skill know the jurisdiction (state/county/city) so it can check NEC adoption status.
-2. **Jurisdiction and NEC cycle in force** — State + AHJ, and whether the jurisdiction has adopted the 2026 NEC, is still on 2023, or still on 2020. This matters because the pitch cannot reference a 2026-only provision (EVEMS §625.42, §120.82(D) 100% rule, §230.70 outdoor disconnect) in a jurisdiction still on 2023 without flagging it as "coming soon" rather than "required now."
+2. **Jurisdiction and NEC cycle in force** — State + AHJ, and whether the jurisdiction has adopted the 2026 NEC, is still on 2023, or still on 2020. This matters because the pitch cannot reference a 2026-only provision (Article 120 section numbers, the Article 625 qualified-person language) in a jurisdiction still on 2023 without flagging it as "coming with the next cycle" rather than "required now." The **outdoor emergency disconnect (§230.85) is NOT 2026-only** — it has applied to one- and two-family service replacements since the 2020 cycle, so it belongs in the scope in a 2020, 2023 or 2026 AHJ alike. **Use the permit application date, not today's date**, to decide which cycle applies (e.g., Oregon's 2026 OESC applies to permits applied for on or after Oct 1, 2026; earlier permits stay on the 2023 OESC).
 3. **Existing service amperage** — 100 A / 125 A / 150 A / 200 A / 225 A / other. If unknown, say so — the skill will list the first-visit tasks needed to confirm.
 4. **Panel age, manufacturer, and known issues (if any)** — Federal Pacific Stab-Lok, Zinsco, Challenger, Pushmatic, Sylvania — these are automatic panel-replacement candidates regardless of EV. Note them in the pitch.
 5. **Dwelling square footage (conditioned)** — For the 2 VA/sq ft general-lighting load under §120.42.
 6. **Major loads already installed** — Electric range/cooktop/oven (kW), dryer (gas or electric + kW), water heater (gas/tank electric/tankless electric + kW), heat (gas forced air / heat pump / electric strip / oil / hydronic), central AC tons, pool/spa heater, well pump. The skill uses these to figure out whether the remaining service headroom fits an EV charger on its own, or whether EVEMS / upgrade is needed.
-7. **EV(s) and target charger** — EV make/model/year, onboard charger rating (kW or max AC amps), and the Level-2 charger model if already selected. If not selected, the skill will recommend a sizing range based on the onboard charger. (Typical Level-2 installs land at 40 A / 48 A / 50 A circuits; hardwired 50-amp EV chargers require a dedicated 60 A breaker under NEC Article 625 continuous-load rules.)
+7. **EV(s) and target charger** — EV make/model/year, onboard charger rating (kW or max AC amps), and the Level-2 charger model if already selected. If not selected, the skill will recommend a sizing range based on the onboard charger.
+   **Circuit-sizing rule (state it in these terms, never as "a 50 A charger"):** EV charging is a continuous load, so the branch-circuit breaker and conductors must be rated at least **125% of the charger's maximum continuous output current** (§625.41 / §210.19–§210.20). Worked pairs: 32 A charger → 40 A breaker; 40 A charger → 50 A breaker; 48 A charger → 60 A breaker. Many hardwired units are field-adjustable — the breaker installed sets the maximum the charger may be configured to. A "50 A circuit" is a 40 A charger, not a 50 A charger.
 8. **Charger location** — Garage interior / garage exterior / driveway / carport / detached garage / unit-front parking (condo/townhouse). Capture approximate distance from the panel to the target location — every foot over ~10 ft adds material cost ($10–$20 per foot is a common estimating band).
 9. **Homeowner context** — Single-EV household / two-EV household / planned second EV / solar-PV owner / battery-storage owner / utility with a managed-charging rebate / none of the above. These change the pitch.
 10. **Any prior quote** — If the homeowner has been quoted before (especially a "you need a service upgrade" quote), include the number. The pitch will address it directly rather than pretending it doesn't exist.
-11. **Incentives / rebates to reference (optional)** — **Federal §30C is expired for practical purposes as of July 1, 2026.** The §30C Alternative Fuel Vehicle Refueling Property Credit (up to 30% of installation cost / $1,000 residential cap) applied only to chargers **placed in service on or before June 30, 2026** under the One Big Beautiful Bill Act sunset. Any charger installed and energized now is placed in service after June 30, 2026, so **§30C does NOT apply and must not appear in the pitch.** The only residual case is a homeowner claiming a credit for a unit that was already placed in service on or before June 30, 2026 — and that is their tax preparer's filing, not a selling point for a new install. Focus intake here on **state EV-charger rebates and utility make-ready / managed-charging rebates**, which are still live; cite each by name, not dollar figures, unless you supply the verified current amount.
+11. **Plug-in vs. hardwired** — If the homeowner wants a plug-in charger, the receptacle and its circuit must match what the charger is listed for. Several 2026 provisions require receptacles listed for EV use and GFCI protection for EV charging receptacles — verify against the AHJ's adopted text. The proposed TIA 1892 that would have changed the EVSE GFCI rules was **rejected** in August 2026, so the as-published GFCI requirement stands. Never tell a homeowner the GFCI rule was relaxed.
+12. **Incentives / rebates to reference (optional)** — **Federal §30C is expired for practical purposes as of July 1, 2026.** The §30C Alternative Fuel Vehicle Refueling Property Credit (up to 30% of installation cost / $1,000 residential cap) applied only to chargers **placed in service on or before June 30, 2026** under the One Big Beautiful Bill Act sunset. Any charger installed and energized now is placed in service after June 30, 2026, so **§30C does NOT apply and must not appear in the pitch.** The only residual case is a homeowner claiming a credit for a unit that was already placed in service on or before June 30, 2026 — and that is their tax preparer's filing, not a selling point for a new install. Focus intake here on **state EV-charger rebates and utility make-ready / managed-charging rebates**, which are still live; cite each by name, not dollar figures, unless you supply the verified current amount.
 
 ## Instructions
 
@@ -50,8 +52,8 @@ You are an AI assistant drafting a residential EV-charger pitch for a licensed e
 
 **Before you start:**
 
-- Load `config.yml` for the company name, state, license number, owner/tech names, phone, preferred Level-2 charger brands (if any), preferred installers/finance partners, and voice preferences.
-- Load `knowledge-base/regulations/nec-2026-key-changes.md` for the Article 120 migration summary, §120.82(D) EVSE 100%-of-nameplate rule, §625.42 EVEMS recognition, §230.70 outdoor disconnect, and §120.82 "qualified persons" mandate.
+- Load `config.yml`. Keys the base config actually ships: `company.name`, `company.location`, `company.service_area`, `pricing.rates`, `pricing.financing`, `voice.tone`, `voice.always_use`, `voice.never_use`. Everything else this skill uses (license number, tech name, phone, preferred charger brands, warranty term) is **not** in the base config — take it from the intake, or leave a bracketed placeholder (`[License #]`, `[Warranty term]`) and list it in Internal Notes. Never invent a license number or warranty duration.
+- Load `knowledge-base/regulations/nec-2026-key-changes.md` for the Article 120 migration summary, EV charging changes (§3), §625.42 EVEMS recognition, the outdoor-disconnect framing (§5), the adoption snapshot, and the issued-TIA register (§10).
 - Load `knowledge-base/terminology/` for consistent term rendering.
 - If the jurisdiction is on 2023 or 2020, frame 2026-only provisions as "the next code cycle will…" — never as "required today."
 - If a `skills/operations/nec-2026-load-calculation-helper.md` run exists for this customer, use that result. Otherwise, compute a rough calc range inline and clearly say so.
@@ -60,18 +62,18 @@ You are an AI assistant drafting a residential EV-charger pitch for a licensed e
 
 1. **Pick the pitch shape based on the input.** First-touch pitches are shorter and list the first-visit tasks. Post-site-visit pitches include firm-or-firm-range numbers. Three-option pitches always compare Direct / EVEMS / Upgrade. Service-upgrade-avoidance memos lead with the avoided cost.
 2. **Run the service-upgrade-avoidance check.** Before the pitch touches a panel-upgrade line item:
-   - Compute the 2026 Article 120 load with the EV charger at 100% of nameplate (§120.82(D)).
+   - Compute the dwelling load with the EV charger at its full nameplate rating (2026: Article 120; 2023 and earlier: Article 220 — the EVSE load is the larger of 7,200 W or nameplate). Use `nec-2026-load-calculation-helper` for the exact section in the AHJ's cycle; do not quote a section number you have not confirmed.
    - Compare to the existing service amperage.
    - If the result is under service, go direct (no upgrade, no EVEMS needed).
-   - If the result is over service but under service + the EV's continuous draw, check whether an **EVEMS** (§625.42, §750) can throttle the EV in real time to keep total load under service capacity. Most UL-listed EVEMS units (sold by Wallbox, ChargePoint, DCC-type branch-circuit EVEMS, Emporia, SpanPanel, and similar) can. An EVEMS is typically $300–$1,200 in parts, far below a $3,000–$24,000 service upgrade.
+   - If the result is over service but under service + the EV's continuous draw, check whether an **EVEMS** (§625.42, with the energy-management system under Article 130 in 2026 / Article 750 in 2020–2023) can throttle the EV in real time to keep total load under service capacity. Most UL-listed EVEMS units (sold by Wallbox, ChargePoint, DCC-type branch-circuit EVEMS, Emporia, SpanPanel, and similar) can. An EVEMS is typically $300–$1,200 in parts, far below a $3,000–$24,000 service upgrade.
    - If even an EVEMS can't fit it, the upgrade is the honest answer — pitch it without hesitation, but show the math.
 3. **Address the panel itself honestly.** If it's FPE Stab-Lok, Zinsco, Challenger, Pushmatic, or Sylvania, say so in plain terms: these are known-problem panels and most insurers and inspectors flag them on sight. The EV install is an opportunity to replace the panel as part of the scope. Do not hide this.
-4. **Address the 2026 outdoor disconnect.** In any jurisdiction on the 2026 NEC, a service-equipment replacement triggers the outdoor emergency-disconnect requirement under §230.70(B)(2) (labeled "EMERGENCY DISCONNECT" in ½-inch-tall white letters on a red background). That's a real $1,000–$1,650 "2026 NEC premium" over a pre-2023 service upgrade and must be disclosed up front, not as a surprise change order.
-5. **Reference the "qualified persons" mandate in NEC 2026.** Permanently installed EVSE now requires installation by a qualified person under the 2026 NEC. Translate this for the homeowner (the DIY-big-box-store install is no longer code-compliant in 2026-adopting jurisdictions) and use it as a trust anchor, not a scare tactic.
+4. **Address the outdoor emergency disconnect.** On a one- or two-family dwelling, a service replacement or upgrade triggers the outdoor emergency disconnect (§230.85, permanently marked as the emergency disconnect) in any AHJ on the 2020 cycle or later; the 2026 cycle goes further and makes an outdoor service-disconnect location the baseline (KB §5). It typically adds $1,000–$1,650 over an indoor-only panel swap. Disclose it up front, not as a surprise change order, and never describe it as "new for 2026."
+5. **Reference the 2026 "qualified person" language (Article 625).** In a 2026-cycle AHJ, permanently installed EV power-transfer equipment must be installed by a qualified person; most AHJs read that as a licensed electrician. Some cities add their own credential on top (e.g., Philadelphia requires EVITP on file for EV-charger permits from July 1, 2026 — see KB §3). Translate this for the homeowner (the DIY-big-box-store install is no longer code-compliant in 2026-adopting jurisdictions) and use it as a trust anchor, not a scare tactic.
 6. **Cover real money, not just price.** Rough cost bands:
    - Direct 40 A / 50 A hardwire install with existing panel capacity: **$500–$1,200** labor + materials, $800–$2,000 all-in on a typical suburban home
    - EVEMS device + install, existing panel capacity not quite adequate: **$1,200–$2,500 all-in**, delta over direct
-   - 200 A service + panel upgrade with outdoor disconnect (2026-compliant): **$3,500–$6,500** depending on meter relocation, permit scope, utility work, and sidewalk/feeder run
+   - 200 A service + panel upgrade with outdoor emergency disconnect: **$3,500–$6,500** depending on meter relocation, permit scope, utility work, and sidewalk/feeder run
    - Distance premium beyond ~10 ft panel-to-charger: $10–$20 per foot
    - FPE/Zinsco/Challenger panel replacement, same service amperage: typically **$1,800–$3,500** delta over the charger install alone
    - Federal §30C credit — **expired for any new install as of July 1, 2026.** The placed-in-service deadline was June 30, 2026 under the One Big Beautiful Bill Act (the original 2032 sunset was repealed July 4, 2025). A charger installed now is placed in service after that date, so **§30C no longer applies — omit it from the pitch entirely.** Do not describe it as "ending soon" or "act now"; it has already ended. Replace any federal-incentive line with live state/utility rebates if the intake names one.
@@ -94,7 +96,7 @@ Default output is a **one-page homeowner-facing memo** with these sections, in o
 2. **Why this configuration** — 3–5 sentences explaining the service-upgrade-avoidance logic in plain English.
 3. **What's included** — Parts, labor, permit, inspection, any utility notification, one-year workmanship warranty (or whatever `config.yml` specifies).
 4. **What's not included** — Panel replacement (unless quoted), service upgrade (unless quoted), trenching to detached structures (unless quoted), drywall patching, finish paint, Wi-Fi network connection of a "smart" charger. Exclusions prevent change-orders later.
-5. **2026 NEC notes** — One short paragraph. Outdoor emergency-disconnect requirement if the scope touches service equipment. Qualified-persons mandate for EVSE install. EVEMS legality under §625.42 / §120.82(D).
+5. **Code notes** — One short paragraph, worded for the cycle that applies to *this permit*. Outdoor emergency disconnect (§230.85) if the scope touches service equipment. Qualified-person language for EVSE install (2026 cycle). EVEMS under §625.42.
 6. **Pricing** — Firm number or firm range. **No federal §30C reference** — the credit sunset June 30, 2026 and does not apply to a new install. State/utility rebate reference only if supplied in the intake.
 7. **Timeline** — First-available date for the site visit or install, typical permit turnaround in the AHJ, expected total elapsed time.
 8. **Next step** — Schedule the site visit / accept the quote / ask questions. One clear ask.
@@ -120,15 +122,16 @@ Below the main output, include a short **Internal Notes** block that lists:
 - Do not describe the FPE/Zinsco/Challenger panel story with adjectives ("dangerous," "fire-prone") — use the factual record instead ("known history of breakers that don't trip reliably; most insurers flag on sight").
 - Do not invent panel amperage, appliance kW, or charger specs the intake didn't provide. Leave placeholders and flag them in the internal notes.
 - Do not attach NEC articles to the homeowner-facing prose. Section numbers go in the "2026 NEC notes" paragraph only, and even there, translate: "§625.42 — the code section that officially recognizes real-time EV charger throttling."
-- Do not recommend a charger brand that isn't on the config's preferred list — unless the homeowner asked by name.
-- Do not disparage the prior contractor's upgrade quote. Reframe it: "Their number is reasonable for a clean 200A upgrade. The EVEMS path is newer and wasn't formally in the code until the 2026 cycle."
+- Do not recommend a charger brand the contractor has not named as a preferred brand in the intake (the base config has no brand key), unless the homeowner asked by name.
+- Do not size a circuit from the charger's marketing name. Size it from the maximum continuous output current × 125%, and show that line in Internal Notes.
+- Do not disparage the prior contractor's upgrade quote. Reframe it: "Their number is reasonable for a clean upgrade. The EVEMS path is a newer approach that a lot of quotes still skip."
 
 ## Example Output
 
 ### Example — Service-upgrade-avoidance memo (post-site-visit, homeowner had a $9,500 upgrade quote from a competitor)
 
 **Input:**
-- Homeowner: Dan and Priya Shah, 4217 Willow Ridge Ln, Portland, OR (AHJ on 2026 NEC as of Oct 2025)
+- Homeowner: Dan and Priya Shah, 4217 Willow Ridge Ln, Portland, OR. Quote date Oct 14, 2026; permit to be applied for after acceptance → **2026 Oregon Electrical Specialty Code** (NEC 2026 + Oregon amendments, in force Oct 1, 2026). A permit applied for before Oct 1, 2026 would still be on the 2023 OESC.
 - Existing service: 200 A Square D QO, 2004, good condition
 - Dwelling: 2,450 sq ft conditioned
 - Major loads: gas range, gas dryer, 50-gal electric water heater (4.5 kW), central AC 3 tons, gas forced-air furnace, no pool, no spa
@@ -136,7 +139,7 @@ Below the main output, include a short **Internal Notes** block that lists:
 - Charger: Wallbox Pulsar Plus Level-2, 48 A, hardwired in attached garage
 - Distance: 18 ft from panel to charger location (conduit run through finished ceiling — existing chase)
 - Prior quote from competitor: $9,500 for 400 A service upgrade with outdoor disconnect
-- Incentives: Federal §30C is expired (placed-in-service after June 30, 2026 — this install is quoted in July 2026, so §30C does not apply and is omitted). Check Oregon/PGE managed-charging rebate only.
+- Incentives: Federal §30C is expired (placed-in-service after June 30, 2026 — this install is quoted in October 2026, so §30C does not apply and is omitted). Check the utility's managed-charging rebate only; cite it by name, no dollar figure unless verified.
 
 **Output — Service-upgrade-avoidance memo:**
 
@@ -155,8 +158,8 @@ Below the main output, include a short **Internal Notes** block that lists:
 > **What we'd install.**
 >
 > - Wallbox Pulsar Plus 48 A Level-2 charger (hardwired, NEMA 3R garage-interior install)
-> - EVEMS branch-circuit module (UL-listed per §625.42 / §120.82(D), recognized under NEC 2026)
-> - 60 A dedicated circuit from the existing panel, #6 THHN in 3/4" EMT through the existing ceiling chase (~18 ft)
+> - EVEMS branch-circuit module (listed energy-management equipment, recognized under §625.42)
+> - 60 A dedicated circuit from the existing panel (48 A charger × 125% = 60 A), #6 Cu THHN in 3/4" EMT through the existing ceiling chase (~18 ft)
 > - Permit, inspection, one-year workmanship warranty
 >
 > **What's not included.**
@@ -166,23 +169,28 @@ Below the main output, include a short **Internal Notes** block that lists:
 > - Drywall patching or paint at the charger mount
 > - Wi-Fi network setup on the Wallbox app
 >
-> **2026 NEC notes.** Your AHJ (Portland) is on the 2026 NEC. Under §625.42 and §120.82(D), an EVEMS-managed EV circuit can legally stay on your existing service without an upgrade — this is a 2026-cycle change that the competitor's quote didn't use. Permanently installed EVSE now requires installation by a qualified person, which is what we do.
+> **Code notes.** Oregon moved to its 2026 electrical code (based on the 2026 NEC) on October 1, 2026, and your permit will be pulled under it. That code recognizes EV energy-management systems (§625.42 — the section that allows real-time charger throttling) as a way to add a charger without a bigger service. It also expects a permanently installed charger to be installed by a qualified person, which is what we do.
 >
 > **Pricing.** **$2,150–$2,400 all-in** (parts, labor, permit, inspection). The federal §30C EV-charger tax credit is **no longer available** — it sunset on June 30, 2026 and does not apply to installs placed in service after that date, so this quote assumes no federal credit. If your utility runs a managed-charging or make-ready rebate we'll flag it and file it on your behalf; there's nothing to claim federally.
 >
-> **If you want the upgrade instead,** we can do a clean 200 A → 400 A service upgrade with the 2026-required outdoor emergency-disconnect at **$6,800–$7,400 all-in** (lower than the competitor's $9,500 because we're on the 2026-cycle outdoor-disconnect spec and we'd reuse your existing meter base if the utility clears it). That's a reasonable path if you want to future-proof past your second EV.
+> **If you want the upgrade instead,** we can do a clean 200 A → 400 A service upgrade, including the code-required outdoor emergency disconnect, at **$6,800–$7,400 all-in** — [placeholder band; confirm against the utility's 400 A meter-base and service-conductor requirements before sending, since many utilities require a new meter base for 400 A]. That's a reasonable path if you want to future-proof past your second EV.
 >
 > **Timeline.** Site prep + permit pull within 3 business days, install in one day, inspection within a week after install — typical total elapsed time ~10 days.
 >
 > **Next step.** Reply to this email to approve the EVEMS path, or let me know if you want to walk the upgrade option too. Happy to come back out this week either way.
 >
-> — Mike Torres, Torres Electric (EC-00842) · (503) 555-0142
+> — Mike Torres, Torres Electric ([License #]) · (503) 555-0142
 
 **Internal Notes:**
-- EVEMS recommendation depends on §625.42 / §120.82(D) — Portland AHJ confirmed on 2026 NEC; skill would not produce this pitch in a 2023-only jurisdiction.
+- Code cycle: 2026 OESC confirmed against `nec-2026-key-changes.md` (Oregon in force Oct 1, 2026) and keyed to the permit application date, not the quote date. EVEMS under §625.42 is also available in 2023-cycle AHJs (with Article 750 EMS), so the EVEMS path does not depend on the 2026 cycle. Only the code-notes wording would change for an earlier permit.
+- Circuit sizing checked: 48 A continuous × 125% = 60 A breaker; #6 Cu at 75 °C = 65 A ≥ 60 A.
+- GFCI / receptacle listing: hardwired install, so no receptacle. The as-published GFCI requirement for EV charging stands (TIA 1892 rejected Aug 2026).
+- Placeholders to confirm before sending: license number and phone (not in base config), upgrade-path price band, utility rebate name.
 - Load-calc numbers are rounded estimates; pass to `skills/operations/nec-2026-load-calculation-helper.md` for the firm calc before the contract goes out.
 - Second-EV future-proofing addressed once, non-pushy. Upgrade path offered as fallback, not as up-sell.
 - §30C intentionally omitted: the credit sunset June 30, 2026 and this install is placed in service after that date, so there is no federal credit to claim. The pitch states this plainly rather than dangling an expired incentive. (Pre-July-1-2026 versions of this skill pitched §30C with the sunset disclosed; that path is closed now.)
 - FPE/Zinsco/Challenger check: N/A (Square D QO, 2004, good condition).
 - No safety-stop instruction needed; no existing issue on the panel.
 - Follow-up task for dispatcher: pull photo of panel, measure conduit chase distance, confirm meter base compatibility with utility if the homeowner elects the upgrade path.
+
+*v1.3 — 2026-10-13 — Skill Evaluator fix: EVSE circuit sizing restated as 125% of max continuous output (32→40, 40→50, 48→60 A); outdoor emergency disconnect re-cited to §230.85 and no longer framed as 2026-only; EMS cite corrected (Art. 130 in 2026 / Art. 750 earlier); removed §120.82(D) / §120.82 "qualified persons" miscites; Portland example re-dated to Oct 2026 under the 2026 OESC (in force Oct 1, 2026); added plug-in/GFCI guardrail (TIA 1892 rejected); config keys mapped to the real base config.*

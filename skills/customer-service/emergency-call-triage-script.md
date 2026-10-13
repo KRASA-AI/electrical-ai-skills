@@ -4,8 +4,8 @@ category: customer-service
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~15 min/after-hours call + avoided nuisance truck-rolls"
-version: 1.1
-last_eval_score: 9.40
+version: 1.2
+last_eval_score: 6.70  # graded 2026-07-20 / re-confirmed 2026-10-13 (v1.1); the 9.40 figure predated the rubric re-baseline. Fixed in v1.2: removed the spoken "Portland is on the 2026 electrical code" line (wrong date, and code talk does not belong in a dispatcher script), §230.85 cite, water-on-panel safety branch, utility phone placeholder, config fallbacks. See changelogs/electrical.md 2026-10-13.
 ---
 
 # 🚨 Emergency Call Triage Script
@@ -50,9 +50,10 @@ You are an AI assistant drafting a call-triage script for an electrical contract
 
 **Before you start:**
 
-- Load `config.yml` for the company name, on-call line, service area, after-hours rates, and any jurisdiction-specific after-hours rules.
+- Load `config.yml`. The base config ships `company.name`, `company.service_area`, `pricing.rates`, `pricing.payment_terms`, `services.excluded` and `voice.tone`. On-call line, on-call roster, after-hours rate, response windows, utility emergency numbers and card-on-phone authorization are **not** base-config keys. Take them from the intake, or insert a bracketed placeholder (`[After-hours dispatch fee]`, `[Utility emergency line]`) and list it in Internal Notes. Never invent a rate or a phone number. A wrong utility number on a downed-line call is a safety failure, not a typo.
 - Load `knowledge-base/terminology/` so the trade terms used in the script are rendered consistently.
-- Reference `knowledge-base/regulations/nec-2026-key-changes.md` if a recurring emergency pattern has a code nexus (e.g., burning smell at the service disconnect — the 2026-cycle §230.70 outdoor-disconnect provisions affect what the tech can safely de-energize from).
+- Reference `knowledge-base/regulations/nec-2026-key-changes.md` only for the **tech handoff**, never for the spoken script (e.g., whether the home has an outdoor emergency disconnect under §230.85, which tells the tech where they can de-energize from).
+- **No code talk to the caller.** The spoken script never states a code edition, a code requirement, or a future scope item ("if we replace your panel we'll have to install…"). That is diagnosis plus pricing by another route, and an AI voice agent cannot correct a spoken error after the call. Code-cycle notes go in the tech handoff and post-call log only.
 - Do not load the Plain-English Translation Dictionary verbatim — this script needs plain spoken English, not the invoice-explanation register. Reach for short sentences a scared caller can understand at 10:30 PM.
 
 ### Priority-Classification Pre-amble (run FIRST — lands P1 / P2 / P3 before any free-text)
@@ -100,11 +101,11 @@ PRIORITY PRE-AMBLE  (read top to bottom; stop at the first YES)
    - *Is anyone injured or feeling dizzy, tingling, or numb after touching a wet surface, a metal pipe, or an appliance?* (If yes → 911 gate, then ambulance, then our tech.)
    - *Do you see sparks, smoke, or flames coming from an outlet, a switch, a light fixture, a panel, or any electrical equipment? Is there a burning plastic smell coming from a panel, an outlet, or a fixture?* (If yes → 911 gate, power shut-off at the main if accessible and safe to reach, on-call tech dispatched.)
    - *Is your service drop (the line from the utility pole to your house) on the ground, or is a tree on the line, or do you hear arcing / buzzing at the meter?* (If yes → utility first, then 911 if occupants in structure, then us after the utility clears the scene.)
-   - *Is any water running onto electrical equipment (flooded basement with a panel, washer line at an outlet, roof leak at a light fixture)?* (If yes → main breaker off at the panel if safely reachable, 911 if water level is rising, on-call tech dispatched.)
+   - *Is any water running onto electrical equipment (flooded basement with a panel, washer line at an outlet, roof leak at a light fixture)?* (If yes and there is standing water on the floor near the panel, or water on the panel itself → **do not go near the panel**; leave that area, call the utility to disconnect at the meter, 911 if water is rising or anyone has been shocked; on-call tech dispatched after the utility disconnects. Only if the panel is dry, the floor in front of it is dry, and the water is somewhere else (e.g., a ceiling fixture) → main breaker off if reachable with dry hands and dry shoes.)
    - *Is anyone in your home on oxygen, dialysis, a powered medical device, or dependent on cooling / heating during an extreme-weather event? Is a food-service freezer or a refrigerated medication at risk?* (If yes → dispatch, elevated priority; recommend contacting the utility for medical-outage registry if not already done.)
 3. **Map to a tier.** Based on the safety screen, assign the call to one of five tiers:
    - **Tier 1 — Life safety / active fire / shock event:** 911 first, utility second, dispatch on-call tech for post-clearance inspection. Never promise a tech will arrive before the fire department.
-   - **Tier 2 — Imminent hazard / structural electrical event:** Dispatch on-call tech within the response-window commitment. Examples: burning smell at the panel with no visible flame, panel sparking that stopped when caller turned off the main, a persistent arc at the meter, water actively dripping onto a live panel.
+   - **Tier 2 — Imminent hazard / structural electrical event:** Dispatch on-call tech within the response-window commitment. Examples: burning smell at the panel with no visible flame, panel sparking that stopped when caller turned off the main, a persistent arc at the meter (utility first), water actively dripping onto a live panel (caller stays away from the panel; utility disconnects at the meter).
    - **Tier 3 — Partial outage with medical/dependent occupant OR full loss of power in extreme-weather conditions:** Dispatch on-call tech on elevated priority even if the symptom itself is not life-threatening (e.g., the whole house is out but neighbors also have power — possible service-side issue the utility owns — still dispatch for the medical occupant).
    - **Tier 4 — Functional outage, contained:** One breaker that won't reset, one circuit out, one outlet out, one light switch not working, one bedroom without power, GFCI that won't reset. Safe to schedule next business day with safe-interim guidance.
    - **Tier 5 — Nuisance / cosmetic:** Flickering light that isn't a fixture issue, a dimmer humming, a switch that "feels warm" but isn't hot (distinguish clearly from a switch that is hot to the touch — that's Tier 2), an outlet that has always worked but now doesn't. Schedule next business day; give the caller one thing to check themselves.
@@ -117,6 +118,8 @@ PRIORITY PRE-AMBLE  (read top to bottom; stop at the first YES)
 **Anti-liability rules:**
 
 - Do not tell the caller to open a panel cover, remove a device cover plate, or touch wiring. The safe-interim guidance is always limited to things that don't require tools or exposed conductors.
+- Do not send a caller to the panel to turn off the main if there is water on the panel or standing water in front of it. Route that call to the utility disconnect.
+- Do not state code requirements, code editions or likely repair scope to the caller (see "No code talk to the caller" above).
 - Do not promise the tech will arrive "in 30 minutes." Promise a **window** with an upper bound the on-call schedule can actually meet — then call the customer back if the upper bound will slip.
 - Do not diagnose the cause over the phone. "It sounds like it could be…" is not diagnosis; "The problem is a loose neutral on your ungrounded half" is diagnosis and belongs to the tech after the work.
 - Do not tell the caller to "just flip the main back on and see what happens." If the main was turned off because of a safety concern, it stays off until the tech looks at it.
@@ -176,7 +179,8 @@ Below the main output, include a short **Internal Notes** block that lists:
 - On-call window: 6:00 PM–10:30 PM Sun–Thu, 6:00 PM–12:00 AM Fri–Sat; after 10:30 PM/12:00 AM, safety-only dispatch and the agent schedules non-safety calls for 7:30 AM next business day
 - Dispatch posture: dispatch-on-safety + dispatch-on-medical-occupant; all other calls scheduled next business day
 - Excluded after-hours calls: no commercial PM, no new-construction rough-in, no generator service without an active service contract
-- Jurisdiction notes: Portland AHJ on NEC 2026 since Oct 2025 — service-equipment replacements trigger outdoor-disconnect; the tech should not energize a replaced panel on an after-hours call without the AHJ temp-energize procedure
+- Utility: Portland General Electric (PGE) for most of the service area. Emergency/downed-line number from the intake: [PGE emergency line — confirm from pge's current outage/emergency page before go-live]
+- Jurisdiction notes (tech-handoff only, never spoken): Oregon has been on the 2026 OESC since Oct 1, 2026; on a one- or two-family service replacement the outdoor emergency disconnect (§230.85) applies in any cycle; the tech must not energize a replaced panel on an after-hours call without the AHJ's temporary-energize / permit procedure
 
 **Output — AI voice agent system prompt (abridged, Tier 1 and Tier 2 branches shown in full; Tier 3–5 summarized):**
 
@@ -215,18 +219,18 @@ Below the main output, include a short **Internal Notes** block that lists:
 > - *"Is anyone in your home on oxygen, dialysis, or a powered medical device? Is anyone in extreme heat or cold without power? Is a food-service freezer or a refrigerated medication at risk?"* — Yes → Tier 3 (dispatch even if symptom would otherwise be Tier 4). No → map by symptom to Tier 4 or Tier 5.
 >
 > **Tier 1 script (active fire, shock event, smoke from panel):**
-> *"Please hang up and call 911 right now. If your main breaker is reachable with dry hands and dry shoes, turn it off before you leave the area. Then call Portland General Electric at 503-228-6322 — they'll cut service at the pole. Call us back as soon as the fire department has cleared the scene and we will send a tech to inspect your panel before you re-energize. I'm logging this call as Tier 1, flagged for the on-call tech as priority-one callback. Your callback number is [read back], correct?"*
+> *"Please hang up and call 911 right now. If your main breaker is reachable with dry hands and dry shoes, turn it off before you leave the area. Then call PGE's emergency line at [PGE emergency line] — they'll cut power at the meter or the pole. Call us back as soon as the fire department has cleared the scene and we will send a tech to inspect your panel before you re-energize. I'm logging this call as Tier 1, flagged for the on-call tech as priority-one callback. Your callback number is [read back], correct?"*
 >
 > **Tier 2 script (imminent hazard — burning smell at panel no flame, panel sparked and stopped when main turned off, active arc at meter, water dripping onto live panel):**
-> *"Okay, here's what I need you to do. If you can safely reach your main breaker — that's the big switch at the top of your electrical panel — and you're on dry ground with dry hands, turn it off. Don't open the panel cover. Don't touch anything metal. Don't flip any breaker back on tonight.*
+> *"Okay, here's what I need you to do. First: is there any water on the panel or on the floor in front of it? [If yes:] Then please don't go near it. Stay out of that area and call PGE at [PGE emergency line] so they can shut power off at the meter. [If no:] If you can safely reach your main breaker — that's the big switch at the top of your electrical panel — and you're on dry ground with dry hands, turn it off. Don't open the panel cover. Don't touch anything metal. Don't flip any breaker back on tonight.*
 >
 > *I'm going to dispatch our on-call tech, [Tech Name], to you. Our after-hours dispatch is $195, plus $175 per hour for repair time, one-hour minimum, and the dispatch fee rolls into the repair ticket if you proceed with the fix tonight. Does that work for you? [Wait for verbal yes.]*
 >
-> *[Tech Name] will be on the way in about 15 minutes and should reach you between [ETA window, 45–75 minutes]. His callback number if he hits a delay is [on-call line]. While you wait: do not flip any breakers back on, don't touch the panel cover, keep kids and pets away from the affected area. If anything changes — smoke, a burning smell coming back, anything that scares you — call 911 first and us second. Your callback number is [read back], service address is [read back], correct?*
+> *[Tech Name] will be on the way in about 15 minutes and should reach you between [ETA window, 45–75 minutes]. The tech's callback number if they hit a delay is [on-call line]. While you wait: do not flip any breakers back on, don't touch the panel cover, keep kids and pets away from the affected area. If anything changes — smoke, a burning smell coming back, anything that scares you — call 911 first and us second. Your callback number is [read back], service address is [read back], correct?*
 >
-> *One more thing: Portland is on the 2026 electrical code, which means if we end up replacing your service panel tonight, we'll be installing an outdoor emergency disconnect as part of the work. [Tech Name] will explain the scope before anything gets touched."*
+> *[Tech Name] will look at everything and explain what they find, and what any repair would cost, before anything gets fixed."*
 >
-> **Tier 3 script (partial outage with medical occupant / extreme-weather / refrigerated medication):** Dispatch at elevated priority even if the symptom alone would be Tier 4; run through the same rate quote and ETA structure as Tier 2 but note the medical context for the tech handoff. Tell the caller to contact PGE and register for the medical-outage list if not already.
+> **Tier 3 script (partial outage with medical occupant / extreme-weather / refrigerated medication):** Dispatch at elevated priority even if the symptom alone would be Tier 4; run through the same rate quote and ETA structure as Tier 2 but note the medical context for the tech handoff. Tell the caller to contact PGE and ask about its medical-certificate / medical-needs program if not already enrolled (program name per the utility; confirm before go-live).
 >
 > **Tier 4 script (functional outage, contained — one breaker won't reset, one circuit out, one room dark, GFCI won't reset):** Schedule next-business-day callback between 7:30 AM and 8:30 AM. Safe-interim: "Press the reset button on the GFCI once; if it doesn't hold, leave it tripped. Don't keep resetting the breaker — if it trips back within a minute, leave it off until we look at it. Unplug anything on that circuit you can identify." No dispatch unless medical-occupant flag from safety screen.
 >
@@ -236,7 +240,7 @@ Below the main output, include a short **Internal Notes** block that lists:
 >
 > **Rate-and-authorization script (dispatch path only):** *"Our after-hours dispatch is $195, plus $175 per hour for repair time, one-hour minimum, and the dispatch fee rolls into the repair ticket if you proceed tonight. Do you authorize us to roll a truck under those terms?"* — Yes: dispatch. No: "Understood — I'll schedule you for [next-business-day callback window] and keep the safe-interim guidance I just gave you in place."
 >
-> **Close-out script (dispatch path):** *"[Tech Name] is on the way. ETA is [window]. His callback number if he hits a delay is [on-call line]. Remember: [safe-interim guidance repeated]. We'll see you shortly."*
+> **Close-out script (dispatch path):** *"[Tech Name] is on the way. ETA is [window]. The tech's callback number if they hit a delay is [on-call line]. Remember: [safe-interim guidance repeated]. We'll see you shortly."*
 >
 > **Close-out script (schedule path):** *"I've scheduled you for a callback between [next-business-day window] — that's when our office opens and we'll set you a time that works. Until then: [safe-interim guidance repeated]. If anything changes — a burning smell, sparks, a shock — call 911 first and us back second. Your callback number is [read back]."*
 >
@@ -244,11 +248,13 @@ Below the main output, include a short **Internal Notes** block that lists:
 >
 > *"[P1/P2/P3] / Tier [N] — [symptom summary, 8 words]. [Dispatch OR Scheduled for {window}]. Safety-screen answers: injury N/Y, smoke-sparks N/Y, drop-down N/Y, water-on-panel N/Y, medical-occupant N/Y. Safe-interim given: [short list]. Rate quoted $195/$175/1-hr-min, authorized: Y/N. Tech dispatched: [Name or N/A]. ETA promised: [window or N/A]. Address/callback confirmed. Notes: [anything material — tenant/owner, insurance claim, prior contractor's work mentioned, recent storm, specific appliance/circuit]."*
 >
-> **On-call tech handoff (SMS):** *"[P1/P2/P3] / [Tier N] — [address] — [8-word symptom] — caller [name, number] — they [turned main off / tried reset / unplugged appliance] — safe-interim guidance: [given]. ETA promised: [window]. Medical flag: [Y/N]. 2026 NEC note if service-equipment touched."*
+> **On-call tech handoff (SMS):** *"[P1/P2/P3] / [Tier N] — [address] — [8-word symptom] — caller [name, number] — they [turned main off / tried reset / unplugged appliance] — safe-interim guidance: [given]. ETA promised: [window]. Medical flag: [Y/N]. Code note (tech only): Oregon on 2026 OESC since 10/1/2026 — check for an outdoor emergency disconnect (§230.85) before de-energizing; no panel re-energize without the AHJ temp-energize procedure."*
 
 **Internal Notes:**
 - Rate structure used ($195/$175/1-hr-min) matches the intake. If any field changes in `config.yml`, the rate-and-authorization script line needs a one-edit update.
-- Portland AHJ 2026 NEC note is included in the Tier 2 script because the intake explicitly stated the jurisdiction is on 2026 and the outdoor-disconnect trigger matters for service-equipment replacements at 11 PM. Remove the sentence for a jurisdiction still on 2023 or 2020.
+- The code-cycle note lives only in the tech handoff. Earlier versions spoke it to the caller ("Portland is on the 2026 electrical code…") with a wrong adoption date; that line was removed on purpose. Code status is checked against `nec-2026-key-changes.md` (Oregon 2026 OESC in force Oct 1, 2026), never against intake memory.
+- Placeholders that must be filled before go-live: PGE emergency line, after-hours rate if it differs from the intake, on-call tech names. Utility numbers are deliberately not hard-coded.
+- Water-on-panel branch sends the caller *away* from the panel and to the utility disconnect. Do not "simplify" it back to "turn off the main."
 - No after-hours credit-card collection is in this script — the intake did not authorize it; collection happens post-service. If the company flips to pre-auth charging, a new sentence is needed before "does that work for you?"
 - Tier 3 "medical occupant" is set to dispatch even without a smoke/spark flag. If the dispatch posture is tightened (e.g., "safety only after 11 PM"), the Tier 3 branch needs a time-of-night cutoff clause.
 - Excluded categories (commercial PM, new-construction rough-in, generator-service-without-contract) are handled earlier in the call when the caller states the issue — add an exclusion branch before the safety screen if the intake requests a hard gate.
@@ -257,3 +263,5 @@ Below the main output, include a short **Internal Notes** block that lists:
 - Voice-agent channel adaptation: the script reads as written. For a voicemail-override channel, collapse Tier 1 language to a 15-second recording that opens with "If you see sparks, smoke, or flames, hang up and call 911 first — then leave us a message after the tone."
 - Route tech's post-call dictation through `skills/customer-service/voice-notes-to-service-report.md` so the invoice narrative is consistent with the triage notes.
 - Follow-up task for the on-call lead: review the safety-screen list quarterly against any OSHA / NFPA / state-L&I bulletins on electrical emergency handling; the list is current as of the 2026-04 cycle.
+
+*v1.2 — 2026-10-13 — Skill Evaluator fix: removed the spoken code-cycle line (it said Portland had been on NEC 2026 since Oct 2025; Oregon's 2026 OESC actually took effect Oct 1, 2026) and added a "no code talk to the caller" rule; moved the code note into the tech handoff with §230.85; added a water-on-panel branch that keeps the caller away from a wet panel and routes to the utility disconnect; replaced the hard-coded utility number with a placeholder that must be confirmed; mapped config keys to the real base config.*
