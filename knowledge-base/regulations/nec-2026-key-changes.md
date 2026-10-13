@@ -2,12 +2,12 @@
 
 **Cycle:** 2026 National Electrical Code (NFPA 70)
 **Adoption:** Effective dates vary by state and AHJ. Many states adopt on a 1–3 year lag after NFPA publication. Always verify the code cycle your AHJ currently enforces before citing 2026 provisions on a permit drawing or inspection report. Authoritative adoption-status sources: **NFPA NEC enforcement map** (primary), **Low Voltage Nation NEC 2026 adoption tracker**, and the **Mike Holt NEC adoption list**. Cross-reference two sources before citing a state's cycle on a submittal.
-**Q2 2026 adoption snapshot (industry-aggregator data, this cycle):**
+**Adoption snapshot (updated 2026-10-13; three states now in force — MA, TX, OR):**
 
 - **Massachusetts — IN EFFECT.** The Board of Fire Prevention Regulations adopted 527 CMR 12.00 based on NFPA 70 (NEC 2026). **Effective April 24, 2026.** This is the first U.S. state with a confirmed in-force NEC 2026 adoption. Permits issued on or after that date follow 2026 + Massachusetts state amendments.
-- **Texas — confirmed effective September 1, 2026.** Per TDLR announcement. Local AHJ adoption may lag.
+- **Texas — IN EFFECT September 1, 2026.** TDLR adopted the 2026 NEC statewide; large-city permitting centers (e.g., Houston) announced the same effective date. Local amendments still apply — check the city's amendment package before citing.
 - **Washington — effective December 31, 2026** (proposed full-by-reference with delayed effective date).
-- **Oregon — pending; anticipated October 1, 2026.** The Oregon Building Codes Division (BCD) has opened the 2026 Oregon Electrical Specialty Code (OESC) adoption process, with an anticipated effective date of **October 1, 2026** (current cycle remains the 2023 OESC, effective Oct 1, 2023, until then). **Data-quality caution:** several commercial NEC-adoption aggregators prematurely list Oregon as already "adopted" — this is not yet in force. Verify against the Oregon BCD OESC-adoption page before citing 2026 provisions on an Oregon submittal.
+- **Oregon — IN EFFECT October 1, 2026.** The 2026 Oregon Electrical Specialty Code (OESC), based on NEC 2026 with Oregon amendments (OAR 918-305, Table 1-E), took effect statewide on October 1, 2026, replacing the 2023 OESC. **Permit date now matters for every Oregon job:** permits applied for before Oct 1, 2026 generally stay on the 2023 OESC; check OAR 918-305-0020 for delayed-effective provisions. Oregon's Table 1-E adopts a *named list* of TIAs (see §10) — it is not "NEC 2026 plus whatever NFPA issues later." Earlier aggregator claims that Oregon was "already on 2026" before this date were wrong at the time; they are only true from Oct 1, 2026 forward.
 - **Minnesota — pending.** NEC 2026 Adoption Review Committee meeting through 2026; no effective date set.
 - **Michigan, Connecticut, Virginia — pending / in committee review.** Adoption process initiated; no effective date set.
 - **All other states — on NEC 2023, 2020, or 2017.** Industry aggregators report ~20 states on 2023, ~20 on 2020, ~9 on 2017 as of Q2 2026.
@@ -20,7 +20,7 @@
 
 **Mid-cycle amendment caution:** the adopted *edition* is only half the question. A published NEC can be amended between editions by a Tentative Interim Amendment (TIA), which carries the same force as the text it amends the moment it is issued. See **§10** before citing a specific section on anything an inspector will read.
 
-**Last updated in this repo:** 2026-07-13 (landscape monitor — added §10 on Tentative Interim Amendments, covering live TIA activity against the 2026 edition: TIA 1903 (§700.6(C) transfer-equipment bypass/isolation exception), TIA 1912 (§624.44(A) portable EVSE/ESVSE connection), TIA 1915 (Table 270.122(B) UL heading alignment). Prior §10 renumbered to §11). Prior update 2026-06-08 (Oregon 2026 OESC anticipated effective Oct 1, 2026 per Oregon BCD; aggregator "adopted" overclaim flagged. Massachusetts in effect April 24, 2026; Texas Sept 1, 2026; Washington Dec 31, 2026 carried forward).
+**Last updated in this repo:** 2026-10-13 (landscape monitor — §10 rewritten: TIAs 1903, 1912 and 1915 were ISSUED by the Standards Council on Aug 20, 2026, effective Sept 9, 2026, alongside TIA 1897 (Table 501.10(A)(1)); the TIA 1892 EVSE-GFCI appeal was denied; added the issued-TIA register and the "state adoption fixes the TIA list" rule. Adoption snapshot: Texas in force Sept 1, 2026; Oregon 2026 OESC in force Oct 1, 2026). Prior update 2026-07-13 (landscape monitor — added §10 on Tentative Interim Amendments, covering live TIA activity against the 2026 edition: TIA 1903 (§700.6(C) transfer-equipment bypass/isolation exception), TIA 1912 (§624.44(A) portable EVSE/ESVSE connection), TIA 1915 (Table 270.122(B) UL heading alignment). Prior §10 renumbered to §11). Prior update 2026-06-08 (Oregon 2026 OESC anticipated effective Oct 1, 2026 per Oregon BCD; aggregator "adopted" overclaim flagged. Massachusetts in effect April 24, 2026; Texas Sept 1, 2026; Washington Dec 31, 2026 carried forward).
 
 This document is a practical summary for contractors. It is not a substitute for reading the Code. Always confirm text against the published NEC and any state/local amendments.
 
@@ -148,26 +148,49 @@ A TIA is proposed (often by a manufacturer, an association, or an individual who
 
 **Practical consequence: a proposed TIA is not a code change and must never be cited as one.** But it is an early-warning signal about a provision that practitioners are finding broken in the field — which is often exactly the provision that will generate an inspection dispute.
 
-### Live TIA activity against the 2026 NEC (as of this update)
+### Issued TIAs against the 2026 NEC (register as of 2026-10-13)
 
-Three TIAs against the 2026 edition were in the public-comment window in mid-2026, and one against the next cycle had ballot results posted. **All are proposals under review — none of the below is enforceable text, and none should be cited on a submittal, permit drawing, or inspection report.**
+The Standards Council's August 20, 2026 meeting cleared the backlog this repo had been watching. **Every TIA in the table below is issued, enforceable text in any jurisdiction that enforces the 2026 NEC "as amended by NFPA" — subject to the state-adoption caveat further down.** Numbering note: NFPA labels issued TIAs "26-N" (sequence number); the "Log #" is the tracking number used while the proposal was open. Trade press usually quotes the Log #.
 
-| TIA Log No. | Targets | What it seeks to do | Comment closed |
-|---|---|---|---|
-| **1903** | §700.6(C) + new Exception | Add an exception to the **bypass-and-isolation requirement for emergency-system transfer equipment**, so it would not apply where the emergency-dependent processes can be safely disabled during service, the structure is unoccupied with fire protection fully functional, temporary means are substituted, and a written emergency plan is filed with the AHJ. Submitted by NEMA. | July 27, 2026 |
-| **1912** | §624.44(A) | Revise **connection requirements for portable EVSE / ESVSE** — permitting certain listed 30 A / 50 A / 60 A receptacles, adding 277 V single-phase and 277/480 V three-phase locking pin-and-sleeve provisions, and clarifying attachment-plug sizing. Argues Article 624 was created from Article 625 in a way that left the two articles in conflict. Submitted by Beta Technologies. | July 8, 2026 |
-| **1915** | Tables 270.122(B)(1)–(3) | Correct **table headings** so they align with the referenced UL standards. An editorial-alignment fix, not a substantive requirement change. | July 7, 2026 |
+| Issued TIA | Log # | Targets | What it does (concept) | Issued / effective |
+|---|---|---|---|---|
+| 26-1 | 1809 | §680.21(C) | Pool-pump motor ground-fault protection — treatment of variable-speed motors on adjustable-speed drives | Apr 10, 2025 / Apr 30, 2025 |
+| 26-2 | 1835 | §690.12(C) | PV rapid-shutdown provisions | Aug 20, 2025 / Sept 9, 2025 |
+| 26-3 | 1843 | new §430.132 | GFCI / SPGFCI between power-conversion equipment and motors | Aug 20, 2025 / Sept 9, 2025 |
+| 26-4 to 26-7 | 1846–1849 | §500.30(A), §501.15(B)(2), §505.30(A), §506.30(A) | Hazardous-location bonding and Class I Div 2 seal-boundary corrections | Aug 20, 2025 / Sept 9, 2025 |
+| 26-8 | 1875 | §270.50 | Grounding electrode system — adds an exception so an existing building's concrete-encased electrode need not be used when the rebar can't be reached without disturbing the concrete | Apr 15, 2026 / May 5, 2026 |
+| 26-9 | 1897 | Table 501.10(A)(1) | Class I Div 1 wiring methods — MC-HL cable conditions, including use in ladder / ventilated cable tray | **Aug 20, 2026 / Sept 9, 2026** |
+| **26-10** | **1903** | **§700.6(C) + new Exception** | **Emergency-system transfer equipment: bypass/isolation requirement gets an exception** (see below) | **Aug 20, 2026 / Sept 9, 2026** |
+| 26-11 | 1912 | §624.44(A) | Portable ESVSE/WPTE connection — expands permitted receptacle configurations (30/50/60 A receptacles **listed for EVSE/WPTE use**, 277 V single-phase, and 277/480 V three-phase locking pin-and-sleeve at 60 or 100 A) and tightens attachment-plug sizing | Aug 20, 2026 / Sept 9, 2026 |
+| 26-12 | 1915 | Tables 270.122(B)(1)–(3) | Editorial — column headings aligned with the referenced UL standards | Aug 20, 2026 / Sept 9, 2026 |
 
-A separate TIA (**No. 1896**, disconnecting means) went to final ballot against the *next* NEC cycle — a reminder that TIA traffic runs against multiple editions at once, and that the edition a TIA targets is as important as the TIA itself.
+**Rejected, not just pending:** **TIA 1892** (GFCI protection for EVSE and WPTE, touching §625.54 and §210.8(F)) failed its Code-Making Panel 12 ballot, and the Standards Council **denied the appeal** on Aug 20, 2026. The as-published 2026 GFCI requirements for EV charging equipment stand. Anyone telling a customer "the EV-charger GFCI rule got relaxed" is wrong.
 
-### Why the §700.6(C) item (TIA 1903) is the one to actually watch
+**Still open:** TIA 1896 (disconnecting means) targets the *next* NEC cycle, not 2026 — a reminder that the edition a TIA targets matters as much as the TIA.
 
-It is the only one of the three with a direct commercial-scope consequence. If a contractor is bidding emergency-system work in a large occupancy — hospital, high-rise, assembly — the bypass-and-isolation requirement for transfer equipment drives real equipment cost and real service-access design. The proposal's own argument is that the as-published 2026 language leaves large occupancies without a practical way to service failed transfer equipment. Whichever way it resolves:
+### TIA 26-10 (§700.6(C)) — what changed for emergency-system bids
 
-- **If the TIA is issued**, some projects gain a documented path to omit bypass/isolation hardware — but only against a four-condition test, one of which is a **written emergency plan made available to the AHJ**. That is contractor scope, and it is the kind of condition that gets promised in a bid and forgotten before inspection.
-- **If it is rejected**, the as-published requirement stands and should be priced in.
+This was the one this repo flagged as commercially material, and it is now issued. The published requirement (bypass and isolation means for transfer equipment when emergency loads ride a single feeder, with active supervision by a qualified person if the bypass is manual) still stands as the default. The new exception switches it off where **any one** of four conditions applies:
 
-**Either way, the bid-time move is the same: do not assume the exception. Price the requirement, and flag the TIA as a potential deduct.**
+1. every process that depends on the emergency source can be shut down during maintenance or repair without endangering life;
+2. the building is unoccupied and its fire-protection systems are fully functional without needing an alternate source;
+3. other temporary means are allowed to stand in for the emergency system; or
+4. a **written emergency plan** — mitigation actions plus named responsibilities for qualified persons, covering the maintenance/repair window — is developed, implemented, and made available to the AHJ.
+
+**Correction to this repo's prior framing:** earlier versions of this section described a "four-condition test" as if all four had to be met. The issued text is disjunctive — one condition is enough. That makes the exception *easier* to reach than the proposal reading suggested, and condition (4) is the one most projects will use.
+
+**Bid-time move now:**
+- In a jurisdiction enforcing the 2026 NEC with TIA 26-10 picked up, a bypass-isolation ATS is no longer automatically required. It may be a legitimate value-engineering deduct — **but only if somebody owns the written emergency plan.** Name who writes it, who implements it, and who delivers it to the AHJ in the proposal; do not let "exception applies" become an unpriced owner obligation the contractor gets blamed for at inspection.
+- Hospitals, high-rises and assembly occupancies will often keep the bypass-isolation switch anyway for operational reasons (owner standards, NFPA 99 / NFPA 110 expectations, insurer requirements). The exception removes a code mandate; it does not remove a spec requirement. Read Division 26 before deducting.
+- Confirm the AHJ actually enforces this TIA (next subsection) before relying on it.
+
+### State adoption can freeze the TIA list
+
+A state that adopts "NEC 2026 with amendments" by rule often names the specific TIAs it is adopting. Those are the TIAs that are enforceable in that state; a TIA NFPA issues *after* the state's rulemaking is not automatically picked up.
+
+**Worked fact:** Oregon's 2026 OESC (in force Oct 1, 2026) adopts TIAs 26-1 through 26-7 and 26-9 by name in its Table 1-E. It does not list 26-8 (§270.50 electrode exception), 26-10 (§700.6(C) bypass/isolation exception), 26-11 (§624.44(A)) or 26-12. So on an Oregon job, **do not assume the §700.6(C) exception is available** until BCD adopts it or the inspector confirms in writing. The same check applies in every state: read the adoption rule's TIA list, not just the edition year.
+
+**The three-question citation check, in order:** (1) Which edition does the AHJ enforce, as of this permit's application date? (2) Which TIAs against that edition has the AHJ adopted? (3) Do local amendments change the section? Only then cite.
 
 ### The rule for this repo
 
@@ -182,7 +205,7 @@ Proposed TIAs are useful to a contractor as **risk signal** (this provision is c
 When using AI skills in this repo to draft inspection reports, permit narratives, or code-reference lookups:
 
 - **Default to the user's AHJ code cycle** loaded from `config.yml`. Do not assume 2026 unless explicitly confirmed.
-- **Never present a proposed TIA as a code change.** If a user's question touches a section with live TIA activity (see §10 — currently §700.6(C), §624.44(A), Tables 270.122(B)(1)–(3)), state the published requirement as the governing text, then flag the TIA separately as a pending proposal and a bid-risk signal. A proposed TIA is never a citation.
+- **Never present a proposed TIA as a code change — and never ignore an issued one.** Proposed TIAs are risk signals, never citations. Issued TIAs (see the §10 register — e.g., §700.6(C), §624.44(A), §270.50, Table 501.10(A)(1)) are enforceable text *where the AHJ has picked them up*. When a question touches one of those sections, state the as-published text, state the TIA, and state whether the user's AHJ has adopted it (unknown → say so and tell the user to confirm). Do not tell anyone the EV-charger GFCI rule changed: TIA 1892 was rejected.
 - If the user cites an article that moved in 2026 (e.g., Article 220), the AI should note the reorganization and provide both the old and new citations in a transition period.
 - For arc flash label content, the AI should always prompt for the assessment date — it is now a required field on the label.
 - AI-generated load calculations should ask whether an energy management system is used; if so, flag Article 130 provisions.
